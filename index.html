@@ -487,7 +487,7 @@ body.mobile.landscape .title { display: none; }
    0. ТЕЛЕГРАМ — впишите сюда ссылку на игру из BotFather (вида https://t.me/имя_бота/имя_игры)
    ========================================================= */
 const TELEGRAM = {
-  gameLink: 'https://t.me/pond_snake_game_bot/snake',   // ссылка на игру в Телеграме
+  gameLink: 'https://t.me/pondsnake_bot/snake',   // ссылка на игру в Телеграме
   shareText: n => n > 0 ? `У меня ${n} ${plural(n, 'лягушка', 'лягушки', 'лягушек')} на спине ужа в «Змейке у пруда» 🐸 Сможешь больше?` : 'Играю в «Змейку у пруда» 🐸 Попробуй собрать лягушек на спину ужа!',
 };
 function plural(n, a, b, c) { const m = n % 100, k = n % 10; return m > 10 && m < 20 ? c : k === 1 ? a : k > 1 && k < 5 ? b : c; }
