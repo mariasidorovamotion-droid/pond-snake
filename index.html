@@ -75,7 +75,7 @@ body {
 .title svg { width: .45em; height: .45em; flex: none; }
 .title .logo { display: block; height: 1.9em; width: auto; filter: drop-shadow(0 4px 6px rgba(0,0,0,.22)); }
 body.wide .title .logo { height: clamp(64px, 11.5vh, 150px); width: auto; max-width: 100%; }
-.card-logo { display: block; width: min(86%, 360px); height: auto; margin: -4px auto 0; }
+.card-logo { display: block; width: min(78%, 320px); max-height: 22vh; object-fit: contain; height: auto; margin: -4px auto 0; }
 body.mobile .card-logo { width: min(92%, 320px); }
 .pills { display: flex; gap: 8px; }
 .pill {
@@ -374,14 +374,75 @@ body.mobile .settings .tog { min-height: 54px; font-size: 18px; }
   body.mobile .title svg { display: none; }
 }
 /* телефон боком: пруд справа во всю высоту, всё остальное колонкой слева */
-body.mobile.landscape { --padcol: 60px; --padrow: 52px; --plate: 50px; }
-body.mobile.landscape .app { max-width: none; grid-template-columns: minmax(0, 1fr) auto; grid-template-rows: auto auto auto 1fr; grid-template-areas: "top board" "btns board" "hint board" "pad board"; }
-body.mobile.landscape .board, body.mobile.landscape.dpad-on .board { width: calc(100dvh - 16px); height: calc(100dvh - 16px); max-width: 58vw; }
-body.mobile.landscape .top { grid-template-columns: 1fr 1fr 1fr; }
-body.mobile.landscape .pill .ic { display: none; }
-body.mobile.landscape .title { display: none; }
-</style>
+body.mobile.landscape { --padcol: 46px; --padrow: 40px; --plate: 44px; padding: 0 !important; height: 100dvh; overflow: hidden; }
+body.mobile.landscape .app { max-width: none; height: 100dvh; box-sizing: border-box; padding: 8px max(10px, env(safe-area-inset-right)) 8px max(8px, env(safe-area-inset-left)); column-gap: clamp(10px, 2vw, 22px); row-gap: clamp(4px, 1.6dvh, 14px);
+  grid-template-columns: minmax(0, 1fr) clamp(170px, 27vw, 320px); grid-template-rows: minmax(0, 1fr) auto auto auto auto minmax(0, 1fr);
+  grid-template-areas: "board ." "board top" "board btns" "board pad" "board hint" "board ."; }   /* панель справа по центру: лого, счёт, кнопки, подсказка (макет Совы) */
+body.mobile.landscape .board, body.mobile.landscape.dpad-on .board { width: 100%; height: 100%; max-width: none; }
+body.mobile.landscape .top { grid-template-columns: 1fr; gap: clamp(4px, 1.6dvh, 12px); }
+body.mobile.landscape .top .title { display: flex; justify-content: center; min-height: 0; padding: 0; background: none; box-shadow: none; margin-bottom: 0; }
+body.mobile.landscape .title .logo { height: clamp(38px, 15dvh, 120px); width: auto; max-width: 100%; object-fit: contain; }
+body.mobile.landscape .pill { min-height: clamp(32px, 10dvh, 62px); padding: 2px clamp(8px, 1.6vw, 16px) 2px clamp(6px, 1.2vw, 12px); flex-direction: row; justify-content: flex-start; gap: clamp(6px, 1.2vw, 14px); border-radius: clamp(12px, 3dvh, 20px); box-shadow: 0 4px 0 var(--cream-edge), 0 6px 12px rgba(0,0,0,.16); }
+body.mobile.landscape .pill .ic { display: block; width: clamp(26px, 8dvh, 48px); flex: none; }
+body.mobile.landscape .pill .txt { flex: 1; flex-direction: row; align-items: center; justify-content: space-between; gap: 6px; }
+body.mobile.landscape .pill small { font-size: clamp(11px, 3.4dvh, 18px); }
+body.mobile.landscape .pill b { font-size: clamp(20px, 6.4dvh, 34px); min-width: 2ch; text-align: right; }
+body.mobile.landscape .row { grid-template-columns: 1fr; gap: clamp(4px, 1.6dvh, 12px); }
+body.mobile.landscape #restartBtn { display: none; }   /* как на макете: заново — через Паузу */
+body.mobile.landscape .row .btn { min-height: clamp(34px, 11dvh, 64px); font-size: clamp(15px, 5.2dvh, 26px); border-radius: clamp(12px, 3dvh, 20px); gap: clamp(6px, 1.2vw, 14px); }
+body.mobile.landscape .row .btn svg { width: clamp(18px, 6dvh, 30px); height: clamp(18px, 6dvh, 30px); }
+body.mobile.landscape .row .btn-icon { width: 100%; }
+.lbl-snd { display: none !important; }
+body.mobile.landscape .lbl-snd { display: inline !important; }
+body.mobile.landscape .hint, body.mobile.landscape.dpad-on .hint { display: flex !important; justify-self: stretch; justify-content: center; min-width: 0; max-width: 100%; box-sizing: border-box; padding-inline: 0; gap: 8px; white-space: nowrap; overflow: hidden; font-size: clamp(11px, 3.2dvh, 17px); margin-top: 0; }
+body.mobile.landscape .hint::before, body.mobile.landscape .hint::after { flex: 1 1 0; min-width: 0; max-width: 36px; }
+body.mobile.landscape .dpad { align-self: end; }
+body.mobile.landscape .card-logo { width: auto; max-width: 70%; height: clamp(52px, 24dvh, 96px); margin: 0 auto; }  /* в горизонтали лого не больше четверти экрана по высоте */
+body.mobile.landscape .overlay, body.mobile.landscape .panel { padding: 6px 4%; overflow-y: auto; align-items: safe center; }
+@media (max-height: 340px) { body.mobile.landscape #overlay .card { padding-block: 8px; gap: 5px; } body.mobile.landscape #overlay .card .btn { min-height: 34px !important; } body.mobile.landscape #ovText { display: none; } }
 
+/* ===== v0.55: Магазин вместо Паузы до старта, «Заново» — в паузе, жест на стартовом окне ===== */
+#shopBtn { display: none; }
+body:not(.in-run) #pauseBtn, body:not(.in-run) #restartBtn { display: none; }
+body.shop-on:not(.in-run) #shopBtn { display: inline-flex; }
+body.mobile #restartBtn { display: none; }
+body.mobile .row { grid-template-columns: minmax(0, 1fr) clamp(64px, 22vw, 104px); }
+body.mobile:not(.in-run) .row { grid-template-columns: minmax(0, auto) 1fr clamp(64px, 22vw, 104px); }
+body.mobile:not(.in-run) .row #soundBtn { grid-column: 3; }
+body.mobile .row #shopBtn { width: auto; padding: 0 clamp(14px, 5vw, 26px); }
+body.mobile:not(.in-run) .hint { visibility: hidden; }
+body.mobile.landscape .row, body.mobile.landscape:not(.in-run) .row { grid-template-columns: 1fr; }
+body.mobile.landscape .row #shopBtn { width: 100%; }
+body.mobile.landscape:not(.in-run) .row #soundBtn { grid-column: auto; }
+#ovText { white-space: pre-line; }
+.gesture { display: flex; flex-direction: column; align-items: center; gap: 2px; color: var(--ink); font-weight: 800; font-size: clamp(14px, 2vh, 18px); margin-top: 2px; }
+.gesture .gest-ic { width: clamp(76px, 12vh, 112px); height: auto; color: var(--ink); opacity: .85; }
+.gesture:not(.swipe) .gest-arr { display: none; }
+.gesture.keys .gest-ic { display: none; }
+@media (prefers-reduced-motion: no-preference) { .gesture.swipe .gest-hand { animation: gest-sw 2.4s ease-in-out infinite; } }
+@keyframes gest-sw { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-9px); } 75% { transform: translateX(9px); } }
+.ov-coins { display: flex; align-items: center; justify-content: center; gap: 6px; margin: 0 !important; white-space: nowrap; font-weight: 800; font-size: clamp(16px, 2.3vh, 19px) !important; }
+.ov-coins img { width: 24px; height: 24px; }
+.ov-coins b { font-weight: 900; }
+.shop { gap: 12px; color: var(--ink); }
+.shop h2 { margin: 0; }
+.shop-wallet { display: flex; align-items: center; justify-content: center; gap: 8px; margin: 0; font-weight: 800; font-size: 18px; }
+.shop-wallet img { width: 28px; height: 28px; }
+.shop-packs { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; width: 100%; }
+.pack { display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 12px 4px 10px; border-radius: 18px; border: 2px solid var(--cream-edge); background: linear-gradient(180deg, #fffaf0, #f6e9cd); box-shadow: 0 4px 0 var(--cream-edge), 0 8px 14px rgba(0,0,0,.14); font: inherit; color: var(--ink); cursor: pointer; }
+.pack:active { transform: translateY(3px); box-shadow: 0 1px 0 var(--cream-edge); }
+.pack:disabled { opacity: .6; }
+.pack-coins { display: flex; flex-direction: column; align-items: center; gap: 4px; font-size: clamp(20px, 6vw, 26px); font-weight: 900; }
+.pack-coins img { width: clamp(34px, 10vw, 46px); height: auto; }
+.pack-price { display: inline-flex; align-items: center; gap: 4px; padding: 5px 10px; border-radius: 12px; background: #1d7c70; color: #fff; font-weight: 900; font-size: 16px; white-space: nowrap; }
+.shop-tip { margin: 0; font-size: 14px; opacity: .8; }
+#shopPanel { z-index: 4; }
+body.mobile .hint { max-width: 100%; min-width: 0; box-sizing: border-box; overflow: hidden; } body.mobile .hint::before, body.mobile .hint::after { flex: 1 1 0; min-width: 0; max-width: 40px; }
+@media (max-width: 360px) { body.mobile .hint { font-size: 15px; gap: 8px; } }
+@media (max-height: 440px) { body.mobile.landscape #overlay .card { padding-block: 10px; gap: 6px; } body.mobile.landscape #overlay .card .btn { min-height: 38px; font-size: 17px; } body.mobile.landscape #ovText.sad { display: none; } body.mobile.landscape #ovSad { display: none; } body.mobile.landscape .gesture .gest-ic { width: 64px; } }
+@media (max-height: 340px) { body.mobile.landscape #overlay .card .btn { min-height: 32px !important; font-size: 15px; } body.mobile.landscape .snd-head { display: none; } }
+.modes .tog:last-child:nth-child(odd) { grid-column: 1 / -1; }
+</style>
 </head>
 <body>
 <div class="app" id="app">
@@ -398,7 +459,7 @@ body.mobile.landscape .title { display: none; }
       </div>
       <div class="pill" title="Монетки в копилке: 10 монет — «Продолжить» после проигрыша">
         <img class="ic coin-ic" id="coinPillIc" alt="">
-        <div class="txt"><small>Монеты</small><b id="coinCount">0</b></div>
+        <div class="txt"><small id="coinLbl">Копилка</small><b id="coinCount">0</b></div>
       </div>
     </div>
   </div>
@@ -423,11 +484,23 @@ body.mobile.landscape .title { display: none; }
         <div class="modes" role="group" aria-label="Управление">
           <button class="tog" data-ctl="dpad" type="button" aria-pressed="false">Стрелки</button>
           <button class="tog" data-ctl="swipe" type="button" aria-pressed="false">Свайпы</button>
+          <button class="tog" data-ctl="point" type="button" aria-pressed="false">Тап к цели</button>
           <button class="tog" data-ctl="tap" type="button" aria-pressed="false">Тапы</button>
           <button class="tog" data-ctl="tilt" type="button" aria-pressed="false">Наклон</button>
         </div>
         <p id="ctlHint" style="margin:0;font-size:14px"></p>
         <button class="btn btn-green" id="panelClose" type="button">Готово</button>
+      </div>
+    </div>
+    <div class="panel" id="shopPanel" hidden>
+      <div class="card shop" role="dialog" aria-labelledby="shopTitle">
+        <button class="card-x" id="shopX" type="button" aria-label="Закрыть">✕</button>
+        <h2 id="shopTitle">Магазин</h2>
+        <p class="shop-wallet"><img id="shopCoinIc" alt="">В копилке: <b id="shopWallet">0</b></p>
+        <div class="shop-packs" id="shopPacks"></div>
+        <p class="stars-note" id="shopNote" hidden></p>
+        <p class="shop-tip" id="shopTip">Монеты нужны, чтобы продолжить забег после проигрыша.</p>
+        <button class="btn btn-green" id="shopClose" type="button">Готово</button>
       </div>
     </div>
     <div class="overlay" id="overlay">
@@ -437,6 +510,7 @@ body.mobile.landscape .title { display: none; }
         <div class="big" id="ovBig" hidden><canvas id="ovFrog" width="176" height="154"></canvas><span id="ovScore">0</span></div>
         <img id="ovSad" hidden alt="">
         <p id="ovText">Подбирай лягушек — они запрыгивают змейке на спину. Не врезайся в бортик и в свой хвост.</p>
+        <p class="ov-coins" id="ovCoins" hidden></p>
         <div class="card-sound" id="ovSound" hidden>
           <div class="snd"><div class="snd-head"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 18V5l11-2v13" stroke="currentColor" stroke-width="2.4" fill="none" stroke-linejoin="round"/><circle cx="6.5" cy="18" r="3" fill="currentColor"/><circle cx="17.5" cy="16" r="3" fill="currentColor"/></svg><b>Музыка</b></div><div class="snd-vol"><button class="switch" id="pmTog" type="button" role="switch" aria-pressed="true" aria-label="Музыка"><em>ВКЛ</em><i></i></button><input type="range" id="pmVol" min="0" max="100" aria-label="Громкость музыки"><b class="pct" id="pmPct">0%</b></div></div>
           <div class="snd"><div class="snd-head"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9h4l5-4v14l-5-4H4z" fill="currentColor"/><path d="M16 8.5a5 5 0 0 1 0 7M18.5 6a8.5 8.5 0 0 1 0 12" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/></svg><b>Звуки</b></div><div class="snd-vol"><button class="switch" id="psTog" type="button" role="switch" aria-pressed="true" aria-label="Звуки"><em>ВКЛ</em><i></i></button><input type="range" id="psVol" min="0" max="100" aria-label="Громкость звуков"><b class="pct" id="psPct">0%</b></div></div>
@@ -446,6 +520,14 @@ body.mobile.landscape .title { display: none; }
         <p class="stars-note" id="starsNote" hidden></p>
         <button class="btn btn-green" id="resumeBtn" type="button" hidden>Продолжить партию</button>
         <button class="btn btn-green" id="startBtn" type="button">Играть</button>
+        <div class="gesture" id="ovGesture" hidden>
+          <svg class="gest-ic" viewBox="0 0 120 74" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round">
+            <g class="gest-arr"><path d="M44 16 Q30 12 16 20"/><path d="M25 11 L15 20.5 L28 25"/><path d="M76 16 Q90 12 104 20"/><path d="M95 11 L105 20.5 L92 25"/></g>
+            <g class="gest-hand"><path d="M53 70 L45 57 Q41 50 47 49 Q50 49 53 53 V31 Q53 26 57.5 26 Q62 26 62 31 V46 Q62 42 66 42 Q70 42 70 46 V49 Q70 45 74 45 Q78 45 78 49 V52 Q78 48.5 81.5 49 Q85 49.5 85 54 V60 Q85 66 81 70"/></g>
+          </g></svg>
+          <span id="ovGestTxt">Свайпни, чтобы повернуть</span>
+        </div>
+        <button class="btn btn-cream" id="againBtn" type="button" hidden>Начать заново</button>
         <button class="btn btn-blue" id="exitBtn" type="button" hidden>Выйти</button>
         <a class="btn btn-blue" id="shareBtn" href="#" target="_blank" rel="noopener" hidden>Поделиться</a>
       </div>
@@ -457,6 +539,10 @@ body.mobile.landscape .title { display: none; }
       <svg viewBox="0 0 24 24" id="pauseIco" aria-hidden="true"><rect x="5" y="4" width="5" height="16" rx="1.5" fill="currentColor"/><rect x="14" y="4" width="5" height="16" rx="1.5" fill="currentColor"/></svg>
       <span class="lbl" id="pauseTxt">Пауза</span>
     </button>
+    <button class="btn btn-cream" id="shopBtn" type="button" aria-label="Магазин">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4.5 8.5h15l-1.2 11.2a1.6 1.6 0 0 1-1.6 1.3H7.3a1.6 1.6 0 0 1-1.6-1.3z" fill="#f6b73c" stroke="#d98a1a" stroke-width="1.6" stroke-linejoin="round"/><path d="M8.5 10.5V7a3.5 3.5 0 0 1 7 0v3.5" fill="none" stroke="#ec6d43" stroke-width="2.2" stroke-linecap="round"/></svg>
+      <span class="lbl">Магазин</span>
+    </button>
     <button class="btn btn-cream" id="restartBtn" type="button" aria-label="Заново">
       <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19.5 13.5A7.5 7.5 0 1 1 16.6 6" fill="none" stroke="#ec6d43" stroke-width="3" stroke-linecap="round"/><path d="M20.2 3.2l-.6 5.4-5.4-.6z" fill="#ec6d43" stroke="#ec6d43" stroke-width="1.6" stroke-linejoin="round"/></svg>
       <span class="lbl">Заново</span>
@@ -467,6 +553,7 @@ body.mobile.landscape .title { display: none; }
         <g id="soundOn" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M16 9a4 4 0 0 1 0 6"/><path d="M18.5 6.5a7.5 7.5 0 0 1 0 11"/></g>
         <g id="soundOff" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M16 9l5 6M21 9l-5 6"/></g>
       </svg>
+      <span class="lbl lbl-snd">Звук</span>
     </button>
   </div>
   <div class="dpad" id="dpad" hidden aria-label="Стрелки">
@@ -505,6 +592,9 @@ const CONFIG = {
     invoiceApi: '',       // адрес сервера, который создаёт счёт (пусто — оплата ещё не подключена)
     previewOutsideTelegram: false, // показать кнопку и вне Телеграма (для проверки вида)
   },
+  shop: {               // магазин монет: покупка за звёзды Telegram (нужен тот же сервер, что и для «Продолжить за звёзды»)
+    packs: [ { id: 'coins50', coins: 50, stars: 10 }, { id: 'coins150', coins: 150, stars: 25 }, { id: 'coins400', coins: 400, stars: 50 } ],
+  },
   wave: { amp: .17, length: 3.2 }, // волна по телу: размах (в клетках) и длина волны (в клетках)
   desktopMaxCols: 26,   // широкий экран компьютера: 15 рядов, в ширину сколько поместится (не больше)
   gridW: 15, gridH: 15, // текущий размер — выставляется сам
@@ -512,7 +602,8 @@ const CONFIG = {
   growPerFrog: 1,       // на сколько клеток вырастает за лягушку (одна лягушка — один сегмент)
   blinkEveryMs: 3200,   // лягушки моргают примерно раз в столько мс (у каждой свой ритм)
   blinkMs: 220,         // длительность одного моргания
-  freeFrogScale: 1.1,
+  freeFrogScale: 1.3,   // свободная лягушка крупнее клетки — её лучше видно (было 1.1)
+  headScale: 1.3,       // голова ужа крупнее тела — её лучше видно
   frogHopEveryMs: 2600, // как часто свободная лягушка подпрыгивает на месте
   // ритм прыжка: [кадр, мс]. Присед дольше, толчок и полёт быстрые, приземление с отдачей — так прыжок «живой»
   frogHopTiming: [[3, 60], [4, 60], [5, 90], [6, 35], [7, 35], [8, 45], [9, 60], [10, 45], [11, 40], [12, 70], [13, 45], [14, 45], [15, 50]],      // размер свободного лягушонка на поле (пассажиры на спине — 0.84)
@@ -522,7 +613,8 @@ const CONFIG = {
   wrapWalls: false,     // true — проплывать сквозь бортик
   swipeMinPx: 16,       // следующий поворот в том же свайпе — через столько пикселей
   swipeStartPx: 28,     // свайп начинается, только когда палец сдвинулся на столько пикселей
-  tapSlopPx: 24,
+  tapSlopPx: 16,        // «Тап к цели»: тап — если палец сдвинулся меньше чем на столько пикселей; больше — это уже свайп
+  flickMinPx: 12,       // короткий свайп (не дотянул до swipeStartPx) всё равно поворачивает по направлению пальца
   tapTargetCells: 1.2,  // тап ближе стольких клеток к бусту или лягушке — уж плывёт к ней сам        // если палец сдвинулся меньше — это тап, а не свайп
   tiltDeg: 14,          // на сколько градусов наклонить телефон, чтобы змейка повернула
   boosts: {            // бусты на поле: появляются сами, подбираются заездом на клетку
@@ -1289,6 +1381,9 @@ function fitGrid(W, H) {
   if (isMobileNow() && H > W * 1.05) {
     gw = CONFIG.mobileCols;
     gh = Math.max(gw, Math.round(H / (W / (gw + Mx)) - My));
+  } else if (isMobileNow() && W > H * 1.05) {          // телефон боком: широкий пруд во всю высоту
+    gh = CONFIG.mobileCols;
+    gw = Math.max(gh, Math.min(CONFIG.desktopMaxCols, Math.round(W / (H / (gh + My)) - Mx)));
   } else if (document.body.classList.contains('wide') && W > H * 1.05) {
     gh = CONFIG.gridSize;
     gw = Math.max(gh, Math.min(CONFIG.desktopMaxCols, Math.round(W / (H / (gh + My)) - Mx)));
@@ -1458,7 +1553,7 @@ function headLook(h) {
 }
 function drawHead(g, sp, t, dead) {
   const c = R.c, h0 = sp.at(sp.u0), h = { x: h0.x, y: h0.y, a: dead ? h0.a : headLook(h0) };
-  g.save(); g.translate(h.x, h.y); g.rotate(h.a);
+  g.save(); g.translate(h.x, h.y); g.scale(CONFIG.headScale, CONFIG.headScale); g.rotate(h.a);
   if (imgReady('snakeHead')) { g.drawImage(images.snakeHead, -.6 * c, -.6 * c, 1.2 * c, 1.2 * c); g.restore(); return; }
   const r = c * .5;
   const tg = dead ? 0 : tongueAmount(t);
@@ -1470,7 +1565,7 @@ function drawHead(g, sp, t, dead) {
   }
   // голова раскрашена теми же слоями, что и тело (смещения — в координатах экрана), рисуется на отдельный холст,
   // а её задняя часть плавно растворяется в теле — края на шее нет
-  g.restore(); g.save(); g.translate(h.x, h.y);
+  g.restore(); g.save(); g.translate(h.x, h.y); g.scale(CONFIG.headScale, CONFIG.headScale);
   const HS = Math.ceil(c * 3.2);
   if (!headCv || headCv.width !== HS) { headCv = document.createElement('canvas'); headCv.width = headCv.height = HS; }
   const hx = headCv.getContext('2d'); hx.setTransform(1, 0, 0, 1, 0, 0); hx.clearRect(0, 0, HS, HS); hx.translate(HS / 2, HS / 2);
@@ -1859,7 +1954,7 @@ function drawWater(g, t) {
 }
 
 /* Подсказка над ужом, пока он ждёт первого жеста */
-const WAIT_TEXT = { swipe: 'Свайпни или тапни, куда плыть', dpad: 'Нажми стрелку', tap: 'Тапни слева или справа', tilt: 'Наклони телефон' };
+const WAIT_TEXT = { swipe: 'Свайпни, куда плыть', point: 'Тапни по лягушке или свайпни', dpad: 'Нажми стрелку', tap: 'Тапни слева или справа', tilt: 'Наклони телефон' };
 function drawStartHint(g, t) {
   const c = R.c, h = game.state.snake[0];
   const text = waitReason === 'saved' ? 'Шлем спас! Куда плывём?' : isMobileNow() ? WAIT_TEXT[ctl] : (ctl === 'swipe' ? 'Нажми стрелку или WASD' : WAIT_TEXT[ctl]);
@@ -1922,7 +2017,11 @@ function updateHud(t) {
     hudKey = key; const top = R.oy / dpr, h = hud.offsetHeight || 32;
     hud.style.left = (R.ox / dpr + R.c / dpr * 1.6) + 'px'; hud.style.top = Math.max(2, (top - h) / 2 + top * .12) + 'px';
   }
-  $('coinCount').textContent = wallet;
+  syncRunUI();
+  const inRun = mode === 'play' || mode === 'pause' || mode === 'dying';
+  const cv = inRun ? st.coins : wallet, cl = inRun ? 'Монеты' : 'Копилка';    // в забеге — собранные за забег, в меню — вся копилка
+  if ($('coinCount').textContent !== String(cv)) $('coinCount').textContent = cv;
+  if ($('coinLbl').textContent !== cl) $('coinLbl').textContent = cl;
   const e = st.effect, fxChip = $('fxChip');
   if (!e) { fxChip.hidden = true; hudFx = ''; }
   else {
@@ -1941,7 +2040,7 @@ function iconFrog(id, s) { const cv = $(id), g = cv.getContext('2d'); g.clearRec
 function setPauseLabel() { ui.pauseTxt.textContent = mode === 'pause' ? 'Дальше' : 'Пауза'; }
 function showCard(title, text, btn, scoreVal) {
   const isMenu = title === 'Змейка у пруда'; $('ovLogo').hidden = !isMenu; ui.ovTitle.hidden = isMenu;
-  shareBtn.hidden = true; $('contBtn').hidden = true; $('exitBtn').hidden = true; $('resumeBtn').hidden = true; $('starsBtn').hidden = true; $('starsNote').hidden = true; $('ovSad').hidden = true; $('ovSound').hidden = true; $('ovClose').hidden = true; ui.ovText.classList.remove('sad'); ui.startBtn.className = 'btn btn-green';
+  shareBtn.hidden = true; $('contBtn').hidden = true; $('exitBtn').hidden = true; $('againBtn').hidden = true; $('ovGesture').hidden = true; $('ovCoins').hidden = true; $('resumeBtn').hidden = true; $('starsBtn').hidden = true; $('starsNote').hidden = true; $('ovSad').hidden = true; $('ovSound').hidden = true; $('ovClose').hidden = true; ui.ovText.classList.remove('sad'); ui.startBtn.className = 'btn btn-green';
   ui.ovTitle.textContent = title; ui.ovText.textContent = text; ui.startBtn.textContent = btn;
   ui.ovBig.hidden = scoreVal === undefined;
   if (scoreVal !== undefined) ui.ovScore.textContent = scoreVal;
@@ -1973,7 +2072,7 @@ function savedRun() {
 }
 function showMenu() {
   mode = 'menu';
-  showCard('Змейка у пруда', '', 'Играть'); syncSound();
+  showCard('Змейка у пруда', '', 'Играть'); $('ovGesture').hidden = false; syncSound();
   const r = savedRun();
   if (r) {
     $('resumeBtn').hidden = false; $('resumeBtn').textContent = 'Продолжить';
@@ -2002,7 +2101,7 @@ function tgBack() {              // в Телеграме системная к�
 }
 function togglePause() {
   if (!ui.panel.hidden) return;
-  if (mode === 'play') { mode = 'pause'; showCard('Уже уходите?', 'Лягушата будут ждать!', '▶ Продолжить'); $('exitBtn').hidden = false; $('ovSad').hidden = false; $('ovSound').hidden = false; $('ovClose').hidden = false; ui.ovText.classList.add('sad'); drawSadFrog(); syncSound(); saveRun(); }
+  if (mode === 'play') { mode = 'pause'; showCard('Уже уходите?', 'Лягушата будут ждать!', '▶ Продолжить'); $('exitBtn').hidden = false; $('againBtn').hidden = false; $('ovSad').hidden = false; $('ovSound').hidden = false; $('ovClose').hidden = false; ui.ovText.classList.add('sad'); drawSadFrog(); syncSound(); saveRun(); }
   else if (mode === 'pause') start();
   else if (mode === 'menu' || mode === 'over') start();
   setPauseLabel();
@@ -2019,9 +2118,19 @@ function die(win) {
     mode = 'over';
     const title = win ? 'Весь пруд твой!' : (record && sc > 0 ? 'Новый рекорд!' : 'Плюх!');
     let text = sc === 0 ? 'Ни одной лягушки. Попробуй ещё раз!' : (sc === fr ? `Лягушек на спине: ${fr}. Рекорд: ${best}.` : `Лягушек на спине: ${fr}, очков: ${sc}. Рекорд: ${best}.`);
-    if (coins) text += ` Монеток: +${coins}, в копилке ${wallet}.`;
     showCard(title, text, 'Ещё раз', sc);
     shareBtn.href = shareUrl(sc); shareBtn.hidden = false;
+    overWin = win; renderOverCoins(); renderContinue();
+  }, 750);
+}
+let overWin = false;
+function renderOverCoins() {                 // «Собрано +8 · В копилке 22»
+  const oc = $('ovCoins'); oc.hidden = false;
+  oc.innerHTML = `<img src="${BOOST_SRC.coin}" alt=""><span>Собрано <b>+${game.state.coins}</b> · В копилке <b>${wallet}</b></span>`;
+}
+function renderContinue() {
+  const win = overWin; $('contBtn').hidden = true; $('starsBtn').hidden = true; ui.startBtn.className = 'btn btn-green';
+  {
     if (!win && continuesLeft > 0 && stepHistory.length) {
       const cost = CONFIG.continueCost, can = wallet >= cost, cb = $('contBtn');
       cb.hidden = false; cb.disabled = !can;
@@ -2033,7 +2142,7 @@ function die(win) {
         const sb = $('starsBtn'); sb.hidden = false; sb.innerHTML = `Продолжить · ${CONFIG.stars.price} ${STAR_ICON_HTML}`; sb.disabled = false; ui.startBtn.className = 'btn btn-coral';
       }
     }
-  }, 750);
+  }
 }
 
 let lastSnap = null, lastEvent = '', lastStepT = 0;
@@ -2043,8 +2152,8 @@ function continueGame(paidWithStars = false) {
   if (mode !== 'over' || continuesLeft <= 0 || !stepHistory.length || (!paidWithStars && wallet < CONFIG.continueCost)) return;
   if (!paidWithStars) { wallet -= CONFIG.continueCost; store.set(KEY_COINS, wallet); } // плата за продолжение монетками
   const i = Math.max(0, stepHistory.length - CONFIG.rewindSteps);
-  const snap = JSON.parse(stepHistory[i]);
-  Object.assign(game.state, snap); game.state.over = false; game.state.queue = [];
+  const snap = JSON.parse(stepHistory[i]), keepCoins = game.state.coins;
+  Object.assign(game.state, snap); game.state.coins = keepCoins;   // монеты за забег не теряются при отмотке game.state.over = false; game.state.queue = [];
   game.state.items = game.state.items.filter(i => !collectedIds.has(i.id)); // монетки не собрать второй раз
   stepHistory.length = i;
   continuesLeft--;
@@ -2152,6 +2261,7 @@ function turnFeedback(dir) {
 
 ui.startBtn.addEventListener('click', start);
 $('exitBtn').addEventListener('click', exitToMenu);
+$('againBtn').addEventListener('click', () => { sound.click(); clearRun(); mode = 'menu'; start(); });   // «Заново» живёт в паузе — чтобы случайно не сбросить забег
 $('ovClose').addEventListener('click', () => { sound.click(); start(); });
 $('resumeBtn').addEventListener('click', resumeRun);
 $('contBtn').addEventListener('click', () => continueGame());
@@ -2174,6 +2284,55 @@ async function buyContinueWithStars() {
   } catch (e) { sb.disabled = false; say('Не получилось открыть оплату. Проверь интернет и попробуй ещё раз.'); }
 }
 $('starsBtn').addEventListener('click', buyContinueWithStars);
+/* ---- Магазин монет за звёзды (Telegram). Без сервера кнопки видны, но оплата не открывается ---- */
+const shopOn = () => CONFIG.stars.enabled !== false;
+let shopResume = false;
+function renderShop() {
+  $('shopWallet').textContent = wallet; $('shopCoinIc').src = BOOST_SRC.coin;
+  $('shopTip').textContent = `Монеты нужны, чтобы продолжить забег после проигрыша: ${CONFIG.continueCost} монет за раз.`;
+  const box = $('shopPacks');
+  if (!box.children.length) CONFIG.shop.packs.forEach((pk, i) => {
+    const b = document.createElement('button'); b.type = 'button'; b.className = 'pack'; b.dataset.pack = i;
+    b.innerHTML = `<span class="pack-coins"><img src="${BOOST_SRC.coin}" alt="">${pk.coins}</span><span class="pack-price">${pk.stars} ${STAR_ICON_HTML}</span>`;
+    b.addEventListener('click', () => buyPack(i)); box.appendChild(b);
+  });
+}
+function openShop() {
+  sound.unlock(); sound.click();
+  shopResume = mode === 'play'; if (shopResume) { mode = 'pause'; setPauseLabel(); }
+  renderShop(); $('shopNote').hidden = true; $('shopPanel').hidden = false;
+}
+function closeShop() {
+  $('shopPanel').hidden = true; sound.click();
+  if (mode === 'over') { renderOverCoins(); renderContinue(); }
+  if (shopResume) { shopResume = false; start(); }
+}
+async function buyPack(i) {
+  const S = CONFIG.stars, pk = CONFIG.shop.packs[i], note = $('shopNote'), btns = [...document.querySelectorAll('#shopPacks .pack')];
+  const say = (t) => { note.textContent = t; note.hidden = false; };
+  sound.click();
+  if (!S.invoiceApi || !inTelegram || !TG.openInvoice) { say(inTelegram ? 'Оплата звёздами скоро появится 🙂' : 'Купить монеты можно в Telegram-версии игры.'); return; }
+  btns.forEach(b => b.disabled = true); say('Открываю оплату…');
+  try {
+    const r = await fetch(S.invoiceApi, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ initData: TG.initData, item: pk.id, stars: pk.stars }) });
+    const { link } = await r.json(); if (!link) throw new Error('no link');
+    TG.openInvoice(link, status => {
+      btns.forEach(b => b.disabled = false);
+      if (status === 'paid') { wallet += pk.coins; store.set(KEY_COINS, wallet); renderShop(); say(`+${pk.coins} монет в копилке!`); haptic('medium'); sound.coin(); }
+      else if (status === 'failed') say('Оплата не прошла. Попробуй ещё раз.');
+      else note.hidden = true;
+    });
+  } catch (e) { btns.forEach(b => b.disabled = false); say('Не получилось открыть оплату. Проверь интернет и попробуй ещё раз.'); }
+}
+$('shopBtn').addEventListener('click', openShop);
+$('shopClose').addEventListener('click', closeShop);
+$('shopX').addEventListener('click', closeShop);
+var runUIKey = '';
+function syncRunUI() {                       // до старта и после проигрыша внизу «Магазин», во время забега — «Пауза»
+  const run = mode === 'play' || mode === 'pause' || mode === 'dying', k = run + '|' + shopOn();
+  if (k === runUIKey) return; runUIKey = k;
+  document.body.classList.toggle('in-run', run); document.body.classList.toggle('shop-on', shopOn());
+}
 $('pauseBtn').addEventListener('click', () => { sound.click(); togglePause(); });
 $('restartBtn').addEventListener('click', () => { if (!ui.panel.hidden) closePanel(); mode = 'menu'; start(); });
 const TILT_WHERE = 'Наклон не работает в игре, открытой из файла: браузер даёт датчики только защищённым сайтам. Открой игру по ссылке на github.io или в Телеграме.';
@@ -2240,19 +2399,23 @@ let ctl = store.get(KEY_CTL, null) || (store.get(KEY_DPAD, false) ? 'dpad' : 'sw
 let panelResume = false;
 const CTL_HINT = {
   dpad: 'Крупные стрелки под прудом. Свайпы тоже работают.',
-  swipe: 'Проведи пальцем в нужную сторону или тапни по пруду: уж свернёт к пальцу.',
+  swipe: 'Проведи пальцем в нужную сторону — уж повернёт. Тапы по пруду не мешают.',
+  point: 'Тапни по лягушке или монетке — уж сам поплывёт к ней. Тап по пустой воде поворачивает к пальцу, свайпы тоже работают.',
   tap: 'Тап по левой половине экрана — змейка свернёт налево, по правой — направо.',
   tilt: 'Наклоняй телефон в нужную сторону. Ровное положение запоминается при старте игры.',
 };
-const HINT_BAR = { dpad: 'Управление стрелками', swipe: 'Свайп или тап по пруду', tap: 'Управление тапами', tilt: 'Управление наклоном' };
-const HINT_DESK = { dpad: 'Стрелки · WASD', swipe: 'Свайп · стрелки · WASD', tap: 'Тап слева / справа', tilt: 'Наклоняй телефон' };
+const HINT_BAR = { dpad: 'Управление стрелками', swipe: 'Свайпни, чтобы повернуть', point: 'Тапни по лягушке', tap: 'Управление тапами', tilt: 'Управление наклоном' };
+const HINT_DESK = { dpad: 'Стрелки · WASD', swipe: 'Свайп · стрелки · WASD', point: 'Клик по лягушке · стрелки', tap: 'Тап слева / справа', tilt: 'Наклоняй телефон' };
+const GESTURE_TEXT = { swipe: 'Свайпни, чтобы повернуть', point: 'Тапни по лягушке — уж поплывёт к ней', dpad: 'Поворачивай стрелками внизу', tap: 'Тапай слева или справа', tilt: 'Наклоняй телефон' };
+const MENU_TEXT = 'Собирай лягушат на спину.\nНе врезайся в берег и хвост.';
 const START_TEXT = {
-  swipe: 'Свайпай или тапай по пруду — уж поплывёт в сторону пальца.',
+  swipe: 'Свайпай по пруду — уж повернёт.',
+  point: 'Тапни по лягушке — уж поплывёт к ней.',
   dpad: 'Поворачивай ужа стрелками внизу.',
   tap: 'Тапай слева или справа — уж свернёт туда.',
   tilt: 'Наклоняй телефон — уж поплывёт в ту сторону.',
 };
-const CTL_ORDER = ['swipe', 'dpad', 'tap', 'tilt'];
+const CTL_ORDER = ['swipe', 'point', 'dpad', 'tap', 'tilt'];
 function setCtl(next) {
   ctl = next; store.set(KEY_CTL, ctl);
   if (ctl === 'tilt') tilt.enable(); else tilt.disable();
@@ -2278,7 +2441,11 @@ function syncSound() {
   const KEYS_HTML = '<span class="keys"><span class="pad"><span class="u">↑</span><span class="l">←</span><span class="d">↓</span><span class="r">→</span></span><span class="sep"></span><b>WASD</b></span>';
   if (!tiltOff && !isMobileNow() && document.body.classList.contains('wide') && (ctl === 'swipe' || ctl === 'dpad')) { $('hint').innerHTML = KEYS_HTML; $('hint').setAttribute('aria-label', 'Управление: стрелки или WASD'); }
   else { $('hint').textContent = tiltOff ? 'Наклон здесь недоступен — сменить ▸' : isMobileNow() ? HINT_BAR[ctl] + ' ▸' : HINT_DESK[ctl]; $('hint').removeAttribute('aria-label'); }
-  if (mode === 'menu') ui.ovText.textContent = tiltOff ? TILT_WHERE : isMobileNow() ? 'Лови лягушек — они садятся ужу на спину. ' + START_TEXT[ctl] : 'Подбирай лягушек — они запрыгивают змейке на спину. Не врезайся в бортик и в свой хвост.';
+  if (mode === 'menu') {
+    ui.ovText.textContent = tiltOff ? TILT_WHERE : MENU_TEXT;
+    $('ovGestTxt').textContent = isMobileNow() ? GESTURE_TEXT[ctl] : (ctl === 'point' ? 'Кликни по лягушке или жми стрелки' : 'Стрелки или WASD');
+    $('ovGesture').classList.toggle('keys', !isMobileNow()); $('ovGesture').classList.toggle('swipe', ctl === 'swipe' || ctl === 'point');
+  }
 }
 function openPanel() {
   sound.unlock(); sound.click();
@@ -2332,7 +2499,7 @@ document.addEventListener('pointerdown', e => {
     flashZone(leftSide ? 'tzL' : 'tzR');
     return;
   }
-  if (ctl === 'dpad' || ctl === 'swipe') sw = { x0: e.clientX, y0: e.clientY, x: e.clientX, y: e.clientY, moved: false, maxD: 0 };
+  if (ctl === 'dpad' || ctl === 'swipe' || ctl === 'point') sw = { x0: e.clientX, y0: e.clientY, x: e.clientX, y: e.clientY, moved: false, maxD: 0 };
 });
 /* Тап по пруду в режиме свайпа: уж поворачивает в сторону пальца относительно своей головы */
 /* Умный тап: тап по предмету или лягушке — уж сам плывёт к ней кратчайшим безопасным путём */
@@ -2403,7 +2570,7 @@ function tapToward(clientX, clientY) {
 }
 document.addEventListener('pointermove', e => {
   if (!sw) return;
-  sw.maxD = Math.max(sw.maxD, Math.hypot(e.clientX - sw.x0, e.clientY - sw.y0));
+  sw.maxD = Math.max(sw.maxD, Math.hypot(e.clientX - sw.x0, e.clientY - sw.y0)); sw.lx = e.clientX; sw.ly = e.clientY;
   // пока палец почти на месте — это ещё тап; свайп начинается только с явного движения
   if (!sw.moved && sw.maxD < CONFIG.swipeStartPx) return;
   const ox = sw.moved ? sw.x : sw.x0, oy = sw.moved ? sw.y : sw.y0;
@@ -2414,7 +2581,11 @@ document.addEventListener('pointermove', e => {
 });
 const endSwipe = () => { sw = null; };
 document.addEventListener('pointerup', e => {
-  if (sw && !sw.moved && sw.maxD < CONFIG.tapSlopPx && ctl === 'swipe') tapToward(sw.x0, sw.y0);
+  if (sw && !sw.moved) {
+    const lx = sw.lx ?? sw.x0, ly = sw.ly ?? sw.y0, dx = lx - sw.x0, dy = ly - sw.y0;
+    if (sw.maxD < CONFIG.tapSlopPx) { if (ctl === 'point') tapToward(sw.x0, sw.y0); }   // тап к цели — только в своём режиме, в режиме свайпа тап ничего не делает
+    else if (Math.max(Math.abs(dx), Math.abs(dy)) >= CONFIG.flickMinPx && mode === 'play') { autoTarget = null; input(Math.abs(dx) > Math.abs(dy) ? (dx > 0 ? 'right' : 'left') : (dy > 0 ? 'down' : 'up')); } // короткий свайп — поворот по жесту, а не тап
+  }
   sw = null;
 });
 document.addEventListener('pointercancel', endSwipe);
@@ -2439,7 +2610,8 @@ function detectMobile() {
   return detectRealMobile();
 }
 function detectRealMobile() {
-  const tgPhone = inTelegram && /^(android|android_x|ios)$/.test(TG.platform);
+  if (inTelegram) return true;   // в Telegram (и на телефоне, и в окне на ПК) — всегда мобильная раскладка: окно узкое, как телефон
+  const tgPhone = false;
   const ua = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent);
   const coarse = window.matchMedia && matchMedia('(pointer: coarse)').matches;
   return tgPhone || ua || (coarse && Math.min(screen.width, screen.height) < 900);
@@ -2506,7 +2678,7 @@ if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => rend
 for (const im of Object.values(images)) im.addEventListener('load', () => { buildStaticLayer(); iconFrog('frogIcon', 52); iconFrog('ovFrog', 138); iconItem('shIc', 'helmet'); hudFx = ''; });
 new ResizeObserver(resize).observe(canvas);
 resize();
-if (savedRun()) showMenu();   // есть незаконченная партия — на стартовой карточке кнопка «Продолжить партию»
+showMenu();   // стартовая карточка (если есть незаконченная партия — с кнопкой «Продолжить партию»)
 requestAnimationFrame(loop);
 </script>
 
