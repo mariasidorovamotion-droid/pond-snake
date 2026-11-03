@@ -53,6 +53,7 @@ body {
   -webkit-tap-highlight-color: transparent;
 }
 .app {
+  position: relative;
   height: 100%;
   max-width: 560px;
   margin: 0 auto;
@@ -247,8 +248,8 @@ a.btn { text-decoration: none; }
 .set-row input[type=range]:disabled { opacity: .35; }
 /* стрелки на экране */
 .dpad { display: grid; grid-template-columns: repeat(3, 76px); grid-template-rows: repeat(2, 62px); gap: 8px; }
-.dpad button { border-radius: 16px; background: var(--teal-btn); color: var(--cream); font-size: 26px; box-shadow: 0 4px 0 var(--teal-btn-edge); touch-action: none; }
-.dpad button:active, .dpad button.hit { transform: translateY(2px); box-shadow: 0 1px 0 var(--teal-btn-edge); background: var(--coral); }
+.dpad button { border-radius: 16px; background: linear-gradient(180deg, #fffaf0, #f3e4c6); color: var(--ink); font-size: 26px; border: 2px solid var(--cream-edge); box-shadow: 0 4px 0 var(--cream-edge), 0 6px 12px rgba(0,0,0,.16); touch-action: none; }   /* стрелки — нейтральные кремовые: это управление, а не действие */
+.dpad button:active, .dpad button.hit { transform: translateY(2px); box-shadow: 0 1px 0 var(--cream-edge); background: var(--coral); color: #fff; border-color: var(--coral-edge); }
 .dpad .up { grid-column: 2; grid-row: 1; } .dpad .left { grid-column: 1; grid-row: 2; }
 .dpad .down { grid-column: 2; grid-row: 2; } .dpad .right { grid-column: 3; grid-row: 2; }
 body.dpad-on .board { width: min(100%, calc(100dvh - 360px)); }
@@ -335,8 +336,8 @@ body.mobile {
 body.mobile .app {
   max-width: 640px; display: grid; gap: 10px;
   grid-template-columns: minmax(0, 1fr);
-  grid-template-rows: auto minmax(0, 1fr) auto auto auto;
-  grid-template-areas: "top" "board" "pad" "btns" "hint";
+  grid-template-rows: auto auto minmax(0, 1fr) auto auto auto;
+  grid-template-areas: "top" "fx" "board" "pad" "btns" "hint";
 }
 body.mobile .top { grid-area: top; width: 100%; display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
 body.mobile .top .title { display: none; }   /* на телефоне шапка — счёт, рекорд и монеты */
@@ -376,8 +377,8 @@ body.mobile .settings .tog { min-height: 54px; font-size: 18px; }
 /* телефон боком: пруд справа во всю высоту, всё остальное колонкой слева */
 body.mobile.landscape { --padcol: 46px; --padrow: 40px; --plate: 44px; padding: 0 !important; height: 100dvh; overflow: hidden; }
 body.mobile.landscape .app { max-width: none; height: 100dvh; box-sizing: border-box; padding: 8px max(10px, env(safe-area-inset-right)) 8px max(8px, env(safe-area-inset-left)); column-gap: clamp(10px, 2vw, 22px); row-gap: clamp(4px, 1.6dvh, 14px);
-  grid-template-columns: minmax(0, 1fr) clamp(170px, 27vw, 320px); grid-template-rows: minmax(0, 1fr) auto auto auto auto minmax(0, 1fr);
-  grid-template-areas: "board ." "board top" "board btns" "board pad" "board hint" "board ."; }   /* панель справа по центру: лого, счёт, кнопки, подсказка (макет Совы) */
+  grid-template-columns: minmax(0, 1fr) clamp(170px, 27vw, 320px); grid-template-rows: minmax(0, 1fr) auto auto auto auto auto minmax(0, 1fr);
+  grid-template-areas: "board ." "board top" "board fx" "board btns" "board pad" "board hint" "board ."; }   /* панель справа по центру: лого, счёт, кнопки, подсказка (макет Совы) */
 body.mobile.landscape .board, body.mobile.landscape.dpad-on .board { width: 100%; height: 100%; max-width: none; }
 body.mobile.landscape .top { grid-template-columns: 1fr; gap: clamp(4px, 1.6dvh, 12px); }
 body.mobile.landscape .top .title { display: flex; justify-content: center; min-height: 0; padding: 0; background: none; box-shadow: none; margin-bottom: 0; }
@@ -401,7 +402,7 @@ body.mobile.landscape .card-logo { width: auto; max-width: 70%; height: clamp(52
 body.mobile.landscape .overlay, body.mobile.landscape .panel { padding: 6px 4%; overflow-y: auto; align-items: safe center; }
 @media (max-height: 340px) { body.mobile.landscape #overlay .card { padding-block: 8px; gap: 5px; } body.mobile.landscape #overlay .card .btn { min-height: 34px !important; } body.mobile.landscape #ovText { display: none; } }
 
-/* ===== v0.55: Магазин вместо Паузы до старта, «Заново» — в паузе, жест на стартовом окне ===== */
+/* ===== v0.56: Магазин вместо Паузы до старта, «Заново» — в паузе, жест на стартовом окне ===== */
 #shopBtn { display: none; }
 body:not(.in-run) #pauseBtn, body:not(.in-run) #restartBtn { display: none; }
 body.shop-on:not(.in-run) #shopBtn { display: inline-flex; }
@@ -437,6 +438,74 @@ body.mobile.landscape:not(.in-run) .row #soundBtn { grid-column: auto; }
 .pack-price { display: inline-flex; align-items: center; gap: 4px; padding: 5px 10px; border-radius: 12px; background: #1d7c70; color: #fff; font-weight: 900; font-size: 16px; white-space: nowrap; }
 .shop-tip { margin: 0; font-size: 14px; opacity: .8; }
 #shopPanel { z-index: 4; }
+/* если файл открыли в просмотрщике без скриптов (например, прямо в Телеграме) — подсказка видна, в браузере скрипт её прячет */
+.nojs { position: fixed; left: 0; right: 0; top: 0; z-index: 99; padding: 14px 16px; background: #fff4d6; color: #5a3a06; font-weight: 800; font-size: 16px; line-height: 1.35; text-align: center; box-shadow: 0 4px 14px rgba(0,0,0,.25); }
+.nojs a { color: #1d7c70; }
+html.js .nojs { display: none; }
+/* затемнение: карточка отделена от игры, поле и стрелки уходят в тень */
+.overlay, .panel { position: fixed; inset: 0; z-index: 5; background: rgba(8, 48, 52, .6); }   /* без размытия — на телефоне оно тормозит */
+#shopPanel { z-index: 6; }
+.overlay[hidden], .panel[hidden] { display: none; }
+.row { position: relative; z-index: 7; }   /* «Магазин» и звук видны и доступны поверх затемнения */
+body.in-run .row, body.panel-open .row { z-index: auto; }   /* пауза, настройки, магазин — кнопки под тенью */
+.row { pointer-events: none; } .row .btn { pointer-events: auto; }
+body.mobile .dpad { position: relative; z-index: 1; }
+.card { box-shadow: 0 10px 0 var(--cream-edge), 0 24px 48px rgba(0,0,0,.35); }
+@media (prefers-reduced-motion: no-preference) { .overlay:not([hidden]) .card, .panel:not([hidden]) .card { animation: card-in .18s ease-out; } }
+@keyframes card-in { from { transform: translateY(10px) scale(.98); opacity: 0; } to { transform: none; opacity: 1; } }
+/* значки бустов: на телефоне в вертикали — строка между плашками и прудом, как на макете */
+body.mobile:not(.landscape) .fxhud { position: static; grid-area: fx; justify-content: center; align-items: center; gap: 10px; width: 100%; height: 40px; margin: -6px 0 -2px; }   /* строка эффектов 40px: 8–12px до мостика, пруд не прыгает */   /* строка эффектов: место сохраняется всегда — пруд не прыгает */
+body.mobile:not(.landscape) .fxhud .chip { height: 34px; box-sizing: border-box; }
+body.mobile:not(.landscape) .fxhud .chip { padding: 4px 14px 4px 6px; gap: 8px; border-radius: 999px; border-width: 2px; box-shadow: 0 3px 0 #dcc59a, 0 6px 12px rgba(0,0,0,.14); font-size: clamp(15px, 4.6vw, 20px); }
+body.mobile:not(.landscape) .fxhud .chip canvas { width: clamp(30px, 9vw, 40px); height: clamp(30px, 9vw, 40px); }
+body.mobile:not(.landscape) .fxhud .fxsec { font-size: clamp(15px, 4.6vw, 20px); }
+body.mobile:not(.landscape) .fxhud .fxbar { width: clamp(60px, 18vw, 90px); height: 10px; }
+body.mobile:not(.landscape) .fxhud #shieldChip { padding-right: 14px; }
+body.mobile:not(.landscape) .fxhud #shieldChip .fxlbl { display: inline; font-size: clamp(14px, 4.2vw, 18px); text-transform: none; letter-spacing: 0; }
+@media (max-height: 700px) and (orientation: portrait) { body.mobile .fxhud { height: 34px; margin: -8px 0 -4px; } body.mobile .fxhud .chip { height: 30px; padding: 2px 10px 2px 4px; font-size: 14px; } body.mobile .fxhud .chip canvas { width: 24px; height: 24px; } body.mobile .fxhud .fxbar { width: 50px; height: 8px; } }
+/* горизонталь: эффекты — своя строка в правой панели, под плашками */
+body.mobile.landscape .fxhud { position: static; grid-area: fx; justify-content: center; align-items: center; gap: 6px; width: 100%; height: 26px; margin: -2px 0; }
+body.mobile.landscape .fxhud .chip { height: 26px; box-sizing: border-box; padding: 1px 8px 1px 3px; font-size: 13px; }
+body.mobile.landscape .fxhud .chip canvas { width: 22px; height: 22px; }
+body.mobile.landscape .fxhud .fxbar { width: 40px; height: 7px; }
+body.mobile.landscape .fxhud .fxsec { font-size: 13px; min-width: 2.2ch; }
+body.mobile.landscape .fxhud #shieldChip .fxlbl { display: inline; font-size: 12px; text-transform: none; letter-spacing: 0; }
+#ovText:empty { display: none; }
+@media (max-height: 620px) and (orientation: portrait) { body.mobile #overlay .big { margin-block: -6px; } body.mobile #overlay .big canvas { width: 52px; height: auto; } }
+/* v0.56: разные размеры телефонов */
+.btn-gold { --hi: #ffe58a; --base: #f6bd3f; --edge: #c98a1c; color: #5a3a06; text-shadow: 0 1px 0 rgba(255,255,255,.45); }
+.btn-gold .price { background: rgba(255,255,255,.45); }
+.btn .price { white-space: nowrap; }
+body.mobile #overlay .card .btn { white-space: nowrap; }
+body.mobile #contBtn, body.mobile #starsBtn { font-size: clamp(16px, 5.2vw, 24px); padding-inline: 12px; gap: 8px; }
+@media (max-width: 345px) { body.mobile #overlay .btn-pair .btn, body.mobile #contBtn, body.mobile #starsBtn { font-size: 15px; } body.mobile #overlay .card { padding-inline: 14px; } }
+@media (max-height: 720px) and (orientation: portrait) { body.mobile #ovSad { width: clamp(48px, 7vh, 70px); margin: -4px auto -6px; } }
+@media (max-height: 700px) and (orientation: portrait) { body.mobile #ovSad { display: none; } body.mobile .snd-head { display: none; } body.mobile #overlay .card { padding-block: 12px; gap: 9px; } body.mobile #overlay .card .btn { min-height: 44px; } body.mobile .card-logo { max-height: 15vh; } }
+@media (max-height: 520px) and (orientation: portrait) { body.mobile #ovText.sad { display: none; } body.mobile .gesture .gest-ic { width: 60px; } body.mobile #ovText { font-size: 15px; } body.mobile #ovTitle { font-size: 22px; } body.mobile .big { font-size: 34px !important; } }
+/* магазин: компактнее на узких и низких экранах */
+.shop-packs .pack { min-width: 0; }
+@media (max-width: 345px) { .shop-packs { gap: 6px; } .pack-coins { font-size: 19px; } .pack-price { font-size: 14px; padding: 4px 6px; } body.mobile .shop { padding-inline: 12px; } }
+body.mobile.landscape .shop { gap: 6px; padding-block: 10px; max-width: 460px; }
+body.mobile.landscape .shop h2 { font-size: 22px; }
+body.mobile.landscape .shop-tip { display: none; }
+body.mobile.landscape .pack { padding: 6px 4px; gap: 4px; }
+body.mobile.landscape .pack-coins { flex-direction: row; font-size: 18px; gap: 4px; }
+body.mobile.landscape .pack-coins img { width: 24px; }
+body.mobile.landscape .pack-price { font-size: 14px; padding: 3px 7px; }
+body.mobile.landscape .shop .btn { min-height: 38px; font-size: 17px; }
+body.mobile.landscape #shopPanel { padding-block: 6px; overflow-y: auto; }
+body.mobile.landscape .hint::before, body.mobile.landscape .hint::after { display: none; }
+
+.btn-pair { display: flex; gap: 10px; width: 100%; }
+.btn-pair > .btn { flex: 1 1 0; min-width: 0; }
+.btn-pair > .btn[hidden] { display: none; }
+.btn-pair { justify-content: center; } .card .btn-pair > .btn { max-width: none; }
+body:not(.mobile) .card .btn-pair { max-width: 360px; }
+body.mobile .overlay { align-items: safe center; overflow-y: auto; }
+body.mobile #overlay .card { max-height: none; gap: clamp(10px, 1.8dvh, 14px); }
+body.mobile #overlay .card .btn { min-height: clamp(46px, 7dvh, 62px); }
+body.mobile #overlay .btn-pair .btn { font-size: clamp(17px, 5vw, 24px); padding: 0 8px; }
+.btn.btn-stars { padding-inline: 14px; font-size: clamp(17px, 5.2vw, 24px); }
 body.mobile .hint { max-width: 100%; min-width: 0; box-sizing: border-box; overflow: hidden; } body.mobile .hint::before, body.mobile .hint::after { flex: 1 1 0; min-width: 0; max-width: 40px; }
 @media (max-width: 360px) { body.mobile .hint { font-size: 15px; gap: 8px; } }
 @media (max-height: 440px) { body.mobile.landscape #overlay .card { padding-block: 10px; gap: 6px; } body.mobile.landscape #overlay .card .btn { min-height: 38px; font-size: 17px; } body.mobile.landscape #ovText.sad { display: none; } body.mobile.landscape #ovSad { display: none; } body.mobile.landscape .gesture .gest-ic { width: 64px; } }
@@ -445,6 +514,7 @@ body.mobile .hint { max-width: 100%; min-width: 0; box-sizing: border-box; overf
 </style>
 </head>
 <body>
+<div class="nojs" id="nojs">Это игра, а не документ 🙂 Откройте файл в браузере (Safari или Chrome) или играйте по ссылке: <a href="https://t.me/pondsnake_bot/snake">t.me/pondsnake_bot/snake</a></div>
 <div class="app" id="app">
   <div class="top">
     <h1 class="title" aria-label="Змейка у пруда"><img class="logo" id="logoTop" alt="Змейка у пруда"></h1>
@@ -464,12 +534,12 @@ body.mobile .hint { max-width: 100%; min-width: 0; box-sizing: border-box; overf
     </div>
   </div>
 
+  <div class="fxhud" id="fxhud">
+    <div class="chip" id="fxChip" hidden><canvas id="fxIc" width="72" height="72" aria-hidden="true"></canvas><span class="fxlbl" id="fxLbl"></span><span class="fxbar"><i id="fxBar"></i></span><b class="fxsec" id="fxSec"></b></div>
+    <div class="chip" id="shieldChip" hidden title="Шлем спасёт от одного удара"><canvas id="shIc" width="72" height="72" aria-hidden="true"></canvas><span class="fxlbl">1 удар</span></div>
+  </div>
   <div class="board" id="board">
     <canvas id="canvas" aria-label="Пруд, игровое поле"></canvas>
-    <div class="fxhud" id="fxhud">
-      <div class="chip" id="fxChip" hidden><canvas id="fxIc" width="72" height="72" aria-hidden="true"></canvas><span class="fxlbl" id="fxLbl"></span><span class="fxbar"><i id="fxBar"></i></span><b class="fxsec" id="fxSec"></b></div>
-      <div class="chip" id="shieldChip" hidden title="Шлем спасёт от одного удара"><canvas id="shIc" width="72" height="72" aria-hidden="true"></canvas><span class="fxlbl">Защита</span></div>
-    </div>
     <div class="panel" id="panel" hidden>
       <div class="card settings" role="dialog" aria-labelledby="setTitle">
         <h2 id="setTitle">Звук и управление</h2>
@@ -515,11 +585,11 @@ body.mobile .hint { max-width: 100%; min-width: 0; box-sizing: border-box; overf
           <div class="snd"><div class="snd-head"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 18V5l11-2v13" stroke="currentColor" stroke-width="2.4" fill="none" stroke-linejoin="round"/><circle cx="6.5" cy="18" r="3" fill="currentColor"/><circle cx="17.5" cy="16" r="3" fill="currentColor"/></svg><b>Музыка</b></div><div class="snd-vol"><button class="switch" id="pmTog" type="button" role="switch" aria-pressed="true" aria-label="Музыка"><em>ВКЛ</em><i></i></button><input type="range" id="pmVol" min="0" max="100" aria-label="Громкость музыки"><b class="pct" id="pmPct">0%</b></div></div>
           <div class="snd"><div class="snd-head"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9h4l5-4v14l-5-4H4z" fill="currentColor"/><path d="M16 8.5a5 5 0 0 1 0 7M18.5 6a8.5 8.5 0 0 1 0 12" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/></svg><b>Звуки</b></div><div class="snd-vol"><button class="switch" id="psTog" type="button" role="switch" aria-pressed="true" aria-label="Звуки"><em>ВКЛ</em><i></i></button><input type="range" id="psVol" min="0" max="100" aria-label="Громкость звуков"><b class="pct" id="psPct">0%</b></div></div>
         </div>
-        <button class="btn btn-green" id="contBtn" type="button" hidden>Продолжить</button>
         <button class="btn btn-stars" id="starsBtn" type="button" hidden>Продолжить за 10 ⭐</button>
+        <button class="btn btn-green" id="contBtn" type="button" hidden>Продолжить</button>
         <p class="stars-note" id="starsNote" hidden></p>
         <button class="btn btn-green" id="resumeBtn" type="button" hidden>Продолжить партию</button>
-        <button class="btn btn-green" id="startBtn" type="button">Играть</button>
+        <div class="btn-pair"><button class="btn btn-green" id="startBtn" type="button">Играть</button><a class="btn btn-blue" id="shareBtn" href="#" target="_blank" rel="noopener" hidden>Поделиться</a></div>
         <div class="gesture" id="ovGesture" hidden>
           <svg class="gest-ic" viewBox="0 0 120 74" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round">
             <g class="gest-arr"><path d="M44 16 Q30 12 16 20"/><path d="M25 11 L15 20.5 L28 25"/><path d="M76 16 Q90 12 104 20"/><path d="M95 11 L105 20.5 L92 25"/></g>
@@ -527,9 +597,7 @@ body.mobile .hint { max-width: 100%; min-width: 0; box-sizing: border-box; overf
           </g></svg>
           <span id="ovGestTxt">Свайпни, чтобы повернуть</span>
         </div>
-        <button class="btn btn-cream" id="againBtn" type="button" hidden>Начать заново</button>
-        <button class="btn btn-blue" id="exitBtn" type="button" hidden>Выйти</button>
-        <a class="btn btn-blue" id="shareBtn" href="#" target="_blank" rel="noopener" hidden>Поделиться</a>
+        <div class="btn-pair"><button class="btn btn-cream" id="againBtn" type="button" hidden>Заново</button><button class="btn btn-blue" id="exitBtn" type="button" hidden>Выйти</button></div>
       </div>
     </div>
   </div>
@@ -567,6 +635,7 @@ body.mobile .hint { max-width: 100%; min-width: 0; box-sizing: border-box; overf
 </div>
 
 <script>
+document.documentElement.classList.add('js');   // скрипты работают — подсказку «откройте в браузере» прячем
 /* =========================================================
    1. НАСТРОЙКИ БАЛАНСА — меняйте числа здесь
    ========================================================= */
@@ -1954,7 +2023,7 @@ function drawWater(g, t) {
 }
 
 /* Подсказка над ужом, пока он ждёт первого жеста */
-const WAIT_TEXT = { swipe: 'Свайпни, куда плыть', point: 'Тапни по лягушке или свайпни', dpad: 'Нажми стрелку', tap: 'Тапни слева или справа', tilt: 'Наклони телефон' };
+const WAIT_TEXT = { swipe: 'Свайпни или тапни, куда плыть', point: 'Тапни по лягушке или свайпни', dpad: 'Нажми стрелку', tap: 'Тапни слева или справа', tilt: 'Наклони телефон' };
 function drawStartHint(g, t) {
   const c = R.c, h = game.state.snake[0];
   const text = waitReason === 'saved' ? 'Шлем спас! Куда плывём?' : isMobileNow() ? WAIT_TEXT[ctl] : (ctl === 'swipe' ? 'Нажми стрелку или WASD' : WAIT_TEXT[ctl]);
@@ -2013,11 +2082,17 @@ let hudKey = '', hudFx = '';
 function updateHud(t) {
   const st = game.state, hud = $('fxhud'), dpr = R.W / canvas.getBoundingClientRect().width || 1;
   const key = R.ox + ',' + R.oy + ',' + R.W;
-  if (key !== hudKey) {             // панель лежит на верхнем бортике, не закрывая воду
+  const fxRow = document.body.classList.contains('mobile');   // на телефоне — своя строка: в вертикали над прудом, в горизонтали в панели справа
+  if (fxRow) { if (hudKey !== 'row') { hudKey = 'row'; hud.style.left = ''; hud.style.top = ''; } }
+  else if (key !== hudKey) {             // панель лежит на верхнем бортике, не закрывая воду
     hudKey = key; const top = R.oy / dpr, h = hud.offsetHeight || 32;
-    hud.style.left = (R.ox / dpr + R.c / dpr * 1.6) + 'px'; hud.style.top = Math.max(2, (top - h) / 2 + top * .12) + 'px';
+    const cr = canvas.getBoundingClientRect(), ar = hud.offsetParent ? hud.offsetParent.getBoundingClientRect() : { left: 0, top: 0 };   // значки лежат на верхнем бортике пруда
+    hud.style.left = (cr.left - ar.left + R.ox / dpr + R.c / dpr * 1.6) + 'px'; hud.style.top = (cr.top - ar.top + Math.max(2, (top - h) / 2 + top * .12)) + 'px';
   }
   syncRunUI();
+  const showFx = mode === 'play' && ui.overlay.hidden && (!!st.effect || !!st.shield);
+  hud.style.visibility = showFx ? '' : 'hidden';   // значки бустов не висят поверх карточек
+  if (fxRow) hud.style.visibility = showFx || mode === 'play' ? (showFx ? '' : 'hidden') : 'hidden';
   const inRun = mode === 'play' || mode === 'pause' || mode === 'dying';
   const cv = inRun ? st.coins : wallet, cl = inRun ? 'Монеты' : 'Копилка';    // в забеге — собранные за забег, в меню — вся копилка
   if ($('coinCount').textContent !== String(cv)) $('coinCount').textContent = cv;
@@ -2117,7 +2192,7 @@ function die(win) {
     if (mode !== 'dying') return;
     mode = 'over';
     const title = win ? 'Весь пруд твой!' : (record && sc > 0 ? 'Новый рекорд!' : 'Плюх!');
-    let text = sc === 0 ? 'Ни одной лягушки. Попробуй ещё раз!' : (sc === fr ? `Лягушек на спине: ${fr}. Рекорд: ${best}.` : `Лягушек на спине: ${fr}, очков: ${sc}. Рекорд: ${best}.`);
+    let text = sc === 0 ? 'Ни одной лягушки. Попробуй ещё раз!' : (sc === fr ? '' : `Лягушек на спине: ${fr}`);   // рекорд и так виден на плашке сверху
     showCard(title, text, 'Ещё раз', sc);
     shareBtn.href = shareUrl(sc); shareBtn.hidden = false;
     overWin = win; renderOverCoins(); renderContinue();
@@ -2133,12 +2208,14 @@ function renderContinue() {
   {
     if (!win && continuesLeft > 0 && stepHistory.length) {
       const cost = CONFIG.continueCost, can = wallet >= cost, cb = $('contBtn');
-      cb.hidden = false; cb.disabled = !can;
-      cb.className = can ? 'btn btn-green' : 'btn btn-cream btn-locked';
+      const buy = !can && shopOn();          // монет не хватает — кнопка ведёт в магазин, а не просто серая
+      cb.hidden = false; cb.disabled = !can && !buy;
+      cb.className = can ? 'btn btn-green' : buy ? 'btn btn-gold' : 'btn btn-cream btn-locked';
       cb.innerHTML = can ? `Продолжить <span class="price"><img src="${BOOST_SRC.coin}" alt="">${cost}</span>`
+                   : buy ? `Купить монеты <span class="price"><img src="${BOOST_SRC.coin}" alt="">${wallet}/${cost}</span>`
                          : `Продолжить <span class="price"><img src="${BOOST_SRC.coin}" alt="">${wallet}/${cost}</span>`;
       if (can) ui.startBtn.className = 'btn btn-coral';
-      if (!can && (inTelegram || CONFIG.stars.previewOutsideTelegram)) {   // монет не хватает — можно продолжить за звёзды
+      if (!can && (inTelegram || CONFIG.stars.previewOutsideTelegram)) {   // монет не хватает — вместо серой кнопки сразу «за звёзды»
         const sb = $('starsBtn'); sb.hidden = false; sb.innerHTML = `Продолжить · ${CONFIG.stars.price} ${STAR_ICON_HTML}`; sb.disabled = false; ui.startBtn.className = 'btn btn-coral';
       }
     }
@@ -2264,7 +2341,7 @@ $('exitBtn').addEventListener('click', exitToMenu);
 $('againBtn').addEventListener('click', () => { sound.click(); clearRun(); mode = 'menu'; start(); });   // «Заново» живёт в паузе — чтобы случайно не сбросить забег
 $('ovClose').addEventListener('click', () => { sound.click(); start(); });
 $('resumeBtn').addEventListener('click', resumeRun);
-$('contBtn').addEventListener('click', () => continueGame());
+$('contBtn').addEventListener('click', () => { if (mode === 'over' && wallet < CONFIG.continueCost && shopOn()) openShop(); else continueGame(); });
 /* Оплата звёздами: сервер создаёт счёт (у него токен бота), Телеграм показывает окно оплаты, после «paid» продолжаем */
 const STAR_ICON_HTML = '<span class="star-ic" aria-label="звёзд">⭐</span>';   // эмодзи звезды — как в других мини-играх Телеграма
 async function buyContinueWithStars() {
@@ -2298,12 +2375,12 @@ function renderShop() {
   });
 }
 function openShop() {
-  sound.unlock(); sound.click();
+  sound.unlock(); sound.click(); document.body.classList.add('panel-open');
   shopResume = mode === 'play'; if (shopResume) { mode = 'pause'; setPauseLabel(); }
   renderShop(); $('shopNote').hidden = true; $('shopPanel').hidden = false;
 }
 function closeShop() {
-  $('shopPanel').hidden = true; sound.click();
+  $('shopPanel').hidden = true; sound.click(); document.body.classList.remove('panel-open');
   if (mode === 'over') { renderOverCoins(); renderContinue(); }
   if (shopResume) { shopResume = false; start(); }
 }
@@ -2399,17 +2476,17 @@ let ctl = store.get(KEY_CTL, null) || (store.get(KEY_DPAD, false) ? 'dpad' : 'sw
 let panelResume = false;
 const CTL_HINT = {
   dpad: 'Крупные стрелки под прудом. Свайпы тоже работают.',
-  swipe: 'Проведи пальцем в нужную сторону — уж повернёт. Тапы по пруду не мешают.',
+  swipe: 'Свайпни в нужную сторону — уж повернёт. Тапни по лягушке — поплывёт к ней сам.',
   point: 'Тапни по лягушке или монетке — уж сам поплывёт к ней. Тап по пустой воде поворачивает к пальцу, свайпы тоже работают.',
   tap: 'Тап по левой половине экрана — змейка свернёт налево, по правой — направо.',
   tilt: 'Наклоняй телефон в нужную сторону. Ровное положение запоминается при старте игры.',
 };
-const HINT_BAR = { dpad: 'Управление стрелками', swipe: 'Свайпни, чтобы повернуть', point: 'Тапни по лягушке', tap: 'Управление тапами', tilt: 'Управление наклоном' };
+const HINT_BAR = { dpad: 'Управление стрелками', swipe: 'Свайп или тап по лягушке', point: 'Тапни по лягушке', tap: 'Управление тапами', tilt: 'Управление наклоном' };
 const HINT_DESK = { dpad: 'Стрелки · WASD', swipe: 'Свайп · стрелки · WASD', point: 'Клик по лягушке · стрелки', tap: 'Тап слева / справа', tilt: 'Наклоняй телефон' };
-const GESTURE_TEXT = { swipe: 'Свайпни, чтобы повернуть', point: 'Тапни по лягушке — уж поплывёт к ней', dpad: 'Поворачивай стрелками внизу', tap: 'Тапай слева или справа', tilt: 'Наклоняй телефон' };
+const GESTURE_TEXT = { swipe: 'Свайпни или тапни по лягушке', point: 'Тапни по лягушке — уж поплывёт к ней', dpad: 'Поворачивай стрелками внизу', tap: 'Тапай слева или справа', tilt: 'Наклоняй телефон' };
 const MENU_TEXT = 'Собирай лягушат на спину.\nНе врезайся в берег и хвост.';
 const START_TEXT = {
-  swipe: 'Свайпай по пруду — уж повернёт.',
+  swipe: 'Свайпай — уж повернёт. Тапни по лягушке — поплывёт к ней.',
   point: 'Тапни по лягушке — уж поплывёт к ней.',
   dpad: 'Поворачивай ужа стрелками внизу.',
   tap: 'Тапай слева или справа — уж свернёт туда.',
@@ -2451,10 +2528,10 @@ function openPanel() {
   sound.unlock(); sound.click();
   panelResume = mode === 'play';
   if (panelResume) mode = 'pause';
-  ui.panel.hidden = false; syncSound();
+  ui.panel.hidden = false; syncSound(); document.body.classList.add('panel-open');
 }
 function closePanel() {
-  ui.panel.hidden = true; sound.click();
+  ui.panel.hidden = true; sound.click(); document.body.classList.remove('panel-open');
   if (panelResume) { panelResume = false; start(); }
 }
 $('soundBtn').addEventListener('click', () => ui.panel.hidden ? openPanel() : closePanel());
@@ -2583,7 +2660,7 @@ const endSwipe = () => { sw = null; };
 document.addEventListener('pointerup', e => {
   if (sw && !sw.moved) {
     const lx = sw.lx ?? sw.x0, ly = sw.ly ?? sw.y0, dx = lx - sw.x0, dy = ly - sw.y0;
-    if (sw.maxD < CONFIG.tapSlopPx) { if (ctl === 'point') tapToward(sw.x0, sw.y0); }   // тап к цели — только в своём режиме, в режиме свайпа тап ничего не делает
+    if (sw.maxD < CONFIG.tapSlopPx) { if (ctl === 'swipe' || ctl === 'point') tapToward(sw.x0, sw.y0); }   // тап по лягушке/монетке или в сторону — работает и в режиме свайпов
     else if (Math.max(Math.abs(dx), Math.abs(dy)) >= CONFIG.flickMinPx && mode === 'play') { autoTarget = null; input(Math.abs(dx) > Math.abs(dy) ? (dx > 0 ? 'right' : 'left') : (dy > 0 ? 'down' : 'up')); } // короткий свайп — поворот по жесту, а не тап
   }
   sw = null;
