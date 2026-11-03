@@ -1,0 +1,1172 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#135258">
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+:root { color-scheme: light; padding-top: env(safe-area-inset-top, 0px); padding-bottom: env(safe-area-inset-bottom, 0px); }
+body { margin: 0; font: 14px/1.4 system-ui, -apple-system, "Segoe UI", sans-serif; }
+img { max-width: 100%; }
+[hidden] { display: none !important; }
+</style>
+<title>Змейка у пруда</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800;900&display=swap">
+<style>
+/* Макет: один экран — заголовок и плашки счёта, квадратный пруд, ряд кнопок. Одна тема «пруд». */
+:root {
+  --page: #1f7a7c;
+  --page-deep: #135258;
+  --cream: #fcf2da;
+  --cream-edge: #d8c79f;
+  --ink: #17403b;
+  --teal-btn: #2a8a86;
+  --teal-btn-edge: #1a5f5c;
+  --coral: #ec6d43;
+  --coral-edge: #b84a26;
+  --muted: #bfe6dc;
+  --font: "Nunito", "Trebuchet MS", system-ui, sans-serif;
+  color-scheme: dark;
+}
+html, body { height: 100%; }
+body {
+  background: radial-gradient(120% 90% at 50% 40%, var(--page) 0%, var(--page-deep) 100%) var(--page-deep);
+  color: var(--cream);
+  font-family: var(--font);
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 10px;
+  box-sizing: border-box;
+  overflow: hidden;
+  touch-action: none;
+  -webkit-user-select: none; user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+.app {
+  height: 100%;
+  max-width: 560px;
+  margin: 0 auto;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 10px;
+}
+.top {
+  width: 100%;
+  display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 10px;
+}
+.title {
+  margin: 0;
+  font-weight: 900;
+  font-size: clamp(26px, 8vw, 42px);
+  letter-spacing: .03em;
+  color: var(--cream);
+  text-shadow: 0 3px 0 var(--teal-btn-edge), 0 6px 12px rgba(0,0,0,.25);
+  display: flex; align-items: center; gap: 6px;
+}
+.title svg { width: .45em; height: .45em; flex: none; }
+.pills { display: flex; gap: 8px; }
+.pill {
+  display: flex; align-items: center; gap: 6px;
+  background: var(--cream); color: var(--ink);
+  border-radius: 16px;
+  padding: 5px 12px 5px 7px;
+  box-shadow: 0 3px 0 var(--cream-edge), 0 6px 14px rgba(0,0,0,.2);
+  font-variant-numeric: tabular-nums;
+}
+.pill .ic { width: 34px; height: 30px; flex: none; }
+.pill .txt { display: flex; flex-direction: column; align-items: center; line-height: 1; }
+.pill small { font-size: 10px; font-weight: 900; text-transform: uppercase; letter-spacing: .08em; }
+.pill b { font-size: 24px; font-weight: 900; min-width: 2ch; text-align: center; }
+.board {
+  position: relative;
+  width: min(100%, calc(100vh - 210px));
+  width: min(100%, calc(100dvh - 210px));
+  min-width: 240px;
+  max-width: 100%;
+  aspect-ratio: 1;
+}
+canvas { display: block; width: 100%; height: 100%; }
+.overlay {
+  position: absolute; inset: 0;
+  display: flex; align-items: center; justify-content: center;
+  padding: 14%;
+}
+.card {
+  background: var(--cream); color: var(--ink);
+  border-radius: 24px;
+  box-shadow: 0 5px 0 var(--cream-edge), 0 14px 30px rgba(0,0,0,.35);
+  padding: 20px 22px 22px;
+  max-width: 320px; width: 100%;
+  display: flex; flex-direction: column; align-items: center; gap: 10px; text-align: center;
+}
+.card h2 { margin: 0; font-size: clamp(22px, 6vw, 30px); font-weight: 900; text-wrap: balance; }
+.card p { margin: 0; font-size: 15px; font-weight: 700; line-height: 1.35; opacity: .85; max-width: 28ch; }
+.card .big { display: flex; align-items: center; gap: 8px; font-size: 34px; font-weight: 900; font-variant-numeric: tabular-nums; }
+.card .big canvas { width: 46px; height: 40px; }
+button {
+  font: inherit; cursor: pointer; border: 0;
+  touch-action: manipulation;
+}
+button:focus-visible { outline: 3px solid var(--cream); outline-offset: 3px; }
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 10px;
+  min-height: 56px; padding: 0 22px;
+  border-radius: 18px;
+  font-size: 20px; font-weight: 900;
+  transition: transform .08s;
+}
+.btn:active { transform: translateY(3px); }
+.btn svg { width: 24px; height: 24px; flex: none; }
+.btn-teal { background: var(--teal-btn); color: var(--cream); box-shadow: 0 4px 0 var(--teal-btn-edge), 0 8px 16px rgba(0,0,0,.25); }
+.btn-cream { background: var(--cream); color: var(--ink); box-shadow: 0 4px 0 var(--cream-edge), 0 8px 16px rgba(0,0,0,.25); }
+.btn-coral { background: var(--coral); color: var(--cream); box-shadow: 0 4px 0 var(--coral-edge), 0 8px 16px rgba(0,0,0,.2); }
+.btn:active.btn-teal { box-shadow: 0 1px 0 var(--teal-btn-edge); }
+.btn:active.btn-cream { box-shadow: 0 1px 0 var(--cream-edge); }
+.btn-icon { padding: 0; width: 64px; }
+a.btn { text-decoration: none; }
+.card .btn { width: 100%; max-width: 260px; box-sizing: border-box; }
+.row { display: flex; gap: 12px; justify-content: center; flex-wrap: nowrap; width: 100%; }
+.row .btn { flex: 0 1 auto; }
+.hint {
+  margin: 0; white-space: nowrap; font-size: 14px; font-weight: 800; font-style: italic; color: var(--muted);
+  display: flex; align-items: center; gap: 12px;
+}
+.hint::before, .hint::after { content: ""; width: 40px; height: 2px; background: currentColor; opacity: .5; border-radius: 2px; }
+/* панель звука */
+.panel { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; padding: 8%; touch-action: auto; }
+.settings { gap: 14px; color-scheme: light; }
+.set-row { width: 100%; display: flex; align-items: center; gap: 12px; }
+.tog {
+  flex: none; min-width: 118px; min-height: 48px; padding: 0 14px;
+  border-radius: 14px; font-size: 16px; font-weight: 900;
+  display: inline-flex; align-items: center; gap: 8px; justify-content: center;
+  background: var(--teal-btn); color: var(--cream); box-shadow: 0 3px 0 var(--teal-btn-edge);
+}
+.tog[aria-pressed="false"] { background: var(--cream-edge); color: var(--ink); box-shadow: 0 3px 0 #b9a77e; opacity: .8; }
+.tog.wide { flex: 1; }
+.set-row input[type=range] {
+  flex: 1; min-width: 0; height: 36px; margin: 0; background: transparent; touch-action: pan-x;
+  -webkit-appearance: none; appearance: none; --fill: 50%;
+}
+.set-row input[type=range]::-webkit-slider-runnable-track { height: 12px; border-radius: 6px; background: linear-gradient(90deg, var(--coral) var(--fill), var(--cream-edge) var(--fill)); }
+.set-row input[type=range]::-moz-range-track { height: 12px; border-radius: 6px; background: var(--cream-edge); }
+.set-row input[type=range]::-moz-range-progress { height: 12px; border-radius: 6px; background: var(--coral); }
+.set-row input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 28px; height: 28px; margin-top: -8px; border-radius: 50%; background: var(--cream); border: 4px solid var(--coral); box-shadow: 0 2px 4px rgba(20,60,60,.25); }
+.set-row input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border-radius: 50%; background: var(--cream); border: 4px solid var(--coral); }
+.set-row input[type=range]:disabled { opacity: .35; }
+/* стрелки на экране */
+.dpad { display: grid; grid-template-columns: repeat(3, 62px); grid-template-rows: repeat(2, 52px); gap: 8px; }
+.dpad button { border-radius: 14px; background: var(--teal-btn); color: var(--cream); font-size: 22px; box-shadow: 0 3px 0 var(--teal-btn-edge); touch-action: none; }
+.dpad button:active { transform: translateY(2px); box-shadow: 0 1px 0 var(--teal-btn-edge); }
+.dpad .up { grid-column: 2; grid-row: 1; } .dpad .left { grid-column: 1; grid-row: 2; }
+.dpad .down { grid-column: 2; grid-row: 2; } .dpad .right { grid-column: 3; grid-row: 2; }
+body.dpad-on .board { width: min(100%, calc(100dvh - 330px)); }
+body.dpad-on .hint { display: none; }
+@media (max-width: 400px) {
+  .btn { padding: 0 16px; font-size: 17px; min-height: 52px; }
+  .btn-icon { width: 54px; padding: 0; }
+  .pill b { font-size: 20px; }
+}
+@media (max-height: 600px) { .hint { display: none; } .board { width: min(100%, calc(100dvh - 170px)); } }
+@media (prefers-reduced-motion: reduce) { .btn { transition: none; } }
+</style>
+
+</head>
+<body>
+<div class="app" id="app">
+  <div class="top">
+    <h1 class="title">
+      <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M10 1C10 1 3 9 3 13a7 7 0 0 0 14 0C17 9 10 1 10 1z" fill="#5cc8e0"/></svg>
+      Змейка
+      <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M10 1C10 1 3 9 3 13a7 7 0 0 0 14 0C17 9 10 1 10 1z" fill="#5cc8e0"/></svg>
+    </h1>
+    <div class="pills">
+      <div class="pill" title="Лягушек на спине">
+        <canvas class="ic" id="frogIcon" width="68" height="60" aria-hidden="true"></canvas>
+        <div class="txt"><small>Счёт</small><b id="score">0</b></div>
+      </div>
+      <div class="pill" title="Лучший результат">
+        <svg class="ic" viewBox="0 0 34 30" aria-hidden="true">
+          <path d="M9 3h16v6a8 8 0 0 1-16 0z" fill="#f2b632" stroke="#c98a12" stroke-width="1.5"/>
+          <path d="M9 5H4v2a5 5 0 0 0 6 5M25 5h5v2a5 5 0 0 1-6 5" fill="none" stroke="#c98a12" stroke-width="2"/>
+          <rect x="15" y="16" width="4" height="6" fill="#d99a1c"/>
+          <rect x="10" y="22" width="14" height="5" rx="2" fill="#f2b632" stroke="#c98a12" stroke-width="1.5"/>
+          <path d="M13 6v4" stroke="#fff4c8" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+        <div class="txt"><small>Рекорд</small><b id="best">0</b></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="board" id="board">
+    <canvas id="canvas" aria-label="Пруд, игровое поле"></canvas>
+    <div class="panel" id="panel" hidden>
+      <div class="card settings" role="dialog" aria-labelledby="setTitle">
+        <h2 id="setTitle">Звук и управление</h2>
+        <div class="set-row">
+          <button class="tog" id="musicTog" type="button" aria-pressed="true">♪ Музыка</button>
+          <input type="range" id="musicVol" min="0" max="100" aria-label="Громкость музыки">
+        </div>
+        <div class="set-row">
+          <button class="tog" id="sfxTog" type="button" aria-pressed="true">Звуки</button>
+          <input type="range" id="sfxVol" min="0" max="100" aria-label="Громкость звуков">
+        </div>
+        <div class="set-row">
+          <button class="tog wide" id="dpadTog" type="button" aria-pressed="false">Стрелки на экране</button>
+        </div>
+        <button class="btn btn-coral" id="panelClose" type="button">Готово</button>
+      </div>
+    </div>
+    <div class="overlay" id="overlay">
+      <div class="card">
+        <h2 id="ovTitle">Змейка у пруда</h2>
+        <div class="big" id="ovBig" hidden><canvas id="ovFrog" width="92" height="80"></canvas><span id="ovScore">0</span></div>
+        <p id="ovText">Подбирай лягушек — они запрыгивают змейке на спину. Не врезайся в бортик и в свой хвост.</p>
+        <button class="btn btn-coral" id="startBtn" type="button">Играть</button>
+        <a class="btn btn-teal" id="shareBtn" href="#" target="_blank" rel="noopener" hidden>Поделиться</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="row">
+    <button class="btn btn-teal" id="pauseBtn" type="button">
+      <svg viewBox="0 0 24 24" id="pauseIco" aria-hidden="true"><rect x="5" y="4" width="5" height="16" rx="1.5" fill="currentColor"/><rect x="14" y="4" width="5" height="16" rx="1.5" fill="currentColor"/></svg>
+      <span id="pauseTxt">Пауза</span>
+    </button>
+    <button class="btn btn-cream" id="restartBtn" type="button">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19 12a7 7 0 1 1-2.05-4.95" fill="none" stroke="#ec6d43" stroke-width="3.2" stroke-linecap="round"/><path d="M18.5 2.5v5.5H13" fill="none" stroke="#ec6d43" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      Заново
+    </button>
+    <button class="btn btn-teal btn-icon" id="soundBtn" type="button" aria-label="Звук и управление">
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M4 9h4l5-4v14l-5-4H4z" fill="currentColor"/>
+        <g id="soundOn" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M16 9a4 4 0 0 1 0 6"/><path d="M18.5 6.5a7.5 7.5 0 0 1 0 11"/></g>
+        <g id="soundOff" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M16 9l5 6M21 9l-5 6"/></g>
+      </svg>
+    </button>
+  </div>
+  <div class="dpad" id="dpad" hidden aria-label="Стрелки">
+    <button class="up" data-dir="up" type="button" aria-label="Вверх">▲</button>
+    <button class="left" data-dir="left" type="button" aria-label="Влево">◀</button>
+    <button class="down" data-dir="down" type="button" aria-label="Вниз">▼</button>
+    <button class="right" data-dir="right" type="button" aria-label="Вправо">▶</button>
+  </div>
+  <p class="hint">Свайп · стрелки · WASD</p>
+</div>
+
+<script>
+/* =========================================================
+   1. НАСТРОЙКИ БАЛАНСА — меняйте числа здесь
+   ========================================================= */
+/* =========================================================
+   0. ТЕЛЕГРАМ — впишите сюда ссылку на игру из BotFather (вида https://t.me/имя_бота/имя_игры)
+   ========================================================= */
+const TELEGRAM = {
+  gameLink: '',   // пусто = делиться адресом текущей страницы
+  shareText: n => n > 0 ? `У меня ${n} ${plural(n, 'лягушка', 'лягушки', 'лягушек')} на спине ужа в «Змейке у пруда» 🐸 Сможешь больше?` : 'Играю в «Змейку у пруда» 🐸 Попробуй собрать лягушек на спину ужа!',
+};
+function plural(n, a, b, c) { const m = n % 100, k = n % 10; return m > 10 && m < 20 ? c : k === 1 ? a : k > 1 && k < 5 ? b : c; }
+
+const CONFIG = {
+  gridSize: 15,         // клеток по стороне пруда
+  startLength: 2,       // начальная длина: голова + хвостик
+  growPerFrog: 1,       // на сколько клеток вырастает за лягушку (одна лягушка — один сегмент)
+  startSpeedMs: 240,    // пауза между шагами в начале (больше = медленнее)
+  minSpeedMs: 105,      // самая высокая скорость
+  speedUpPerFrog: 3,    // ускорение за каждую лягушку, мс
+  wrapWalls: false,     // true — проплывать сквозь бортик
+  swipeMinPx: 16,       // длина свайпа, после которой засчитывается поворот
+  lateTurnWindow: .25,  // поворот, нажатый в первые 25% шага, применяется к этому же шагу (без ускорения змейки)
+};
+
+/* =========================================================
+   2. ЦВЕТА И ЗАМЕНЯЕМЫЕ КАРТИНКИ
+   Чтобы поставить свою картинку, впишите адрес (или data:URI) в SPRITES.
+   Пока там null, элемент рисуется кодом.
+   ========================================================= */
+const THEME = {
+  water: '#4cbde6', waterAlt: '#45b3de', waterEdge: 'rgba(20,95,150,.38)',
+  ripple: 'rgba(255,255,255,.5)', waveCrest: '#ffffff', waveShade: '#1f86c4', caustic: 'rgba(255,255,255,.12)',
+  stone: '#d2d6d0', stoneDark: '#a6aea8', stoneEdge: '#8a958f', moss: '#a2d64a', mossDark: '#7fbb3a', frameBand: '#79a69a', softShadow: 'rgba(20,80,110,.25)',
+  snake: '#77828e', snakeShade: '#65707c', snakeLight: '#95a0ab', snakeSpot: '#5d6873', snakeShadow: 'rgba(16,80,125,.3)', snakeEdge: '#65707c',
+  ear: '#ffd63f', earEdge: '#f0a91f',
+  cheek: '#f7a3a0', tongue: '#ef5a6a', eye: '#2e4253',
+  frog: '#7cd03f', frogDark: '#4f9a26', frogBelly: '#ccf283',
+  lily: '#6cc44a', lilyDark: '#4b9c33', lotus: '#f9b3c2', lotusDeep: '#f07f9a', lotusCore: '#ffd65a',
+  reedLeafBase: '#3f9b45', reedLeafTip: '#9ddc5b', reedStalk: '#5fae42', reedHead: '#a96a34', reedHeadDark: '#8a5328', reedHeadLight: '#d29558',
+  plus: '#f26a45', drop: '#bff2ff',
+};
+const SPRITES = {
+  frog: null,       // лягушка (смотрит на зрителя), квадратная картинка
+  snakeHead: null,  // голова змейки, смотрит вправо, квадратная картинка
+  pond: null,       // весь фон пруда с бортиком, квадратная картинка
+};
+
+/* =========================================================
+   3. ИГРОВАЯ ЛОГИКА — без рисования
+   ========================================================= */
+const DIRS = { up: [0, -1], down: [0, 1], left: [-1, 0], right: [1, 0] };
+const OPPOSITE = { up: 'down', down: 'up', left: 'right', right: 'left' };
+
+function createGame(cfg) {
+  const s = {};
+  function placeFrog() {
+    const free = [];
+    for (let y = 0; y < cfg.gridSize; y++)
+      for (let x = 0; x < cfg.gridSize; x++)
+        if (!s.snake.some(p => p.x === x && p.y === y)) free.push({ x, y });
+    s.food = free.length ? free[Math.floor(Math.random() * free.length)] : null;
+  }
+  function reset() {
+    const mid = Math.floor(cfg.gridSize / 2);
+    s.snake = [];
+    for (let i = 0; i < cfg.startLength; i++) s.snake.push({ x: mid - 1 - i, y: mid });
+    s.trail = [1, 2, 3].map(k => ({ x: mid - cfg.startLength - k, y: mid })); // клетки, которые хвост только что покинул — нужны для плавной отрисовки
+    s.dir = 'right'; s.queue = []; s.grow = 0;
+    s.frogs = 0; s.stepMs = cfg.startSpeedMs; s.over = false;
+    placeFrog();
+  }
+  function turn(dir) {
+    const last = s.queue.length ? s.queue[s.queue.length - 1] : s.dir;
+    if (dir === last || dir === OPPOSITE[last] || s.queue.length >= 2) return;
+    s.queue.push(dir);
+  }
+  function step() {
+    if (s.over) return { type: 'none' };
+    if (s.queue.length) s.dir = s.queue.shift();
+    const [dx, dy] = DIRS[s.dir], n = cfg.gridSize;
+    let x = s.snake[0].x + dx, y = s.snake[0].y + dy;
+    if (cfg.wrapWalls) { x = (x + n) % n; y = (y + n) % n; }
+    else if (x < 0 || y < 0 || x >= n || y >= n) { s.over = true; return { type: 'dead' }; }
+    const eating = !!s.food && s.food.x === x && s.food.y === y;
+    const keepTail = s.grow > 0;
+    const body = keepTail ? s.snake : s.snake.slice(0, -1);
+    if (body.some(p => p.x === x && p.y === y)) { s.over = true; return { type: 'dead' }; }
+    s.snake.unshift({ x, y });
+    if (keepTail) s.grow--; else { s.trail.unshift(s.snake.pop()); s.trail.length = 3; }
+    if (eating) {
+      const at = s.food;
+      s.frogs++;
+      s.grow += cfg.growPerFrog; // змейка дорастает за следующие шаги
+      s.stepMs = Math.max(cfg.minSpeedMs, s.stepMs - cfg.speedUpPerFrog);
+      placeFrog();
+      if (!s.food) { s.over = true; return { type: 'win', at }; }
+      return { type: 'ate', at };
+    }
+    return { type: 'move' };
+  }
+  reset();
+  return { state: s, reset, turn, step };
+}
+
+/* =========================================================
+   4. СОХРАНЕНИЕ (localStorage этого браузера)
+   ========================================================= */
+const store = {
+  get(k, d) { try { const v = localStorage.getItem(k); return v === null ? d : JSON.parse(v); } catch (e) { return d; } },
+  set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} },
+};
+const KEY_BEST = 'pondsnake.best.v1', KEY_AUDIO = 'pondsnake.audio.v1', KEY_DPAD = 'pondsnake.dpad.v1';
+
+/* =========================================================
+   5. ЗВУК И МУЗЫКА — синтез в браузере, без файлов
+   Громкость и вкл/выкл сохраняются в браузере.
+   ========================================================= */
+const sound = (() => {
+  const set = Object.assign({ musicOn: true, musicVol: 55, sfxOn: true, sfxVol: 80 }, store.get(KEY_AUDIO, {}));
+  let ac = null, master, musicBus, sfxBus, timer = null, nextTime = 0, stepIdx = 0;
+  function ctx() {
+    if (!ac) {
+      try { ac = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) { return null; }
+      master = ac.createGain(); master.connect(ac.destination);
+      musicBus = ac.createGain(); musicBus.connect(master);
+      sfxBus = ac.createGain(); sfxBus.connect(master);
+      applyGains(true);
+    }
+    if (ac.state === 'suspended' && !document.hidden) ac.resume();
+    return ac;
+  }
+  function applyGains(now) {
+    if (!ac) return;
+    const m = set.musicOn ? (set.musicVol / 100) * .5 : 0, s = set.sfxOn ? set.sfxVol / 100 : 0;
+    musicBus.gain.setTargetAtTime(m, ac.currentTime, now ? .001 : .08);
+    sfxBus.gain.setTargetAtTime(s, ac.currentTime, now ? .001 : .05);
+  }
+  function tone(bus, type, f0, f1, dur, vol, at, filter = 0, attack = .012) {
+    const o = ac.createOscillator(), g = ac.createGain();
+    o.type = type; o.frequency.setValueAtTime(f0, at); if (f1 !== f0) o.frequency.exponentialRampToValueAtTime(f1, at + dur);
+    g.gain.setValueAtTime(0.0001, at); g.gain.exponentialRampToValueAtTime(vol, at + attack); g.gain.exponentialRampToValueAtTime(0.0001, at + dur);
+    let node = o;
+    if (filter) { const f = ac.createBiquadFilter(); f.type = 'lowpass'; f.frequency.value = filter; o.connect(f); node = f; }
+    node.connect(g); g.connect(bus);
+    o.start(at); o.stop(at + dur + .05);
+  }
+  // «колокольчик»: основной тон + тихий обертон, быстрое затухание
+  const midi = m => 440 * Math.pow(2, (m - 69) / 12);
+  function bell(f, at, vol) { tone(sfxBus, 'sine', f, f, .55, vol, at, 0, .004); tone(sfxBus, 'sine', f * 3, f * 3, .16, vol * .18, at, 0, .003); tone(sfxBus, 'triangle', f * .5, f * .5, .25, vol * .25, at, 0, .004); }
+  const sfx = (fn) => { const a = ctx(); if (!a || !set.sfxOn || set.sfxVol === 0) return; fn(a.currentTime); };
+
+  /* Музыка: тихая «прудовая» петля — бас, мягкий пэд и маримба, 96 ударов в минуту */
+  const BEAT = 60 / 96 / 2;
+  const CHORDS = [[48, 55, 64, 67], [45, 52, 60, 64], [41, 48, 57, 60], [43, 50, 59, 62]];
+  const MEL_A = [72, 0, 76, 0, 79, 0, 76, 74, 72, 0, 69, 0, 72, 76, 0, 0, 77, 0, 76, 0, 72, 0, 74, 0, 74, 76, 74, 0, 71, 0, 67, 0];
+  const MEL_B = [0, 0, 79, 0, 0, 0, 76, 0, 72, 0, 0, 0, 69, 0, 0, 0, 77, 0, 0, 76, 0, 0, 72, 0, 74, 0, 0, 0, 71, 0, 0, 0];
+  function playStep(i, t) {
+    const bar = Math.floor((i % 32) / 8), ch = CHORDS[bar], inBar = i % 8;
+    if (inBar === 0) {
+      for (const n of ch.slice(1)) tone(musicBus, 'sine', midi(n), midi(n), BEAT * 8, .03, t, 0, .35);
+      tone(musicBus, 'triangle', midi(ch[0] - 12), midi(ch[0] - 12), .45, .2, t);
+    }
+    if (inBar === 4) tone(musicBus, 'triangle', midi(ch[1] - 12), midi(ch[1] - 12), .4, .14, t);
+    const m = (i < 32 ? MEL_A : MEL_B)[i % 32];
+    if (m) { tone(musicBus, 'sine', midi(m), midi(m), .55, .09, t, 0, .005); tone(musicBus, 'sine', midi(m) * 4, midi(m) * 4, .12, .015, t, 0, .003); }
+    if (inBar % 2 === 1 && Math.random() < .12) { const f = 900 + Math.random() * 700; tone(musicBus, 'sine', f, f * 1.8, .08, .03, t + BEAT * .5); }
+  }
+  function schedule() {
+    if (!ac) return;
+    while (nextTime < ac.currentTime + .3) { playStep(stepIdx, nextTime); nextTime += BEAT; stepIdx = (stepIdx + 1) % 64; }
+  }
+  function musicStart() {
+    const a = ctx(); if (!a || timer || !set.musicOn) return;
+    nextTime = a.currentTime + .1; stepIdx = 0; timer = setInterval(schedule, 60); schedule();
+  }
+  function musicStop() { if (timer) { clearInterval(timer); timer = null; } }
+
+  document.addEventListener('visibilitychange', () => {
+    if (!ac) return;
+    if (document.hidden) ac.suspend(); else ac.resume();
+  });
+
+  return {
+    settings: set,
+    unlock() { ctx(); musicStart(); },
+    update(patch) {
+      Object.assign(set, patch); store.set(KEY_AUDIO, set);
+      ctx(); applyGains();
+      if (set.musicOn) musicStart(); else musicStop();
+    },
+    get silent() { return !(set.musicOn && set.musicVol > 0) && !(set.sfxOn && set.sfxVol > 0); },
+    start() { sfx(t => { tone(sfxBus, 'sine', 520, 820, .12, .2, t); tone(sfxBus, 'sine', 780, 1240, .1, .12, t + .09); }); },
+    // поимка: мягкий «блуп» + колокольчик из двух нот; с каждой лягушкой мелодия поднимается по гамме
+    catch(n = 1) {
+      sfx(t => {
+        tone(sfxBus, 'sine', 240, 640, .1, .16, t, 0, .006);
+        const scale = [72, 74, 76, 79, 81, 84, 86, 88], i = (n - 1) % 6, a = midi(scale[i]), b = midi(scale[i + 2]);
+        bell(a, t + .07, .13); bell(b, t + .17, .11);
+        tone(sfxBus, 'sine', b * 2, b * 2.02, .18, .02, t + .2, 0, .004);
+      });
+    },
+    plop() { sfx(t => tone(sfxBus, 'sine', 520, 820, .06, .05, t, 0, .005)); },
+    turn() { sfx(t => tone(sfxBus, 'sine', 620, 700, .05, .035, t)); },
+    click() { sfx(t => tone(sfxBus, 'triangle', 880, 660, .06, .08, t)); },
+    dead() { sfx(t => { tone(sfxBus, 'triangle', 420, 80, .5, .24, t); tone(sfxBus, 'square', 160, 60, .35, .05, t + .05, 600); }); },
+  };
+})();
+
+/* =========================================================
+   6. ОФОРМЛЕНИЕ — только рисование
+   ========================================================= */
+const images = {};
+for (const [k, src] of Object.entries(SPRITES)) if (src) { const im = new Image(); im.src = src; images[k] = im; }
+const imgReady = k => images[k] && images[k].complete && images[k].naturalWidth > 0;
+
+function rng(seed) { return () => { seed |= 0; seed = seed + 0x6D2B79F5 | 0; let t = Math.imul(seed ^ seed >>> 15, 1 | seed); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+function ellipse(g, x, y, rx, ry, rot = 0) { g.beginPath(); g.ellipse(x, y, Math.max(rx, .1), Math.max(ry, .1), rot, 0, Math.PI * 2); }
+function circle(g, x, y, r) { g.beginPath(); g.arc(x, y, Math.max(r, .1), 0, Math.PI * 2); }
+function rrect(g, x, y, w, h, r) { g.beginPath(); g.roundRect ? g.roundRect(x, y, w, h, r) : (g.moveTo(x + r, y), g.arcTo(x + w, y, x + w, y + h, r), g.arcTo(x + w, y + h, x, y + h, r), g.arcTo(x, y + h, x, y, r), g.arcTo(x, y, x + w, y, r), g.closePath()); }
+
+/* Лягушка: s — ширина. Смотрит на зрителя. */
+function drawFrog(g, x, y, s, o = {}) {
+  g.save();
+  g.translate(x, y);
+  if (o.rot) g.rotate(o.rot);
+  if (o.scale) g.scale(o.scale, o.scale);
+  g.globalAlpha *= (o.alpha ?? 1);
+  if (o.shadow) { g.fillStyle = THEME.softShadow; ellipse(g, 0, .4 * s, .42 * s, .1 * s); g.fill(); }
+  if (o.squash) g.scale(1 + o.squash * .5, 1 - o.squash);
+  if (imgReady('frog')) { g.drawImage(images.frog, -.55 * s, -.6 * s, 1.1 * s, 1.1 * s); g.restore(); return; }
+  const lw = Math.max(1, .035 * s);
+  g.lineWidth = lw; g.strokeStyle = THEME.frogDark;
+  g.fillStyle = THEME.frogDark;
+  ellipse(g, -.33 * s, .22 * s, .19 * s, .14 * s, -.3); g.fill();
+  ellipse(g, .33 * s, .22 * s, .19 * s, .14 * s, .3); g.fill();
+  g.fillStyle = THEME.frog;
+  ellipse(g, 0, .08 * s, .42 * s, .34 * s); g.fill(); g.stroke();
+  for (const sx of [-1, 1]) { circle(g, sx * .2 * s, -.2 * s, .17 * s); g.fill(); g.stroke(); }
+  ellipse(g, 0, .02 * s, .38 * s, .27 * s); g.fill();
+  g.fillStyle = THEME.frogBelly;
+  ellipse(g, 0, .2 * s, .25 * s, .17 * s); g.fill();
+  ellipse(g, -.15 * s, .41 * s, .09 * s, .05 * s); g.fill();
+  ellipse(g, .15 * s, .41 * s, .09 * s, .05 * s); g.fill();
+  for (const sx of [-1, 1]) {
+    const ex = sx * .2 * s, ey = -.21 * s;
+    if ((o.blink || 0) > .5) {
+      g.strokeStyle = THEME.eye; g.lineWidth = lw * 1.3;
+      g.beginPath(); g.arc(ex, ey - .02 * s, .08 * s, .2 * Math.PI, .8 * Math.PI); g.stroke();
+    } else {
+      g.fillStyle = '#fff'; circle(g, ex, ey, .12 * s); g.fill();
+      g.fillStyle = THEME.eye; circle(g, ex + .015 * s, ey + .01 * s, .068 * s); g.fill();
+      g.fillStyle = '#fff'; circle(g, ex - .02 * s, ey - .03 * s, .025 * s); g.fill();
+    }
+  }
+  g.fillStyle = THEME.cheek; g.globalAlpha *= .7;
+  ellipse(g, -.25 * s, .02 * s, .065 * s, .04 * s); g.fill();
+  ellipse(g, .25 * s, .02 * s, .065 * s, .04 * s); g.fill();
+  g.globalAlpha /= .7;
+  g.strokeStyle = THEME.eye; g.lineWidth = lw * 1.2; g.lineCap = 'round';
+  g.beginPath(); g.arc(0, -.04 * s, .11 * s, .2 * Math.PI, .8 * Math.PI); g.stroke();
+  g.restore();
+}
+
+function drawLily(g, x, y, r, rot) {
+  g.save(); g.translate(x, y); g.rotate(rot);
+  g.fillStyle = THEME.softShadow; ellipse(g, .06 * r, .1 * r, r, r * .92); g.fill();
+  g.fillStyle = THEME.lily; g.strokeStyle = THEME.lilyDark; g.lineWidth = Math.max(1, r * .06);
+  g.beginPath(); g.moveTo(0, 0); g.arc(0, 0, r, .18, Math.PI * 2 - .18); g.closePath(); g.fill(); g.stroke();
+  g.strokeStyle = 'rgba(30,90,30,.35)'; g.lineWidth = Math.max(1, r * .04);
+  for (let i = 1; i < 7; i++) { const a = .18 + i * (Math.PI * 2 - .36) / 7; g.beginPath(); g.moveTo(0, 0); g.lineTo(Math.cos(a) * r * .85, Math.sin(a) * r * .85); g.stroke(); }
+  g.restore();
+}
+function drawLotus(g, x, y, r, rot = 0) {
+  g.save(); g.translate(x, y); g.rotate(rot);
+  drawLily(g, r * .2, r * .3, r * 1.1, 2.4);
+  for (const [n, rr, col, off] of [[8, 1, THEME.lotusDeep, 0], [8, .78, THEME.lotus, Math.PI / 8], [5, .5, '#ffd3dc', .3]]) {
+    for (let i = 0; i < n; i++) {
+      const a = off + i * Math.PI * 2 / n;
+      g.fillStyle = col; ellipse(g, Math.cos(a) * r * .42 * rr, Math.sin(a) * r * .42 * rr - r * .05, r * .42 * rr, r * .2 * rr, a); g.fill();
+    }
+  }
+  g.fillStyle = THEME.lotusCore; circle(g, 0, -r * .05, r * .16); g.fill();
+  g.restore();
+}
+function drawReeds(g, x, y, h, lean) {
+  g.save(); g.translate(x, y);
+  g.fillStyle = 'rgba(255,255,255,.25)'; ellipse(g, 0, 0, h * .32, h * .07); g.fill();
+  function leaf(bx, H, bend, w) {
+    const tx = bx + bend * H, ty = -H;
+    const grd = g.createLinearGradient(0, 0, 0, ty); grd.addColorStop(0, THEME.reedLeafBase); grd.addColorStop(1, THEME.reedLeafTip);
+    g.fillStyle = grd;
+    g.beginPath(); g.moveTo(bx - w, 0);
+    g.quadraticCurveTo(bx - w * .6 + bend * H * .25, ty * .55, tx, ty);
+    g.quadraticCurveTo(bx + w * .6 + bend * H * .45, ty * .5, bx + w, 0);
+    g.closePath(); g.fill();
+  }
+  function cattail(bx, H, bend) {
+    const tx = bx + bend * H, ty = -H;
+    g.strokeStyle = THEME.reedStalk; g.lineWidth = h * .028; g.lineCap = 'round';
+    g.beginPath(); g.moveTo(bx, 0); g.quadraticCurveTo(bx, ty * .5, tx, ty); g.stroke();
+    const ang = Math.atan2(ty - ty * .5, tx - bx) + Math.PI / 2;
+    g.save(); g.translate(tx, ty); g.rotate(ang);
+    g.beginPath(); g.moveTo(0, -h * .26); g.lineTo(0, -h * .36); g.stroke();
+    const hw = h * .05, hl = h * .26;
+    const grd = g.createLinearGradient(-hw, 0, hw, 0); grd.addColorStop(0, THEME.reedHeadLight); grd.addColorStop(.45, THEME.reedHead); grd.addColorStop(1, THEME.reedHeadDark);
+    g.fillStyle = grd; rrect(g, -hw, -hl - h * .02, hw * 2, hl, hw); g.fill();
+    g.restore();
+  }
+  leaf(-h * .16, h * .62, -.45 + lean, h * .045);
+  leaf(h * .2, h * .55, .5 + lean, h * .04);
+  cattail(-h * .05, h * 1, lean - .05);
+  cattail(h * .09, h * .8, lean + .12);
+  leaf(-h * .02, h * .5, -.15 + lean, h * .05);
+  leaf(h * .08, h * .7, .2 + lean, h * .04);
+  g.restore();
+}
+
+function roundRectPath(x, y, w, h, r) {
+  const segs = [], hp = Math.PI / 2;
+  segs.push({ len: w - 2 * r, at: t => ({ x: x + r + t, y, a: 0 }) });
+  segs.push({ len: r * hp, at: t => { const a = -hp + t / r; return { x: x + w - r + Math.cos(a) * r, y: y + r + Math.sin(a) * r, a: a + hp }; } });
+  segs.push({ len: h - 2 * r, at: t => ({ x: x + w, y: y + r + t, a: hp }) });
+  segs.push({ len: r * hp, at: t => { const a = t / r; return { x: x + w - r + Math.cos(a) * r, y: y + h - r + Math.sin(a) * r, a: a + hp }; } });
+  segs.push({ len: w - 2 * r, at: t => ({ x: x + w - r - t, y: y + h, a: Math.PI }) });
+  segs.push({ len: r * hp, at: t => { const a = hp + t / r; return { x: x + r + Math.cos(a) * r, y: y + h - r + Math.sin(a) * r, a: a + hp }; } });
+  segs.push({ len: h - 2 * r, at: t => ({ x, y: y + h - r - t, a: -hp }) });
+  segs.push({ len: r * hp, at: t => { const a = Math.PI + t / r; return { x: x + r + Math.cos(a) * r, y: y + r + Math.sin(a) * r, a: a + hp }; } });
+  const total = segs.reduce((s, q) => s + q.len, 0);
+  return { total, at(d) { d = ((d % total) + total) % total; for (const q of segs) { if (d <= q.len) return q.at(d); d -= q.len; } return segs[0].at(0); } };
+}
+
+/* Декор по углам — рисуется каждый кадр и слегка качается на воде/ветру */
+const DECOR = [
+  ['lily', .55, 2.2, .6, .6], ['lotus', .55, .7, .62, 0], ['lily', 2, .25, .45, 2.2],
+  ['reeds', -.55, 2.7, 2.2, -.05], ['lily', -.9, .3, .5, 4],
+  ['reeds', .55, -.8, 2.1, .05], ['lily', 1.6, -.2, .55, 1.1],
+  ['lotus', -.6, -.75, .6, 0], ['lily', -2.1, -.2, .45, 5],
+]; // [вид, x, y (в клетках от угла; минус — от правого/нижнего края), размер, поворот]
+function drawDecor(g, t) {
+  const { W, c, O } = R, T = reduceMotion ? 0 : t;
+  DECOR.forEach(([kind, dx, dy, size, rot], i) => {
+    const x = dx >= 0 ? O + c * dx : W - O + c * dx, y = dy >= 0 ? O + c * dy : W - O + c * dy;
+    const ph = i * 1.7;
+    if (kind === 'lily') drawLily(g, x + Math.sin(T / 2100 + ph) * c * .03, y + Math.cos(T / 1800 + ph) * c * .04, c * size, rot + Math.sin(T / 2400 + ph) * .09);
+    else if (kind === 'lotus') drawLotus(g, x, y + Math.sin(T / 1700 + ph) * c * .04, c * size, Math.sin(T / 2600 + ph) * .07);
+    else {
+      const sway = Math.sin(T / 1400 + ph) * .05 + Math.sin(T / 610 + ph * 2) * .015;
+      g.save(); g.translate(x, y); g.rotate(sway); drawReeds(g, 0, 0, c * size, rot + sway * .8); g.restore();
+    }
+  });
+}
+
+const canvas = document.getElementById('canvas');
+const ctx = canvas.getContext('2d');
+const R = { W: 0, c: 0, ox: 0, F: 0, O: 0, field: 0, layer: null };
+
+function buildStaticLayer() {
+  const { W, c, ox, F, O, field } = R;
+  const L = document.createElement('canvas'); L.width = L.height = W;
+  const g = L.getContext('2d');
+  if (imgReady('pond')) { g.drawImage(images.pond, 0, 0, W, W); R.layer = L; return; }
+  const rand = rng(7);
+  const fr = c * .9;
+  // вода
+  g.save(); rrect(g, ox, ox, field, field, fr); g.clip();
+  g.fillStyle = THEME.water; g.fillRect(ox, ox, field, field);
+  g.fillStyle = THEME.waterAlt;
+  for (let y = 0; y < CONFIG.gridSize; y++) for (let x = 0; x < CONFIG.gridSize; x++) if ((x + y) % 2) g.fillRect(ox + x * c, ox + y * c, c, c);
+  g.shadowColor = THEME.waterEdge; g.shadowBlur = c * .7; g.strokeStyle = '#000'; g.lineWidth = c;
+  rrect(g, ox - c * .5, ox - c * .5, field + c, field + c, fr + c * .5); g.stroke();
+  g.restore();
+  // бортик из камней
+  const mid = ox - F / 2, fw = field + F;
+  g.strokeStyle = THEME.frameBand; g.lineWidth = F * 1.05;
+  rrect(g, mid, mid, fw, fw, fr + F / 2); g.stroke();
+  const path = roundRectPath(mid, mid, fw, fw, fr + F / 2);
+  const count = Math.round(path.total / (c * .74));
+  for (let i = 0; i < count; i++) {
+    const p = path.at(i * path.total / count + rand() * c * .1);
+    const sw = c * (.42 + rand() * .1), sh = F * (.42 + rand() * .1), rot = p.a + (rand() - .5) * .3;
+    g.save(); g.translate(p.x, p.y); g.rotate(rot);
+    g.fillStyle = THEME.softShadow; ellipse(g, 0, sh * .25, sw, sh); g.fill();
+    const grd = g.createLinearGradient(0, -sh, 0, sh); grd.addColorStop(0, THEME.stone); grd.addColorStop(1, THEME.stoneDark);
+    g.fillStyle = grd; g.strokeStyle = THEME.stoneEdge; g.lineWidth = Math.max(1, c * .04);
+    ellipse(g, 0, 0, sw, sh); g.fill(); g.stroke();
+    g.fillStyle = 'rgba(255,255,255,.35)'; ellipse(g, -sw * .2, -sh * .35, sw * .5, sh * .25); g.fill();
+    if (rand() < .65) {
+      const n = 2 + Math.floor(rand() * 4);
+      for (let k = 0; k < n; k++) {
+        g.fillStyle = rand() < .5 ? THEME.moss : THEME.mossDark;
+        circle(g, (rand() - .5) * sw * 1.4, -sh * (.45 + rand() * .45), c * (.06 + rand() * .07)); g.fill();
+      }
+    }
+    g.restore();
+  }
+  R.layer = L;
+}
+
+function resize() {
+  const r = canvas.getBoundingClientRect();
+  const dpr = Math.min(window.devicePixelRatio || 1, 2.5);
+  const W = Math.max(100, Math.round(r.width * dpr));
+  canvas.width = canvas.height = W;
+  const c = W / (CONFIG.gridSize + 2.3);
+  R.W = W; R.c = c; R.O = c * .55; R.F = c * .6; R.ox = R.O + R.F; R.field = c * CONFIG.gridSize;
+  buildStaticLayer();
+  render(performance.now());
+}
+
+const cellX = x => R.ox + (x + .5) * R.c;
+
+/* Гладкая кривая через клетки змейки и её «след».
+   u — непрерывный номер вдоль тела: u=0 — центр первой клетки, u=1 — второй и т.д.
+   Каждая клетка даёт дугу от середины одной стороны до середины другой, поэтому
+   повороты всегда скруглены, а при смене направления тело не дёргается. */
+function snakeCells() { const s = game.state; return s.snake.concat(s.trail); }
+function curveAt(E, u) {
+  const n = E.length;
+  const get = j => {
+    if (j >= 0 && j < n) return E[j];
+    const a = j < 0 ? E[0] : E[n - 1], b = j < 0 ? E[1] : E[n - 2], m = j < 0 ? -j : j - n + 1;
+    return { x: a.x + (a.x - b.x) * m, y: a.y + (a.y - b.y) * m };
+  };
+  const i = Math.round(u);
+  const C = get(i);
+  let P0 = get(i - 1), P2 = get(i + 1);
+  const far = (a, b) => Math.abs(a.x - b.x) > 1 || Math.abs(a.y - b.y) > 1;
+  if (far(P0, C)) P0 = { x: 2 * C.x - P2.x, y: 2 * C.y - P2.y };
+  if (far(P2, C)) P2 = { x: 2 * C.x - P0.x, y: 2 * C.y - P0.y };
+  const A = { x: (P0.x + C.x) / 2, y: (P0.y + C.y) / 2 }, B = { x: (C.x + P2.x) / 2, y: (C.y + P2.y) / 2 };
+  const t = u - (i - .5), v = 1 - t;
+  const x = v * v * A.x + 2 * v * t * C.x + t * t * B.x, y = v * v * A.y + 2 * v * t * C.y + t * t * B.y;
+  // направление: к голове (уменьшение u)
+  const dx = -(2 * v * (C.x - A.x) + 2 * t * (B.x - C.x)), dy = -(2 * v * (C.y - A.y) + 2 * t * (B.y - C.y));
+  return { x: cellX(x), y: cellX(y), a: Math.atan2(dy, dx) };
+}
+const headU = () => .5 + (1 - alpha); // голова на полклетки позади логики — так движение непрерывно
+
+/* «Хребет»: точки кривой с шагом 0.05 клетки, дополнительно сглаженные —
+   повороты становятся широкими мягкими дугами. По нему едут тело, голова и лягушки. */
+const SPINE_DU = .05, SPINE_SMOOTH = 6, SPINE_PASSES = 3;
+function buildSpine() {
+  const E = snakeCells(), L = game.state.snake.length, u0 = headU();
+  const uA = Math.max(0, u0 - .45), uB = u0 + L - 1 + .9;
+  const n = Math.ceil((uB - uA) / SPINE_DU) + 1;
+  let X = new Float64Array(n), Y = new Float64Array(n);
+  for (let i = 0; i < n; i++) { const q = curveAt(E, uA + i * SPINE_DU); X[i] = q.x; Y[i] = q.y; }
+  for (let p = 0; p < SPINE_PASSES; p++) {
+    const NX = new Float64Array(n), NY = new Float64Array(n);
+    for (let i = 0; i < n; i++) {
+      const k = Math.min(SPINE_SMOOTH, i, n - 1 - i);
+      let sx = 0, sy = 0;
+      for (let j = i - k; j <= i + k; j++) { sx += X[j]; sy += Y[j]; }
+      NX[i] = sx / (2 * k + 1); NY[i] = sy / (2 * k + 1);
+    }
+    X = NX; Y = NY;
+  }
+  function at(u) {
+    const f = Math.max(0, Math.min(n - 1.001, (u - uA) / SPINE_DU)), i = Math.floor(f), t = f - i;
+    const j0 = Math.max(0, i - 2), j1 = Math.min(n - 1, i + 3);
+    return { x: X[i] + (X[i + 1] - X[i]) * t, y: Y[i] + (Y[i + 1] - Y[i]) * t, a: Math.atan2(Y[j0] - Y[j1], X[j0] - X[j1]) };
+  }
+  return { at, u0, L, uEnd: u0 + L - 1 + .6 };
+}
+
+function drawSnake(g, sp, t, dead) {
+  const c = R.c, { u0, L, uEnd } = sp, base = c * .82;
+  const ts = u0 + Math.max(.35, L - 1.7);
+  const width = u => u <= ts ? base : base * (1 - .85 * Math.pow((u - ts) / (uEnd - ts), 1.15));
+  const S = [];
+  for (let u = uEnd; u > u0; u -= .08) S.push({ ...sp.at(u), u });
+  S.push({ ...sp.at(u0), u: u0 });
+  const k0 = Math.max(0, S.findIndex(q => q.u <= ts));
+  function pass(color, scale, dx = 0, dy = 0, extra = 0) {
+    g.strokeStyle = color; g.lineCap = 'round'; g.lineJoin = 'round';
+    for (let k = 0; k < k0; k++) {
+      g.lineWidth = Math.max(.5, Math.min(width(S[k].u), width(S[k + 1].u)) * scale + extra);
+      g.beginPath(); g.moveTo(S[k].x + dx, S[k].y + dy); g.lineTo(S[k + 1].x + dx, S[k + 1].y + dy); g.stroke();
+    }
+    if (k0 < S.length - 1) {
+      g.lineWidth = base * scale + extra;
+      g.beginPath(); g.moveTo(S[k0].x + dx, S[k0].y + dy);
+      for (let k = k0 + 1; k < S.length; k++) g.lineTo(S[k].x + dx, S[k].y + dy);
+      g.stroke();
+    }
+  }
+  // плоская подача как в референсе: мягкая тень, основной тон, тень вдоль бока, светлая полоса
+  pass(THEME.snakeShadow, 1, c * .1, c * .17);
+  pass(THEME.snake, 1);
+  pass(THEME.snakeShade, .5, c * .1, c * .1);
+  pass(THEME.snakeLight, .2, -c * .11, -c * .12);
+  // пятна: у каждого сегмента свой узор, он «приклеен» к телу и едет вместе с ним
+  g.fillStyle = THEME.snakeSpot;
+  for (let k = 0; k < L; k++) {
+    const r = rng(k * 7919 + 13);
+    const n = 1 + Math.floor(r() * 2);
+    for (let m = 0; m < n; m++) {
+      const u = u0 + k + .25 + r() * .5; if (u > uEnd - .25) continue;
+      const q = sp.at(u), sz = width(u) / base, rad = c * (.07 + r() * .09) * sz;
+      const off = (r() * 2 - 1) * Math.max(0, base / 2 - rad - c * .05) * .9;
+      const nx = -Math.sin(q.a), ny = Math.cos(q.a);
+      ellipse(g, q.x + nx * off, q.y + ny * off, rad * 1.25, rad, q.a); g.fill();
+    }
+  }
+}
+
+/* Язык: высовывается сам раз в несколько секунд, дрожит и прячется */
+let tongueAt = 1500;
+function tongueAmount(t) {
+  if (t > tongueAt + 700) tongueAt = t + 2200 + Math.random() * 2600;
+  const k = (t - tongueAt) / 700; if (k < 0 || k > 1) return 0;
+  return k < .2 ? ease(k / .2) : k > .8 ? 1 - ease((k - .8) / .2) : 1;
+}
+
+function drawHead(g, sp, t, dead) {
+  const c = R.c, h = sp.at(sp.u0);
+  g.save(); g.translate(h.x, h.y); g.rotate(h.a);
+  if (imgReady('snakeHead')) { g.drawImage(images.snakeHead, -.6 * c, -.6 * c, 1.2 * c, 1.2 * c); g.restore(); return; }
+  const r = c * .5;
+  const tg = dead ? 0 : tongueAmount(t);
+  if (tg > 0) {
+    const len = c * .6 * tg, x0 = r * .95, wig = Math.sin(t / 35) * c * .05 * tg, fork = c * .13;
+    g.strokeStyle = THEME.tongue; g.lineWidth = c * .065; g.lineCap = 'round'; g.lineJoin = 'round';
+    g.beginPath(); g.moveTo(x0, 0); g.quadraticCurveTo(x0 + len * .5, wig, x0 + len, wig * .4);
+    g.lineTo(x0 + len + fork, wig * .4 - fork * .55); g.moveTo(x0 + len, wig * .4); g.lineTo(x0 + len + fork, wig * .4 + fork * .55); g.stroke();
+  }
+  g.fillStyle = THEME.snakeShadow; rrect(g, -r * .7 + c * .1, -r * .82 + c * .17, r * 1.85, r * 1.64, r * .75); g.fill();
+  g.fillStyle = THEME.snake; rrect(g, -r * .7, -r * .82, r * 1.85, r * 1.64, r * .75); g.fill();
+  g.save(); rrect(g, -r * .7, -r * .82, r * 1.85, r * 1.64, r * .75); g.clip();
+  g.fillStyle = THEME.snakeShade; ellipse(g, r * .2, r * .75, r * 1.2, r * .38); g.fill();
+  g.fillStyle = THEME.snakeLight; ellipse(g, r * .05, -r * .62, r * .75, r * .16); g.fill();
+  g.restore();
+  // жёлтые «ушки» ужа
+  g.fillStyle = THEME.ear;
+  for (const sy of [-1, 1]) { ellipse(g, -r * .5, sy * r * .6, r * .32, r * .22, -sy * .35); g.fill(); }
+  for (const sy of [-1, 1]) {
+    const ex = r * .55, ey = sy * r * .36;
+    if (dead) {
+      g.strokeStyle = THEME.eye; g.lineWidth = c * .05; g.lineCap = 'round';
+      g.beginPath(); g.moveTo(ex - c * .07, ey - c * .07); g.lineTo(ex + c * .07, ey + c * .07); g.moveTo(ex + c * .07, ey - c * .07); g.lineTo(ex - c * .07, ey + c * .07); g.stroke();
+    } else {
+      g.fillStyle = THEME.eye; circle(g, ex, ey, c * .1); g.fill();
+      g.fillStyle = '#fff'; circle(g, ex - c * .025, ey - c * .03, c * .03); g.fill();
+    }
+  }
+  g.restore();
+}
+
+/* Эффекты: лягушки на спине, всплески «+1», разлёт при проигрыше */
+let riders = [], popups = [], deathAt = 0, frogBornAt = 0;
+const ease = t => 1 - Math.pow(1 - t, 3);
+
+function drawRiders(g, sp, t, dead) {
+  const c = R.c, u0 = sp.u0, L = sp.L;
+  [...riders.keys()].reverse().forEach(k => { // ближние к голове рисуются поверх
+    const rd = riders[k];
+    const seat = sp.at(u0 + Math.min(1 + k, L - 1));
+    const bob = Math.sin(t / 220 + k * 1.3) * c * .04;
+    let x = seat.x, y = seat.y - c * .14 + bob, sc = 1, alpha = 1, rot = 0;
+    const blink = ((t + k * 977) % 3400) < 140 ? 1 : 0;
+    const j = (t - rd.born) / 420;
+    if (j < 1) {
+      const e = ease(Math.max(0, j)), fx = cellX(rd.from.x), fy = cellX(rd.from.y);
+      x = fx + (x - fx) * e; y = fy + (y - fy) * e - Math.sin(Math.PI * Math.max(0, j)) * c * 1.1;
+      sc = 1 + Math.sin(Math.PI * Math.max(0, j)) * .35;
+    }
+    if (dead) {
+      const d = (t - deathAt) / 700; if (d >= 1) return;
+      const a = k * 2.399 + .5;
+      x += Math.cos(a) * c * 2 * ease(d); y += Math.sin(a) * c * 2 * ease(d) - Math.sin(Math.PI * d) * c;
+      alpha = 1 - d; rot = d * 3 * (k % 2 ? 1 : -1);
+    }
+    drawFrog(g, x, y, c * .84 * sc, { blink, alpha, rot, shadow: !dead && j >= 1 });
+  });
+}
+
+function drawFood(g, t) {
+  const f = game.state.food; if (!f) return;
+  const c = R.c, x = cellX(f.x), y = cellX(f.y);
+  const ph = ((t - frogBornAt) % 2600) / 2600;
+  const hop = ph < .14 ? Math.sin(ph / .14 * Math.PI) : 0;
+  const born = Math.min(1, (t - frogBornAt) / 320);
+  const pop = born < 1 ? 1 + Math.sin(born * Math.PI) * .25 : 1;
+  g.strokeStyle = 'rgba(255,255,255,.6)'; g.lineWidth = Math.max(1, c * .035);
+  for (let i = 0; i < 2; i++) {
+    const r = ((t / 1400 + i / 2) % 1);
+    g.globalAlpha = 1 - r; ellipse(g, x, y + c * .3, c * (.3 + r * .35), c * (.1 + r * .12)); g.stroke();
+  }
+  g.globalAlpha = 1;
+  const blink = (t % 3100) < 130 ? 1 : 0;
+  drawFrog(g, x, y - hop * c * .25, c * .92 * pop * Math.max(.05, ease(born)), { blink, shadow: true, squash: hop ? -.06 * hop : 0 });
+}
+
+function drawPopups(g, t) {
+  const c = R.c;
+  popups = popups.filter(p => t - p.born < 800);
+  for (const p of popups) {
+    const k = (t - p.born) / 800, x = cellX(p.x), y = cellX(p.y) - c * .4 - ease(k) * c * .9;
+    g.globalAlpha = 1 - k * k;
+    g.fillStyle = THEME.drop;
+    for (let i = 0; i < 5; i++) {
+      const a = -Math.PI / 2 + (i - 2) * .55, d = ease(k) * c * .75;
+      circle(g, cellX(p.x) + Math.cos(a) * d, cellX(p.y) + Math.sin(a) * d - c * .1, c * .06 * (1 - k)); g.fill();
+    }
+    g.font = `900 ${Math.round(c * .62)}px ${getComputedStyle(document.body).fontFamily}`;
+    g.textAlign = 'center'; g.textBaseline = 'middle';
+    g.lineWidth = c * .12; g.strokeStyle = '#fcf2da'; g.lineJoin = 'round'; g.strokeText('+1', x, y);
+    g.fillStyle = THEME.plus; g.fillText('+1', x, y);
+    g.globalAlpha = 1;
+  }
+}
+
+/* Анимация воды: круги ряби, бегущие волны, блики */
+let ripples = [], nextRipple = 0;
+function addRipple(x, y, kind, t) {
+  const K = { ambient: [.15, 1.3, 2600, .5, 2], wake: [.35, 1.05, 900, .55, 1], splash: [.3, 1.6, 1000, .9, 3], bump: [.4, 1.8, 900, .9, 2] }[kind];
+  ripples.push({ x, y, r0: K[0], r1: K[1], dur: K[2], a: K[3], rings: K[4], born: t });
+}
+/* Волны-«серпики»: появляются, проплывают, покачиваются и тают. Иногда парами. */
+const WAVES = { count: 13, life: [2200, 3600], size: [.7, 1.25], alpha: .8, drift: .35 };
+let waves = [];
+function spawnWave(t, born) {
+  const r = Math.random, n = CONFIG.gridSize;
+  return { x: r() * n - .5, y: r() * n - .5, l: WAVES.size[0] + r() * (WAVES.size[1] - WAVES.size[0]),
+    born: born ?? t, life: WAVES.life[0] + r() * (WAVES.life[1] - WAVES.life[0]), vx: (.4 + r() * .6) * (r() < .75 ? 1 : -1), ph: r() * 6.28, pair: r() < .4 };
+}
+const sparks = Array.from({ length: 12 }, (_, i) => { const r = rng(300 + i); return { x: r(), y: r(), ph: r() * 6.28, sp: .7 + r() * .8 }; });
+
+/* Гребень волны. k — возраст 0..1: волна вырастает, выгибается, её вершина «катится» вдоль, потом опадает */
+function drawWavelet(g, x, y, l, h, a, k, dir) {
+  if (a <= .01) return;
+  const grow = Math.sin(Math.PI * Math.min(1, k * 1.15));          // рост и спад
+  const L = l * (.45 + .55 * grow), hl = L / 2, H = h * (.35 + .65 * grow);
+  const px = x + dir * hl * (k * 1.4 - .7);                           // вершина бежит вдоль гребня
+  const th = Math.max(1.5, L * .1);
+  g.globalAlpha = a * .35; g.fillStyle = THEME.waveShade;
+  g.beginPath(); g.moveTo(x - hl, y + th); g.quadraticCurveTo(px, y - H + th * 1.6, x + hl, y + th);
+  g.quadraticCurveTo(px, y - H + th * 2.6, x - hl, y + th); g.fill();
+  g.globalAlpha = a; g.fillStyle = THEME.waveCrest;
+  g.beginPath(); g.moveTo(x - hl, y); g.quadraticCurveTo(px, y - H - th, x + hl, y);
+  g.quadraticCurveTo(px, y - H + th, x - hl, y); g.fill();
+  // блик на вершине
+  g.globalAlpha = a * grow; circle(g, (x + px) / 2 + dir * hl * .1, y - H * .5 - th * .2, th * .55); g.fill();
+  g.globalAlpha = 1;
+}
+
+function drawWater(g, t) {
+  const { ox, field, c } = R;
+  g.save(); rrect(g, ox, ox, field, field, c * .9); g.clip();
+  if (!reduceMotion) {
+    for (let i = 0; i < 4; i++) {
+      const x = ox + field * (.5 + .38 * Math.sin(t / (9000 + i * 2100) + i * 2)), y = ox + field * (.5 + .38 * Math.cos(t / (11000 + i * 1700) + i));
+      const r = field * .28, grd = g.createRadialGradient(x, y, 0, x, y, r);
+      grd.addColorStop(0, THEME.caustic); grd.addColorStop(1, 'rgba(255,255,255,0)');
+      g.fillStyle = grd; g.fillRect(x - r, y - r, r * 2, r * 2);
+    }
+    if (waves.length < WAVES.count) waves.push(spawnWave(t, t - Math.random() * 3000));
+    waves = waves.map(w => (t - w.born > w.life ? spawnWave(t) : w));
+    for (const w of waves) {
+      const k = (t - w.born) / w.life; if (k < 0) continue;
+      const fade = Math.pow(Math.sin(Math.PI * k), 1.4);
+      const age = (t - w.born) / 1000, dir = Math.sign(w.vx);
+      const x = cellX(w.x + w.vx * WAVES.drift * age), y = cellX(w.y) + Math.sin(t / 380 + w.ph) * c * .07;
+      const l = w.l * c, lift = (.27 + .07 * Math.sin(t / 260 + w.ph)) * c;
+      drawWavelet(g, x, y, l, lift, fade * WAVES.alpha, k, dir);
+      if (w.pair) drawWavelet(g, x + dir * l * .55, y + c * .22, l * .7, lift * .8, fade * WAVES.alpha * .8, Math.min(1, k * 1.1), dir);
+    }
+    g.globalAlpha = 1;
+    if (t > nextRipple) { addRipple(Math.random() * (CONFIG.gridSize - 1), Math.random() * (CONFIG.gridSize - 1), 'ambient', t); nextRipple = t + 700 + Math.random() * 900; }
+    g.fillStyle = '#fff';
+    for (const s of sparks) {
+      const k = Math.max(0, Math.sin(t / 700 * s.sp + s.ph)) ** 10; if (k < .02) continue;
+      const x = ox + s.x * field, y = ox + s.y * field, r = c * .16 * k;
+      g.globalAlpha = k; g.beginPath(); g.moveTo(x, y - r); g.lineTo(x + r * .25, y); g.lineTo(x, y + r); g.lineTo(x - r * .25, y); g.closePath(); g.fill();
+      g.beginPath(); g.moveTo(x - r, y); g.lineTo(x, y + r * .25); g.lineTo(x + r, y); g.lineTo(x, y - r * .25); g.closePath(); g.fill();
+    }
+    g.globalAlpha = 1;
+  }
+  ripples = ripples.filter(r => t - r.born < r.dur);
+  g.strokeStyle = THEME.ripple;
+  for (const r of ripples) {
+    for (let i = 0; i < r.rings; i++) {
+      const k = (t - r.born) / r.dur - i * .18; if (k <= 0 || k >= 1) continue;
+      const rad = c * (r.r0 + (r.r1 - r.r0) * ease(k));
+      g.globalAlpha = r.a * (1 - k); g.lineWidth = Math.max(1, c * .06 * (1 - k * .6));
+      ellipse(g, cellX(r.x), cellX(r.y), rad, rad * .8); g.stroke();
+    }
+  }
+  g.globalAlpha = 1;
+  g.restore();
+}
+
+function render(t) {
+  const g = ctx, c = R.c;
+  if (!R.layer) return;
+  g.setTransform(1, 0, 0, 1, 0, 0);
+  g.clearRect(0, 0, R.W, R.W);
+  const dead = mode === 'dying' || mode === 'over';
+  const sh = dead ? Math.max(0, 1 - (t - deathAt) / 320) : 0;
+  if (sh > 0) g.translate((Math.random() - .5) * c * .3 * sh, (Math.random() - .5) * c * .3 * sh);
+  g.drawImage(R.layer, 0, 0);
+  drawWater(g, t);
+  drawDecor(g, t);
+  drawFood(g, t);
+  const sp = buildSpine();
+  drawSnake(g, sp, t, dead);
+  drawRiders(g, sp, t, dead);
+  drawHead(g, sp, t, dead);
+  drawPopups(g, t);
+}
+
+/* =========================================================
+   7. ИГРОВОЙ ЦИКЛ, ИНТЕРФЕЙС, УПРАВЛЕНИЕ
+   ========================================================= */
+const reduceMotion = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+const game = createGame(CONFIG);
+let prevSnake = game.state.snake.map(p => ({ ...p }));
+let mode = 'menu'; // menu | play | pause | dying | over
+let acc = 0, lastT = performance.now(), alpha = 1;
+let best = store.get(KEY_BEST, 0);
+const $ = id => document.getElementById(id);
+const ui = { panel: $('panel'), score: $('score'), best: $('best'), overlay: $('overlay'), ovTitle: $('ovTitle'), ovText: $('ovText'), ovBig: $('ovBig'), ovScore: $('ovScore'), startBtn: $('startBtn'), pauseTxt: $('pauseTxt') };
+ui.best.textContent = best;
+
+function iconFrog(id, s) { const cv = $(id), g = cv.getContext('2d'); g.clearRect(0, 0, cv.width, cv.height); drawFrog(g, cv.width / 2, cv.height * .5, s); }
+
+function setPauseLabel() { ui.pauseTxt.textContent = mode === 'pause' ? 'Дальше' : 'Пауза'; }
+function showCard(title, text, btn, scoreVal) {
+  shareBtn.hidden = true;
+  ui.ovTitle.textContent = title; ui.ovText.textContent = text; ui.startBtn.textContent = btn;
+  ui.ovBig.hidden = scoreVal === undefined;
+  if (scoreVal !== undefined) ui.ovScore.textContent = scoreVal;
+  ui.overlay.hidden = false;
+}
+function start() {
+  sound.unlock();
+  if (mode !== 'pause') {
+    game.reset(); prevSnake = game.state.snake.map(p => ({ ...p }));
+    riders = []; popups = []; ripples = []; frogBornAt = performance.now();
+    ui.score.textContent = 0;
+    sound.start();
+  }
+  mode = 'play'; acc = 0; lastT = performance.now();
+  ui.overlay.hidden = true; setPauseLabel();
+}
+function togglePause() {
+  if (!ui.panel.hidden) return;
+  if (mode === 'play') { mode = 'pause'; showCard('Пауза', 'Лягушки отдыхают на спинке и ждут.', 'Продолжить'); }
+  else if (mode === 'pause') start();
+  else if (mode === 'menu' || mode === 'over') start();
+  setPauseLabel();
+}
+function die(win) {
+  mode = 'dying'; deathAt = performance.now();
+  win ? sound.start() : sound.dead();
+  haptic(win ? 'medium' : 'error');
+  const sc = game.state.frogs, record = sc > best;
+  if (record) { best = sc; store.set(KEY_BEST, best); ui.best.textContent = best; }
+  setTimeout(() => {
+    if (mode !== 'dying') return;
+    mode = 'over';
+    const title = win ? 'Весь пруд твой!' : (record && sc > 0 ? 'Новый рекорд!' : 'Плюх!');
+    const text = sc === 0 ? 'Ни одной лягушки. Попробуй ещё раз!' : `Лягушек на спине: ${sc}. Рекорд: ${best}.`;
+    showCard(title, text, 'Ещё раз', sc);
+    shareBtn.href = shareUrl(sc); shareBtn.hidden = false;
+  }, 750);
+}
+
+let lastSnap = null, lastEvent = '', lastStepT = 0;
+function doStep(t) {
+  const st = game.state;
+  lastSnap = JSON.stringify({ snake: st.snake, trail: st.trail, dir: st.dir, queue: st.queue, grow: st.grow, frogs: st.frogs, stepMs: st.stepMs, over: st.over, food: st.food });
+  lastStepT = t;
+  const ev = game.step();
+  lastEvent = ev.type;
+  const hd = st.snake[1] || st.snake[0];
+  if (ev.type === 'move' && !reduceMotion) addRipple(hd.x, hd.y, 'wake', t);
+  if (ev.type === 'ate') addRipple(ev.at.x, ev.at.y, 'splash', t);
+  if (ev.type === 'dead') addRipple(st.snake[0].x, st.snake[0].y, 'bump', t);
+  if (ev.type === 'ate' || ev.type === 'win') {
+    riders.push({ born: t, from: ev.at });
+    popups.push({ x: ev.at.x, y: ev.at.y, born: t });
+    frogBornAt = t;
+    ui.score.textContent = st.frogs;
+    sound.catch(st.frogs); haptic('light'); setTimeout(() => sound.plop(), 400);
+  }
+  if (ev.type === 'dead' || ev.type === 'win') { alpha = 1; die(ev.type === 'win'); }
+}
+
+function loop(t) {
+  if (mode === 'play') {
+    acc += Math.min(t - lastT, 250); // скорость всегда ровная — никаких ускорений
+    while (acc >= game.state.stepMs && mode === 'play') { acc -= game.state.stepMs; doStep(t); }
+    if (mode === 'play') alpha = reduceMotion ? 1 : Math.min(1, acc / game.state.stepMs);
+  }
+  lastT = t;
+  render(t);
+  requestAnimationFrame(loop);
+}
+
+/* Поздний поворот: если кнопку нажали в самом начале шага, шаг пересчитывается
+   с новым направлением. Голова в этот момент почти не сдвинулась, так что подмены не видно. */
+function tryLateTurn(dir) {
+  if (!lastSnap || lastEvent !== 'move' || alpha >= CONFIG.lateTurnWindow) return false;
+  const st = game.state, snap = JSON.parse(lastSnap);
+  if (st.queue.length || snap.queue.length || dir === snap.dir || dir === OPPOSITE[snap.dir]) return false;
+  Object.assign(st, snap);
+  st.queue = [dir];
+  doStep(lastStepT);
+  return true;
+}
+
+function input(dir) {
+  sound.unlock();
+  if (!ui.panel.hidden) return;
+  if (mode === 'menu' || mode === 'over') start();
+  if (mode !== 'play') return;
+  if (tryLateTurn(dir)) { sound.turn(); return; }
+  const q = game.state.queue.length; game.turn(dir); if (game.state.queue.length > q) sound.turn();
+}
+
+ui.startBtn.addEventListener('click', start);
+$('pauseBtn').addEventListener('click', () => { sound.click(); togglePause(); });
+$('restartBtn').addEventListener('click', () => { if (!ui.panel.hidden) closePanel(); mode = 'menu'; start(); });
+let dpadOn = store.get(KEY_DPAD, false), panelResume = false;
+function syncSound() {
+  const st = sound.settings;
+  $('soundOn').style.visibility = sound.silent ? 'hidden' : 'visible';
+  $('soundOff').style.visibility = sound.silent ? 'visible' : 'hidden';
+  $('musicTog').setAttribute('aria-pressed', st.musicOn); $('sfxTog').setAttribute('aria-pressed', st.sfxOn);
+  $('musicVol').value = st.musicVol; $('sfxVol').value = st.sfxVol;
+  $('musicVol').style.setProperty('--fill', st.musicVol + '%'); $('sfxVol').style.setProperty('--fill', st.sfxVol + '%');
+  $('musicVol').disabled = !st.musicOn; $('sfxVol').disabled = !st.sfxOn;
+  $('dpadTog').setAttribute('aria-pressed', dpadOn);
+  $('dpad').hidden = !dpadOn; document.body.classList.toggle('dpad-on', dpadOn);
+}
+function openPanel() {
+  sound.unlock(); sound.click();
+  panelResume = mode === 'play';
+  if (panelResume) mode = 'pause';
+  ui.panel.hidden = false; syncSound();
+}
+function closePanel() {
+  ui.panel.hidden = true; sound.click();
+  if (panelResume) { panelResume = false; start(); }
+}
+$('soundBtn').addEventListener('click', () => ui.panel.hidden ? openPanel() : closePanel());
+$('panelClose').addEventListener('click', closePanel);
+$('musicTog').addEventListener('click', () => { sound.update({ musicOn: !sound.settings.musicOn }); syncSound(); });
+$('sfxTog').addEventListener('click', () => { sound.update({ sfxOn: !sound.settings.sfxOn }); syncSound(); sound.click(); });
+$('musicVol').addEventListener('input', e => { sound.update({ musicVol: +e.target.value }); syncSound(); });
+$('sfxVol').addEventListener('input', e => { sound.update({ sfxVol: +e.target.value }); syncSound(); });
+$('sfxVol').addEventListener('change', () => sound.catch(1));
+$('dpadTog').addEventListener('click', () => { dpadOn = !dpadOn; store.set(KEY_DPAD, dpadOn); syncSound(); sound.click(); });
+document.querySelectorAll('#dpad [data-dir]').forEach(b => b.addEventListener('pointerdown', e => { e.preventDefault(); input(b.dataset.dir); }));
+syncSound();
+
+const KEYS = { ArrowUp: 'up', ArrowDown: 'down', ArrowLeft: 'left', ArrowRight: 'right', KeyW: 'up', KeyS: 'down', KeyA: 'left', KeyD: 'right' };
+window.addEventListener('keydown', e => {
+  if (e.target.closest && e.target.closest('.panel')) return;
+  if (KEYS[e.code]) { e.preventDefault(); if (!e.repeat) input(KEYS[e.code]); }
+  else if (e.code === 'Space' || e.code === 'KeyP') { e.preventDefault(); togglePause(); }
+  else if (e.code === 'KeyR') { mode = 'menu'; start(); }
+  else if (e.code === 'KeyM') { const st = sound.settings, on = !(st.musicOn || st.sfxOn); sound.update({ musicOn: on, sfxOn: on }); syncSound(); }
+});
+
+// свайп по всему экрану, поворот срабатывает прямо во время движения пальца
+let sw = null;
+document.addEventListener('pointerdown', e => { if (!e.target.closest('button, .panel, input')) sw = { x: e.clientX, y: e.clientY }; });
+document.addEventListener('pointermove', e => {
+  if (!sw) return;
+  const dx = e.clientX - sw.x, dy = e.clientY - sw.y;
+  if (Math.max(Math.abs(dx), Math.abs(dy)) < CONFIG.swipeMinPx) return;
+  if (mode === 'play') input(Math.abs(dx) > Math.abs(dy) ? (dx > 0 ? 'right' : 'left') : (dy > 0 ? 'down' : 'up'));
+  sw = { x: e.clientX, y: e.clientY };
+});
+const endSwipe = () => { sw = null; };
+document.addEventListener('pointerup', endSwipe);
+document.addEventListener('pointercancel', endSwipe);
+document.addEventListener('visibilitychange', () => { if (document.hidden && mode === 'play') togglePause(); });
+
+/* ---- Телеграм Mini App: включается, только если игра открыта внутри Телеграма ---- */
+const TG = window.Telegram && window.Telegram.WebApp;
+const inTelegram = !!(TG && TG.platform && TG.platform !== 'unknown');
+if (inTelegram) {
+  try {
+    TG.ready(); TG.expand();
+    if (TG.isVersionAtLeast && TG.isVersionAtLeast('7.7') && TG.disableVerticalSwipes) TG.disableVerticalSwipes(); // свайп вниз не закрывает игру
+    if (TG.isVersionAtLeast && TG.isVersionAtLeast('6.1')) { TG.setHeaderColor('#135258'); TG.setBackgroundColor('#135258'); }
+  } catch (e) {}
+}
+function haptic(kind) { try { if (inTelegram && TG.HapticFeedback) kind === 'error' ? TG.HapticFeedback.notificationOccurred('error') : TG.HapticFeedback.impactOccurred(kind); } catch (e) {} }
+function shareUrl(n) {
+  const link = TELEGRAM.gameLink || location.href.split('#')[0];
+  return 'https://t.me/share/url?url=' + encodeURIComponent(link) + '&text=' + encodeURIComponent(TELEGRAM.shareText(n));
+}
+const shareBtn = $('shareBtn');
+shareBtn.addEventListener('click', e => {
+  sound.click();
+  if (inTelegram && TG.openTelegramLink) { e.preventDefault(); try { TG.openTelegramLink(shareBtn.href); } catch (err) {} }
+});
+
+iconFrog('frogIcon', 52);
+iconFrog('ovFrog', 70);
+if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => render(performance.now()));
+for (const im of Object.values(images)) im.addEventListener('load', () => { buildStaticLayer(); iconFrog('frogIcon', 52); iconFrog('ovFrog', 70); });
+new ResizeObserver(resize).observe(canvas);
+resize();
+requestAnimationFrame(loop);
+</script>
+
+</body>
+</html>
