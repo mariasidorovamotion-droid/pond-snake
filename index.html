@@ -37,7 +37,7 @@ img { max-width: 100%; }
   --font: "Nunito", "Trebuchet MS", system-ui, sans-serif;
   color-scheme: dark;
 }
-html, body { height: 100%; }
+html, body { height: 100%; overscroll-behavior: none; }
 body {
   background: linear-gradient(180deg, var(--bg-top) 0%, var(--bg-mid) 58%, var(--bg-bottom) 100%) var(--bg-top);
   background-attachment: fixed;
@@ -48,12 +48,12 @@ body {
   padding-block: 10px;
   box-sizing: border-box;
   overflow: hidden;
-  touch-action: none;
+  touch-action: none; overscroll-behavior: none;
   -webkit-user-select: none; user-select: none;
   -webkit-tap-highlight-color: transparent;
 }
 .app {
-  position: relative;
+  position: relative; touch-action: none;
   height: 100%;
   max-width: 560px;
   margin: 0 auto;
@@ -99,7 +99,7 @@ body.mobile .card-logo { width: min(92%, 320px); }
   max-width: 100%;
   aspect-ratio: 1;
 }
-canvas { display: block; width: 100%; height: 100%; }
+canvas { display: block; width: 100%; height: 100%; touch-action: none; }   /* жесты по пруду — только игре, браузер их не перехватывает */
 .overlay {
   position: absolute; inset: 0;
   display: flex; align-items: center; justify-content: center;
@@ -402,7 +402,7 @@ body.mobile.landscape .card-logo { width: auto; max-width: 70%; height: clamp(52
 body.mobile.landscape .overlay, body.mobile.landscape .panel { padding: 6px 4%; overflow-y: auto; align-items: safe center; }
 @media (max-height: 340px) { body.mobile.landscape #overlay .card { padding-block: 8px; gap: 5px; } body.mobile.landscape #overlay .card .btn { min-height: 34px !important; } body.mobile.landscape #ovText { display: none; } }
 
-/* ===== v0.56: Магазин вместо Паузы до старта, «Заново» — в паузе, жест на стартовом окне ===== */
+/* ===== v0.57: Магазин вместо Паузы до старта, «Заново» — в паузе, жест на стартовом окне ===== */
 #shopBtn { display: none; }
 body:not(.in-run) #pauseBtn, body:not(.in-run) #restartBtn { display: none; }
 body.shop-on:not(.in-run) #shopBtn { display: inline-flex; }
@@ -472,7 +472,7 @@ body.mobile.landscape .fxhud .fxsec { font-size: 13px; min-width: 2.2ch; }
 body.mobile.landscape .fxhud #shieldChip .fxlbl { display: inline; font-size: 12px; text-transform: none; letter-spacing: 0; }
 #ovText:empty { display: none; }
 @media (max-height: 620px) and (orientation: portrait) { body.mobile #overlay .big { margin-block: -6px; } body.mobile #overlay .big canvas { width: 52px; height: auto; } }
-/* v0.56: разные размеры телефонов */
+/* v0.57: разные размеры телефонов */
 .btn-gold { --hi: #ffe58a; --base: #f6bd3f; --edge: #c98a1c; color: #5a3a06; text-shadow: 0 1px 0 rgba(255,255,255,.45); }
 .btn-gold .price { background: rgba(255,255,255,.45); }
 .btn .price { white-space: nowrap; }
@@ -514,6 +514,7 @@ body.mobile .hint { max-width: 100%; min-width: 0; box-sizing: border-box; overf
 </style>
 </head>
 <body>
+<div class="nojs" id="nojs">Это игра, а не документ 🙂 Откройте файл в браузере (Safari или Chrome) или играйте по ссылке: <a href="https://t.me/pondsnake_bot/snake">t.me/pondsnake_bot/snake</a></div>
 <div class="nojs" id="nojs">Это игра, а не документ 🙂 Откройте файл в браузере (Safari или Chrome) или играйте по ссылке: <a href="https://t.me/pondsnake_bot/snake">t.me/pondsnake_bot/snake</a></div>
 <div class="app" id="app">
   <div class="top">
