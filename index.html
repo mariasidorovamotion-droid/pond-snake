@@ -677,6 +677,20 @@ body.mobile:not(.landscape) .pill .txt { flex-direction: row; align-items: cente
 body.mobile:not(.landscape) #frogIcon { height: calc(var(--hud-ic) / .65); margin: calc(var(--hud-ic) * -.27) -7px; }   /* рисунок лягушки занимает 65% своего холста — холст крупнее, видимая высота как у кубка и монеты */
 body.mobile:not(.landscape) .pill small { display: none; }
 body.mobile:not(.landscape) .pill b { color: #fff; font-size: clamp(17px, 5.4vw, 24px); line-height: 1; text-shadow: 0 2px 0 rgba(0,0,0,.28); font-variant-numeric: tabular-nums; }
+/* v0.62: окно размера пруда — три варианта в ряд */
+.size-opts { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+.size-opts .ctl-opt { padding: 12px 4px 10px; }
+.size-opts .ctl-opt svg { width: clamp(40px, 12vw, 56px); aspect-ratio: 1; color: var(--teal-btn); }
+.size-opts .ctl-opt b { font-size: clamp(12px, 3.7vw, 19px); white-space: nowrap; }
+.size-opts .ctl-opt { min-width: 0; padding-inline: 2px; }
+.size-opts .ctl-opt small { font-size: clamp(11px, 3vw, 13px); }
+#sizeBtn svg, #sizeBtnSet svg { color: var(--teal-btn); }
+#sizeBtn, body.mobile #overlay .card #sizeBtn, body.mobile .card #sizeBtnSet { min-height: 44px; font-size: clamp(15px, 4.4vw, 18px); padding: 0 12px; }
+@media (max-width: 359px) { body.mobile #overlay .card #sizeBtn, body.mobile .card #sizeBtnSet { font-size: 14px; padding: 0 8px; gap: 6px; } }
+/* все кнопки «Пруд: …» и «Управление: …» — одного вида и размера везде (меню, пауза, настройки) */
+#panel .modes { display: grid; grid-template-columns: minmax(0, 1fr); gap: 10px; }
+#board .card .btn.btn-ctl:is(#ctlBtn, #sizeBtn, #ctlBtnSet, #sizeBtnSet) { width: 100%; min-height: 44px; height: auto; max-width: none; font-size: clamp(13px, 3.9vw, 17px); padding: 6px 10px; gap: 8px; line-height: 1.15; white-space: nowrap; }
+@media (max-width: 359px) { #board .card .btn.btn-ctl:is(#ctlBtn, #sizeBtn, #ctlBtnSet, #sizeBtnSet) { font-size: 13px; padding: 6px 6px; gap: 5px; } }
 </style>
 </head>
 <body>
@@ -711,7 +725,7 @@ body.mobile:not(.landscape) .pill b { color: #fff; font-size: clamp(17px, 5.4vw,
     <canvas id="canvas" aria-label="Пруд, игровое поле"></canvas>
     <div class="panel" id="panel" hidden>
       <div class="card settings" role="dialog" aria-labelledby="setTitle">
-        <h2 id="setTitle">Звук и управление</h2>
+        <h2 id="setTitle">Настройки</h2>
         <div class="set-row">
           <button class="tog" id="musicTog" type="button" aria-pressed="true">♪ Музыка</button>
           <input type="range" id="musicVol" min="0" max="100" aria-label="Громкость музыки">
@@ -721,6 +735,7 @@ body.mobile:not(.landscape) .pill b { color: #fff; font-size: clamp(17px, 5.4vw,
           <input type="range" id="sfxVol" min="0" max="100" aria-label="Громкость звуков">
         </div>
         <div class="modes" role="group" aria-label="Управление">
+          <button class="btn btn-cream btn-ctl" id="sizeBtnSet" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><g fill="currentColor"><rect x="2.60" y="2.60" width="3.80" height="3.80" rx=".8"/><rect x="7.60" y="2.60" width="3.80" height="3.80" rx=".8"/><rect x="12.60" y="2.60" width="3.80" height="3.80" rx=".8"/><rect x="17.60" y="2.60" width="3.80" height="3.80" rx=".8"/><rect x="2.60" y="7.60" width="3.80" height="3.80" rx=".8"/><rect x="7.60" y="7.60" width="3.80" height="3.80" rx=".8"/><rect x="12.60" y="7.60" width="3.80" height="3.80" rx=".8"/><rect x="17.60" y="7.60" width="3.80" height="3.80" rx=".8"/><rect x="2.60" y="12.60" width="3.80" height="3.80" rx=".8"/><rect x="7.60" y="12.60" width="3.80" height="3.80" rx=".8"/><rect x="12.60" y="12.60" width="3.80" height="3.80" rx=".8"/><rect x="17.60" y="12.60" width="3.80" height="3.80" rx=".8"/><rect x="2.60" y="17.60" width="3.80" height="3.80" rx=".8"/><rect x="7.60" y="17.60" width="3.80" height="3.80" rx=".8"/><rect x="12.60" y="17.60" width="3.80" height="3.80" rx=".8"/><rect x="17.60" y="17.60" width="3.80" height="3.80" rx=".8"/></g></svg><span>Пруд: <b class="size-name">Обычный</b></span></button>
           <button class="btn btn-cream btn-ctl" id="ctlBtnSet" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><g fill="currentColor"><rect x="9" y="2.5" width="6" height="6" rx="1.6"/><rect x="2.5" y="10" width="6" height="6" rx="1.6"/><rect x="9" y="10" width="6" height="6" rx="1.6"/><rect x="15.5" y="10" width="6" height="6" rx="1.6"/></g></svg><span>Управление: <b class="ctl-name">Свайпы и тапы</b></span></button>
         </div>
         <p id="ctlHint" style="margin:0;font-size:14px"></p>
@@ -736,6 +751,26 @@ body.mobile:not(.landscape) .pill b { color: #fff; font-size: clamp(17px, 5.4vw,
         <p class="stars-note" id="shopNote" hidden></p>
         <p class="shop-tip" id="shopTip">Монеты нужны, чтобы продолжить забег после проигрыша.</p>
         <button class="btn btn-green" id="shopClose" type="button">Готово</button>
+      </div>
+    </div>
+    <div class="panel ctl-panel" id="sizePanel" hidden>
+      <div class="card ctl-pick" role="dialog" aria-labelledby="sizeTitle">
+        <h2 id="sizeTitle">Размер пруда</h2>
+        <div class="ctl-opts size-opts">
+          <button class="ctl-opt" data-size="small" type="button" aria-pressed="false">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><g fill="currentColor"><rect x="2.60" y="2.60" width="5.47" height="5.47" rx=".8"/><rect x="9.27" y="2.60" width="5.47" height="5.47" rx=".8"/><rect x="15.93" y="2.60" width="5.47" height="5.47" rx=".8"/><rect x="2.60" y="9.27" width="5.47" height="5.47" rx=".8"/><rect x="9.27" y="9.27" width="5.47" height="5.47" rx=".8"/><rect x="15.93" y="9.27" width="5.47" height="5.47" rx=".8"/><rect x="2.60" y="15.93" width="5.47" height="5.47" rx=".8"/><rect x="9.27" y="15.93" width="5.47" height="5.47" rx=".8"/><rect x="15.93" y="15.93" width="5.47" height="5.47" rx=".8"/></g></svg>
+            <b>Маленький</b><small>Тесно и быстро</small>
+          </button>
+          <button class="ctl-opt" data-size="normal" type="button" aria-pressed="false">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><g fill="currentColor"><rect x="2.60" y="2.60" width="3.80" height="3.80" rx=".8"/><rect x="7.60" y="2.60" width="3.80" height="3.80" rx=".8"/><rect x="12.60" y="2.60" width="3.80" height="3.80" rx=".8"/><rect x="17.60" y="2.60" width="3.80" height="3.80" rx=".8"/><rect x="2.60" y="7.60" width="3.80" height="3.80" rx=".8"/><rect x="7.60" y="7.60" width="3.80" height="3.80" rx=".8"/><rect x="12.60" y="7.60" width="3.80" height="3.80" rx=".8"/><rect x="17.60" y="7.60" width="3.80" height="3.80" rx=".8"/><rect x="2.60" y="12.60" width="3.80" height="3.80" rx=".8"/><rect x="7.60" y="12.60" width="3.80" height="3.80" rx=".8"/><rect x="12.60" y="12.60" width="3.80" height="3.80" rx=".8"/><rect x="17.60" y="12.60" width="3.80" height="3.80" rx=".8"/><rect x="2.60" y="17.60" width="3.80" height="3.80" rx=".8"/><rect x="7.60" y="17.60" width="3.80" height="3.80" rx=".8"/><rect x="12.60" y="17.60" width="3.80" height="3.80" rx=".8"/><rect x="17.60" y="17.60" width="3.80" height="3.80" rx=".8"/></g></svg>
+            <b>Обычный</b><small>Как в Google Snake</small>
+          </button>
+          <button class="ctl-opt" data-size="large" type="button" aria-pressed="false">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><g fill="currentColor"><rect x="2.60" y="2.60" width="2.80" height="2.80" rx=".8"/><rect x="6.60" y="2.60" width="2.80" height="2.80" rx=".8"/><rect x="10.60" y="2.60" width="2.80" height="2.80" rx=".8"/><rect x="14.60" y="2.60" width="2.80" height="2.80" rx=".8"/><rect x="18.60" y="2.60" width="2.80" height="2.80" rx=".8"/><rect x="2.60" y="6.60" width="2.80" height="2.80" rx=".8"/><rect x="6.60" y="6.60" width="2.80" height="2.80" rx=".8"/><rect x="10.60" y="6.60" width="2.80" height="2.80" rx=".8"/><rect x="14.60" y="6.60" width="2.80" height="2.80" rx=".8"/><rect x="18.60" y="6.60" width="2.80" height="2.80" rx=".8"/><rect x="2.60" y="10.60" width="2.80" height="2.80" rx=".8"/><rect x="6.60" y="10.60" width="2.80" height="2.80" rx=".8"/><rect x="10.60" y="10.60" width="2.80" height="2.80" rx=".8"/><rect x="14.60" y="10.60" width="2.80" height="2.80" rx=".8"/><rect x="18.60" y="10.60" width="2.80" height="2.80" rx=".8"/><rect x="2.60" y="14.60" width="2.80" height="2.80" rx=".8"/><rect x="6.60" y="14.60" width="2.80" height="2.80" rx=".8"/><rect x="10.60" y="14.60" width="2.80" height="2.80" rx=".8"/><rect x="14.60" y="14.60" width="2.80" height="2.80" rx=".8"/><rect x="18.60" y="14.60" width="2.80" height="2.80" rx=".8"/><rect x="2.60" y="18.60" width="2.80" height="2.80" rx=".8"/><rect x="6.60" y="18.60" width="2.80" height="2.80" rx=".8"/><rect x="10.60" y="18.60" width="2.80" height="2.80" rx=".8"/><rect x="14.60" y="18.60" width="2.80" height="2.80" rx=".8"/><rect x="18.60" y="18.60" width="2.80" height="2.80" rx=".8"/></g></svg>
+            <b>Большой</b><small>Для долгих забегов</small>
+          </button>
+        </div>
+        <p class="ctl-note" id="sizeNote">Новый размер — со следующей игры</p>
       </div>
     </div>
     <div class="panel ctl-panel" id="ctlPanel" hidden>
@@ -779,6 +814,7 @@ body.mobile:not(.landscape) .pill b { color: #fff; font-size: clamp(17px, 5.4vw,
           <span id="ovGestTxt">Свайпни, чтобы повернуть</span>
         </div>
         <div class="btn-pair"><button class="btn btn-cream" id="againBtn" type="button" hidden>Заново</button><button class="btn btn-blue" id="exitBtn" type="button" hidden>Выйти</button></div>
+        <button class="btn btn-cream btn-ctl" id="sizeBtn" type="button" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><g fill="currentColor"><rect x="2.60" y="2.60" width="3.80" height="3.80" rx=".8"/><rect x="7.60" y="2.60" width="3.80" height="3.80" rx=".8"/><rect x="12.60" y="2.60" width="3.80" height="3.80" rx=".8"/><rect x="17.60" y="2.60" width="3.80" height="3.80" rx=".8"/><rect x="2.60" y="7.60" width="3.80" height="3.80" rx=".8"/><rect x="7.60" y="7.60" width="3.80" height="3.80" rx=".8"/><rect x="12.60" y="7.60" width="3.80" height="3.80" rx=".8"/><rect x="17.60" y="7.60" width="3.80" height="3.80" rx=".8"/><rect x="2.60" y="12.60" width="3.80" height="3.80" rx=".8"/><rect x="7.60" y="12.60" width="3.80" height="3.80" rx=".8"/><rect x="12.60" y="12.60" width="3.80" height="3.80" rx=".8"/><rect x="17.60" y="12.60" width="3.80" height="3.80" rx=".8"/><rect x="2.60" y="17.60" width="3.80" height="3.80" rx=".8"/><rect x="7.60" y="17.60" width="3.80" height="3.80" rx=".8"/><rect x="12.60" y="17.60" width="3.80" height="3.80" rx=".8"/><rect x="17.60" y="17.60" width="3.80" height="3.80" rx=".8"/></g></svg><span>Пруд: <b class="size-name">Обычный</b></span></button>
         <button class="btn btn-cream btn-ctl" id="ctlBtn" type="button" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><g fill="currentColor"><rect x="9" y="2.5" width="6" height="6" rx="1.6"/><rect x="2.5" y="10" width="6" height="6" rx="1.6"/><rect x="9" y="10" width="6" height="6" rx="1.6"/><rect x="15.5" y="10" width="6" height="6" rx="1.6"/></g></svg><span>Управление: <b class="ctl-name">Свайпы и тапы</b></span></button>
       </div>
     </div>
@@ -845,11 +881,16 @@ const dbg = { on: false, swipes: 0, turns: 0, rejected: 0, cancels: 0, maxLag: 0
     if (!this.t0) this.t0 = t; if (t - this.t0 >= 1000) { this.fps = Math.round(this.n * 1000 / (t - this.t0)); this.n = 0; this.t0 = t; this.show(); this.worst = 0; } },
   show() {
     const T = window.Telegram && window.Telegram.WebApp, tg = T && T.platform && T.platform !== 'unknown' ? 'TG ' + T.version + ' ' + T.platform : 'браузер';
-    document.getElementById('dbg').textContent = `v0.61${CONFIG.stars.server ? ' · сервер' : ''} · FPS ${this.fps} · худший кадр ${Math.round(this.worst)} мс · ${tg}\nокно ${innerWidth}×${innerHeight} · dpr ${devicePixelRatio} · пруд ${CONFIG.gridW}×${CONFIG.gridH} · ${ctl}\nсвайпы ${this.swipes} · повороты ${this.turns} · отброшено ${this.rejected} · сорвано ${this.cancels}\nзадержка событий до ${Math.round(this.maxLag)} мс · ввод ${this.ptype || '—'}`;
+    document.getElementById('dbg').textContent = `v0.62 · ${fieldSize}${CONFIG.stars.server ? ' · сервер' : ''} · FPS ${this.fps} · худший кадр ${Math.round(this.worst)} мс · ${tg}\nокно ${innerWidth}×${innerHeight} · dpr ${devicePixelRatio} · пруд ${CONFIG.gridW}×${CONFIG.gridH} · ${ctl}\nсвайпы ${this.swipes} · повороты ${this.turns} · отброшено ${this.rejected} · сорвано ${this.cancels}\nзадержка событий до ${Math.round(this.maxLag)} мс · ввод ${this.ptype || '—'}`;
   },
 };
 const CONFIG = {
-  gridSize: 15,         // компьютер: квадратный пруд N×N клеток
+  fieldSizes: {         // v0.62: размер пруда — выбирает игрок (Маленький / Обычный / Большой)
+    small:  { mobileCols: 9,  tallCellPx: 40, gridSize: 11, desktopMaxCols: 20 },   // как «Маленькое» в Google Snake: тесно и быстро
+    normal: { mobileCols: 12, tallCellPx: 32, gridSize: 15, desktopMaxCols: 26 },   // как «Обычное» (17×15)
+    large:  { mobileCols: 15, tallCellPx: 26, gridSize: 19, desktopMaxCols: 32 },   // как «Большое» (24×21): долгие забеги
+  },
+  gridSize: 15,         // компьютер: квадратный пруд N×N клеток (выставляется из fieldSizes)
   mobileCols: 12,       // телефон: клеток в ширину (v0.60: 12, примерно 12×19 — как обычное поле Google Snake; v0.59 было 9)
   tallMinCols: 9,       // Telegram на ПК: не уже стольких клеток; высота подбирается под экран (прямоугольный пруд)
   mobileFrameBleed: 1,  // телефон: боковой бортик целиком за краем экрана — стенки пруда = края экрана, камни видны только сверху и снизу (v0.60)
@@ -2313,6 +2354,10 @@ function render(t) {
    7. ИГРОВОЙ ЦИКЛ, ИНТЕРФЕЙС, УПРАВЛЕНИЕ
    ========================================================= */
 const reduceMotion = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+const KEY_SIZE = 'pondsnake.size.v1', SIZE_NAME = { small: 'Маленький', normal: 'Обычный', large: 'Большой' };
+let fieldSize = (() => { try { const v = JSON.parse(localStorage.getItem(KEY_SIZE)); return SIZE_NAME[v] ? v : 'normal'; } catch (e) { return 'normal'; } })();
+function applySize() { Object.assign(CONFIG, CONFIG.fieldSizes[fieldSize]); }   // клетки, ряды и колонки под выбранный размер
+applySize();
 if (CONFIG.stars.server) CONFIG.stars.invoiceApi = CONFIG.stars.server.replace(/\/+$/, '') + '/invoice';   // v0.61
 const game = createGame(CONFIG);
 let prevSnake = game.state.snake.map(p => ({ ...p }));
@@ -2396,7 +2441,8 @@ function iconFrog(id, s) { const cv = $(id), g = cv.getContext('2d'); g.clearRec
 function setPauseLabel() { ui.pauseTxt.textContent = mode === 'pause' ? 'Дальше' : 'Пауза'; }
 function showCard(title, text, btn, scoreVal) {
   const isMenu = title === 'Змейка у пруда'; $('ovLogo').hidden = !isMenu; ui.ovTitle.hidden = isMenu;
-  $('ctlBtn').hidden = !(isMenu || title === 'Уже уходите?');   // v0.59: смена управления — в меню и на паузе
+  $('ctlBtn').hidden = !(isMenu || title === 'Уже уходите?');
+  $('sizeBtn').hidden = !isMenu;   // v0.62: размер пруда — в стартовом окне (и в настройках)   // v0.59: смена управления — в меню и на паузе
   shareBtn.hidden = true; $('contBtn').hidden = true; $('exitBtn').hidden = true; $('againBtn').hidden = true; $('ovGesture').hidden = true; $('ovCoins').hidden = true; $('resumeBtn').hidden = true; $('starsBtn').hidden = true; $('starsNote').hidden = true; $('ovSad').hidden = true; $('ovSound').hidden = true; $('ovClose').hidden = true; ui.ovText.classList.remove('sad'); ui.startBtn.className = 'btn btn-green';
   ui.ovTitle.textContent = title; ui.ovText.textContent = text; ui.startBtn.textContent = btn;
   ui.ovBig.hidden = scoreVal === undefined;
@@ -2458,7 +2504,7 @@ function tgBack() {              // в Телеграме системная к�
   try { if (inTelegram && TG.BackButton) { if (mode === 'play' || mode === 'pause') TG.BackButton.show(); else TG.BackButton.hide(); } } catch (e) {}
 }
 function togglePause() {
-  if (!ui.panel.hidden || !$('ctlPanel').hidden) return;
+  if (!ui.panel.hidden || !$('ctlPanel').hidden || !$('sizePanel').hidden) return;
   if (mode === 'play') { mode = 'pause'; showCard('Уже уходите?', 'Лягушата будут ждать!', '▶ Продолжить'); $('exitBtn').hidden = false; $('againBtn').hidden = false; $('ovSad').hidden = false; $('ovSound').hidden = false; $('ovClose').hidden = false; ui.ovText.classList.add('sad'); drawSadFrog(); syncSound(); saveRun(); }
   else if (mode === 'pause') start();
   else if (mode === 'menu' || mode === 'over') start();
@@ -2599,7 +2645,7 @@ function tryLateTurn(dir) {
 function input(dir, auto = false) {
   if (!auto) autoTarget = null;          // любое ручное управление отменяет автопилот
   sound.unlock();
-  if (!ui.panel.hidden || !$('ctlPanel').hidden) return;
+  if (!ui.panel.hidden || !$('ctlPanel').hidden || !$('sizePanel').hidden) return;
   if (mode === 'menu' || mode === 'over') start();
   if (mode !== 'play') return;
   if (waitFirst) { // первый жест: трогаемся сразу в выбранную сторону, даже назад
@@ -2808,6 +2854,7 @@ function syncSound() {
   $('musicVol').disabled = !st.musicOn; $('sfxVol').disabled = !st.sfxOn;
   document.querySelectorAll('[data-ctl]').forEach(b => b.setAttribute('aria-pressed', b.dataset.ctl === ctl));
   document.querySelectorAll('.ctl-name').forEach(e => e.textContent = CTL_NAME[ctl]);
+  document.querySelectorAll('.size-name').forEach(e => e.textContent = SIZE_NAME[fieldSize]);
   $('dpad').hidden = ctl !== 'dpad'; document.body.classList.toggle('dpad-on', ctl === 'dpad');
   $('ctlHint').textContent = tilt.error && ctl === 'tilt' ? tilt.error : CTL_HINT[ctl];
   const tiltOff = ctl === 'tilt' && tilt.error;
@@ -3126,6 +3173,25 @@ document.querySelectorAll('[data-pick]').forEach(b => b.addEventListener('click'
   else if (ctlBack === 'card' && mode !== 'menu') ui.overlay.hidden = false;
   else showMenu();
 }));
+let sizeBack = 'menu';
+function showSizePick(back) {
+  sizeBack = back;
+  if (back === 'panel') ui.panel.hidden = true; else ui.overlay.hidden = true;
+  const live = mode === 'play' || mode === 'pause' || mode === 'dying';
+  $('sizeNote').hidden = !live;   // во время партии размер не меняется — подсказываем, что со следующей
+  $('sizePanel').hidden = false;
+  document.querySelectorAll('[data-size]').forEach(b => b.setAttribute('aria-pressed', b.dataset.size === fieldSize));
+}
+document.querySelectorAll('[data-size]').forEach(b => b.addEventListener('click', () => {
+  sound.unlock(); sound.click();
+  fieldSize = b.dataset.size; try { localStorage.setItem(KEY_SIZE, JSON.stringify(fieldSize)); } catch (e) {}
+  applySize(); syncSound();
+  $('sizePanel').hidden = true;
+  if (mode === 'menu' || mode === 'over') { mode = 'menu'; resize(); }   // новый пруд сразу виден в меню
+  if (sizeBack === 'panel') ui.panel.hidden = false; else showMenu();
+}));
+$('sizeBtn').addEventListener('click', () => { sound.unlock(); sound.click(); showSizePick('menu'); });
+$('sizeBtnSet').addEventListener('click', () => { sound.unlock(); sound.click(); showSizePick('panel'); });
 $('ctlBtn').addEventListener('click', () => { sound.unlock(); sound.click(); showCtlPick(mode === 'menu' ? 'menu' : 'card'); });
 $('ctlBtnSet').addEventListener('click', () => { sound.unlock(); sound.click(); showCtlPick('panel'); });
 if (isMobile) showCtlPick(); else showMenu();
