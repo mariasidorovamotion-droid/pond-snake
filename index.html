@@ -677,6 +677,8 @@ body.mobile:not(.landscape) .pill .txt { flex-direction: row; align-items: cente
 body.mobile:not(.landscape) #frogIcon { height: calc(var(--hud-ic) / .65); margin: calc(var(--hud-ic) * -.27) -7px; }   /* рисунок лягушки занимает 65% своего холста — холст крупнее, видимая высота как у кубка и монеты */
 body.mobile:not(.landscape) .pill small { display: none; }
 body.mobile:not(.landscape) .pill b { color: #fff; font-size: clamp(17px, 5.4vw, 24px); line-height: 1; text-shadow: 0 2px 0 rgba(0,0,0,.28); font-variant-numeric: tabular-nums; }
+body.mobile .overlay.fit::-webkit-scrollbar, body.mobile .panel.fit::-webkit-scrollbar { display: none; }
+body.mobile .overlay.fit, body.mobile .panel.fit { scrollbar-width: none; padding-block: 4px; box-shadow: 0 0 0 100vmax rgba(8, 48, 52, .6); clip-path: inset(-100vmax); overflow-y: auto; align-items: safe center; }
 /* v0.62: окно размера пруда — три варианта в ряд */
 .size-opts { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
 .size-opts .ctl-opt { padding: 12px 4px 10px; }
@@ -886,9 +888,9 @@ const dbg = { on: false, swipes: 0, turns: 0, rejected: 0, cancels: 0, maxLag: 0
 };
 const CONFIG = {
   fieldSizes: {         // v0.62: размер пруда — выбирает игрок (Маленький / Обычный / Большой)
-    small:  { mobileCols: 9,  tallCellPx: 40, gridSize: 11, desktopMaxCols: 20 },   // как «Маленькое» в Google Snake: тесно и быстро
-    normal: { mobileCols: 12, tallCellPx: 32, gridSize: 15, desktopMaxCols: 26 },   // как «Обычное» (17×15)
-    large:  { mobileCols: 15, tallCellPx: 26, gridSize: 19, desktopMaxCols: 32 },   // как «Большое» (24×21): долгие забеги
+    small:  { mobileCols: 8,  tallCellPx: 44, gridSize: 10, desktopMaxCols: 18 },   // как «Маленькое» в Google Snake (10×9 ≈ 90 клеток): тесно и быстро
+    normal: { mobileCols: 13, tallCellPx: 31, gridSize: 15, desktopMaxCols: 26 },   // как «Обычное» (17×15 ≈ 255)
+    large:  { mobileCols: 18, tallCellPx: 22, gridSize: 21, desktopMaxCols: 34 },   // как «Большое» (24×21 ≈ 504): долгие забеги
   },
   gridSize: 15,         // компьютер: квадратный пруд N×N клеток (выставляется из fieldSizes)
   mobileCols: 12,       // телефон: клеток в ширину (v0.60: 12, примерно 12×19 — как обычное поле Google Snake; v0.59 было 9)
@@ -1682,6 +1684,17 @@ function resize() {
   centerCards();
   render(performance.now());
 }
+function fitOverlay() {   // v0.62: на телефоне окна стоят строго между верхней строкой и нижними кнопками и прокручиваются внутри себя
+  const on = isMobileNow() && !document.body.classList.contains('landscape');
+  const rowR = document.querySelector('.row').getBoundingClientRect();
+  const t = on ? Math.round(document.querySelector('.top').getBoundingClientRect().bottom + 6) + 'px' : '';
+  const b = on && rowR.height ? Math.max(0, Math.round(innerHeight - rowR.top + 8)) + 'px' : '';
+  document.querySelectorAll('#overlay, #board > .panel').forEach(el => {
+    if (el.style.top !== t) el.style.top = t;
+    if (el.style.bottom !== b) el.style.bottom = b;
+    el.classList.toggle('fit', on);
+  });
+}
 function centerCards() {   // v0.60: на компьютере карточка стоит по центру воды, а не всей области с бортиком и мостиком
   const cr = canvas.getBoundingClientRect(), k = R.W / (cr.width || 1), wide = !isMobileNow();
   const wx = cr.left + (R.ox + R.fieldW / 2) / k, wy = cr.top + (R.oy + R.fieldH / 2) / k;
@@ -2311,10 +2324,13 @@ const WAIT_TEXT = { swipe: 'Свайпни или тапни, куда плыт�
 function drawStartHint(g, t) {
   const c = R.c, h = game.state.snake[0];
   const text = waitReason === 'saved' ? 'Шлем спас! Куда плывём?' : isMobileNow() ? WAIT_TEXT[ctl] : (ctl === 'swipe' ? 'Нажми стрелку или WASD' : WAIT_TEXT[ctl]);
-  const fs = Math.round(c * .5), pulse = reduceMotion ? 1 : 1 + .04 * Math.sin(t / 220);
+  const k = R.W / (canvas.getBoundingClientRect().width || R.W), ff = getComputedStyle(document.body).fontFamily, pulse = reduceMotion ? 1 : 1 + .04 * Math.sin(t / 220);
+  let fs = Math.round(Math.max(13 * k, Math.min(c * .5, 19 * k)));   // v0.62: подсказка 13–19 px на экране при любом размере пруда
   g.save();
-  g.font = `900 ${fs}px ${getComputedStyle(document.body).fontFamily}`;
-  const w = g.measureText(text).width + c * .8, hh = c * .9;
+  g.font = `900 ${fs}px ${ff}`;
+  const room = R.fieldW * .9 - fs * 1.6, tw = g.measureText(text).width;
+  if (tw > room) { fs = Math.floor(fs * room / tw); g.font = `900 ${fs}px ${ff}`; }   // и всегда влезает в ширину пруда
+  const w = g.measureText(text).width + fs * 1.6, hh = fs * 1.8;
   let x = cellX(h.x), y = cellY(h.y) - c * 1.4;
   x = Math.max(R.ox + w / 2 + c * .2, Math.min(R.ox + R.fieldW - w / 2 - c * .2, x));
   if (y - hh / 2 < R.oy) y = cellY(h.y) + c * 1.4;
@@ -2475,7 +2491,7 @@ function savedRun() {
 }
 function showMenu() {
   mode = 'menu';
-  showCard('Змейка у пруда', '', 'Играть'); $('ovGesture').hidden = false; syncSound();
+  showCard('Змейка у пруда', '', 'Играть'); $('ovGesture').hidden = true; syncSound();   // v0.62: жест не дублируем — он написан на кнопке «Управление»
   const r = savedRun();
   if (r) {
     $('resumeBtn').hidden = false; $('resumeBtn').textContent = 'Продолжить';
@@ -2617,7 +2633,7 @@ let waitFirst = false;
 function loop(t) {
   if (dbg.on) dbg.frame(t);
   syncPadCur();
-  if (!isMobileNow()) centerCards();   // окна могли только что открыться
+  if (!isMobileNow()) centerCards(); else fitOverlay();   // окна могли только что открыться
   if (mode === 'play' && waitFirst) { acc = 0; alpha = 1; }
   else if (mode === 'play') {
     acc += Math.min(t - lastT, 250); // скорость всегда ровная — никаких ускорений
@@ -3194,7 +3210,7 @@ $('sizeBtn').addEventListener('click', () => { sound.unlock(); sound.click(); sh
 $('sizeBtnSet').addEventListener('click', () => { sound.unlock(); sound.click(); showSizePick('panel'); });
 $('ctlBtn').addEventListener('click', () => { sound.unlock(); sound.click(); showCtlPick(mode === 'menu' ? 'menu' : 'card'); });
 $('ctlBtnSet').addEventListener('click', () => { sound.unlock(); sound.click(); showCtlPick('panel'); });
-if (isMobile) showCtlPick(); else showMenu();
+showMenu();   // v0.62: отдельный экран выбора управления убран — «Управление» и «Пруд» есть кнопками в меню
 srvStart();   // v0.61: копилка с сервера (только в Телеграме с подключённой оплатой)   // потом стартовая карточка (если есть незаконченная партия — с кнопкой «Продолжить»)
 requestAnimationFrame(loop);
 </script>
