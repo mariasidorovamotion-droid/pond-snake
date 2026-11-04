@@ -687,6 +687,19 @@ body.mobile .overlay.fit, body.mobile .panel.fit { scrollbar-width: none; paddin
 .size-opts .ctl-opt { min-width: 0; padding-inline: 2px; }
 .size-opts .ctl-opt small { font-size: clamp(11px, 3vw, 13px); }
 #sizeBtn svg, #sizeBtnSet svg { color: var(--teal-btn); }
+/* ===== v0.62: правила вёрстки «как на сайтах» =====
+   1) Текст в плитках и кнопках подстраивается под ширину СВОЕЙ кнопки (container queries), а не экрана — не может упереться в край.
+   2) Логотип скромнее: не больше ~60% ширины карточки и 15% высоты экрана. */
+.ctl-opt { container-type: inline-size; }
+body .ctl-opts .ctl-opt b { font-size: clamp(11px, 13.5cqi, 21px); white-space: nowrap; }
+body .ctl-opts .ctl-opt small { font-size: clamp(10px, 9.5cqi, 14px); }
+.btn-pair { container-type: inline-size; }
+body:not(.mobile) #overlay .card .btn-pair .btn { font-size: min(clamp(20px, 3vh, 30px), 6.2cqi); }
+body:not(.mobile) #overlay .card :is(#contBtn, #starsBtn, #resumeBtn) { white-space: nowrap; max-width: none; font-size: clamp(16px, 2.4vh, 24px); }
+body .card-logo, body.mobile .card-logo { width: min(62%, 240px); max-height: 15vh; }
+body.mobile.landscape .card-logo { height: clamp(44px, 18dvh, 80px); max-width: 55%; }
+body.wide .title .logo { height: clamp(48px, 8vh, 104px); }
+
 #sizeBtn, body.mobile #overlay .card #sizeBtn, body.mobile .card #sizeBtnSet { min-height: 44px; font-size: clamp(15px, 4.4vw, 18px); padding: 0 12px; }
 @media (max-width: 359px) { body.mobile #overlay .card #sizeBtn, body.mobile .card #sizeBtnSet { font-size: 14px; padding: 0 8px; gap: 6px; } }
 /* все кнопки «Пруд: …» и «Управление: …» — одного вида и размера везде (меню, пауза, настройки) */
@@ -883,7 +896,7 @@ const dbg = { on: false, swipes: 0, turns: 0, rejected: 0, cancels: 0, maxLag: 0
     if (!this.t0) this.t0 = t; if (t - this.t0 >= 1000) { this.fps = Math.round(this.n * 1000 / (t - this.t0)); this.n = 0; this.t0 = t; this.show(); this.worst = 0; } },
   show() {
     const T = window.Telegram && window.Telegram.WebApp, tg = T && T.platform && T.platform !== 'unknown' ? 'TG ' + T.version + ' ' + T.platform : 'браузер';
-    document.getElementById('dbg').textContent = `v0.62 · ${fieldSize}${CONFIG.stars.server ? ' · сервер' : ''} · FPS ${this.fps} · худший кадр ${Math.round(this.worst)} мс · ${tg}\nокно ${innerWidth}×${innerHeight} · dpr ${devicePixelRatio} · пруд ${CONFIG.gridW}×${CONFIG.gridH} · ${ctl}\nсвайпы ${this.swipes} · повороты ${this.turns} · отброшено ${this.rejected} · сорвано ${this.cancels}\nзадержка событий до ${Math.round(this.maxLag)} мс · ввод ${this.ptype || '—'}`;
+    document.getElementById('dbg').textContent = `v0.63 · ${fieldSize}${CONFIG.stars.server ? ' · сервер' : ''} · FPS ${this.fps} · худший кадр ${Math.round(this.worst)} мс · ${tg}\nокно ${innerWidth}×${innerHeight} · dpr ${devicePixelRatio} · пруд ${CONFIG.gridW}×${CONFIG.gridH} · ${ctl}\nсвайпы ${this.swipes} · повороты ${this.turns} · отброшено ${this.rejected} · сорвано ${this.cancels}\nзадержка событий до ${Math.round(this.maxLag)} мс · ввод ${this.ptype || '—'}`;
   },
 };
 const CONFIG = {
@@ -907,7 +920,7 @@ const CONFIG = {
   continueCost: 10,     // цена «Продолжить» в монетках
   stars: {              // «Продолжить за звёзды» — только в Телеграме, когда не хватает монеток
     price: 10,            // цена в звёздах Telegram
-    server: '',           // v0.61: адрес сервера оплаты (Cloudflare Worker), например https://pond-snake-pay.ИМЯ.workers.dev — пусто: оплата не подключена
+    server: 'https://pond-snake-pay.maria-sidorova-motion.workers.dev',   // v0.63: сервер оплаты подключён. v0.61: адрес сервера оплаты (Cloudflare Worker), например https://pond-snake-pay.ИМЯ.workers.dev — пусто: оплата не подключена
     invoiceApi: '',       // выставляется сам из server (+ /invoice)
     previewOutsideTelegram: false, // показать кнопку и вне Телеграма (для проверки вида)
   },
@@ -2701,6 +2714,7 @@ async function buyContinueWithStars() {
   sb.disabled = true; say('Открываю оплату…');
   try {
     const r = await fetch(S.invoiceApi, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ initData: TG.initData, item: 'continue', stars: S.price }) });
+    if (r.status === 401) { sb.disabled = false; say('Оплата сейчас недоступна. Напиши боту /paysupport.'); return; }
     const { link } = await r.json(); if (!link) throw new Error('no link');
     TG.openInvoice(link, status => {
       sb.disabled = false;
@@ -2742,6 +2756,7 @@ async function buyPack(i) {
   btns.forEach(b => b.disabled = true); say('Открываю оплату…');
   try {
     const r = await fetch(S.invoiceApi, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ initData: TG.initData, item: pk.id, stars: pk.stars }) });
+    if (r.status === 401) { btns.forEach(b => b.disabled = false); say('Оплата сейчас недоступна. Напиши боту /paysupport.'); return; }   // v0.63: сервер не узнал подпись Telegram
     const { link } = await r.json(); if (!link) throw new Error('no link');
     TG.openInvoice(link, status => {
       btns.forEach(b => b.disabled = false);
