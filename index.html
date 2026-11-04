@@ -706,6 +706,16 @@ body.wide .title .logo { height: clamp(48px, 8vh, 104px); }
 #panel .modes { display: grid; grid-template-columns: minmax(0, 1fr); gap: 10px; }
 #board .card .btn.btn-ctl:is(#ctlBtn, #sizeBtn, #ctlBtnSet, #sizeBtnSet) { width: 100%; min-height: 44px; height: auto; max-width: none; font-size: clamp(13px, 3.9vw, 17px); padding: 6px 10px; gap: 8px; line-height: 1.15; white-space: nowrap; }
 @media (max-width: 359px) { #board .card .btn.btn-ctl:is(#ctlBtn, #sizeBtn, #ctlBtnSet, #sizeBtnSet) { font-size: 13px; padding: 6px 6px; gap: 5px; } }
+/* v0.64: окно помещается — ничего не обрезаем (листья и лотосы карточки видны целиком) */
+body.mobile .overlay.fit:not(.scroll), body.mobile .panel.fit:not(.scroll) { overflow: visible; }
+/* v0.64: объёмные иконки Совы на кнопках «Магазин» и «Звук» */
+.btn .btn-ic { display: block; flex: none; width: 30px; height: 30px; object-fit: contain; filter: drop-shadow(0 2px 2px rgba(0,0,0,.18)); }
+.btn .snd-ic { position: relative; }
+.btn .snd-ic img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; }
+body.mobile .row .btn .btn-ic { width: clamp(28px, 8.4vw, 36px); height: clamp(28px, 8.4vw, 36px); }
+body.mobile .row #soundBtn .btn-ic { width: 58%; height: 58%; }
+body:is(.wide, .deskn) .row .btn .btn-ic, body.mobile.landscape .row .btn .btn-ic { width: clamp(26px, 4.4vh, 36px); height: clamp(26px, 4.4vh, 36px); }
+body:is(.wide, .deskn) .row #soundBtn .btn-ic, body.mobile.landscape .row #soundBtn .btn-ic { width: 58%; height: 58%; }
 </style>
 </head>
 <body>
@@ -841,7 +851,7 @@ body.wide .title .logo { height: clamp(48px, 8vh, 104px); }
       <span class="lbl" id="pauseTxt">Пауза</span>
     </button>
     <button class="btn btn-cream" id="shopBtn" type="button" aria-label="Магазин">
-      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4.5 8.5h15l-1.2 11.2a1.6 1.6 0 0 1-1.6 1.3H7.3a1.6 1.6 0 0 1-1.6-1.3z" fill="#f6b73c" stroke="#d98a1a" stroke-width="1.6" stroke-linejoin="round"/><path d="M8.5 10.5V7a3.5 3.5 0 0 1 7 0v3.5" fill="none" stroke="#ec6d43" stroke-width="2.2" stroke-linecap="round"/></svg>
+      <img class="btn-ic" alt="" aria-hidden="true" src="data:image/webp;base64,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">
       <span class="lbl">Магазин</span>
     </button>
     <button class="btn btn-cream" id="restartBtn" type="button" aria-label="Заново">
@@ -849,11 +859,7 @@ body.wide .title .logo { height: clamp(48px, 8vh, 104px); }
       <span class="lbl">Заново</span>
     </button>
     <button class="btn btn-teal btn-icon" id="soundBtn" type="button" aria-label="Звук и управление">
-      <svg viewBox="0 0 24 24" aria-hidden="true">
-        <path d="M4 9h4l5-4v14l-5-4H4z" fill="currentColor"/>
-        <g id="soundOn" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M16 9a4 4 0 0 1 0 6"/><path d="M18.5 6.5a7.5 7.5 0 0 1 0 11"/></g>
-        <g id="soundOff" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M16 9l5 6M21 9l-5 6"/></g>
-      </svg>
+      <span class="btn-ic snd-ic" aria-hidden="true"><img id="soundOn" alt="" src="data:image/webp;base64,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"><img id="soundOff" alt="" src="data:image/webp;base64,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"></span>
       <span class="lbl lbl-snd">Звук</span>
     </button>
   </div>
@@ -896,7 +902,7 @@ const dbg = { on: false, swipes: 0, turns: 0, rejected: 0, cancels: 0, maxLag: 0
     if (!this.t0) this.t0 = t; if (t - this.t0 >= 1000) { this.fps = Math.round(this.n * 1000 / (t - this.t0)); this.n = 0; this.t0 = t; this.show(); this.worst = 0; } },
   show() {
     const T = window.Telegram && window.Telegram.WebApp, tg = T && T.platform && T.platform !== 'unknown' ? 'TG ' + T.version + ' ' + T.platform : 'браузер';
-    document.getElementById('dbg').textContent = `v0.63 · ${fieldSize}${CONFIG.stars.server ? ' · сервер' : ''} · FPS ${this.fps} · худший кадр ${Math.round(this.worst)} мс · ${tg}\nокно ${innerWidth}×${innerHeight} · dpr ${devicePixelRatio} · пруд ${CONFIG.gridW}×${CONFIG.gridH} · ${ctl}\nсвайпы ${this.swipes} · повороты ${this.turns} · отброшено ${this.rejected} · сорвано ${this.cancels}\nзадержка событий до ${Math.round(this.maxLag)} мс · ввод ${this.ptype || '—'}`;
+    document.getElementById('dbg').textContent = `v0.65 · ${fieldSize}${CONFIG.stars.server ? ' · сервер' : ''} · FPS ${this.fps} · худший кадр ${Math.round(this.worst)} мс · ${tg}\nокно ${innerWidth}×${innerHeight} · dpr ${devicePixelRatio} · пруд ${CONFIG.gridW}×${CONFIG.gridH} · ${ctl}\nсвайпы ${this.swipes} · повороты ${this.turns} · отброшено ${this.rejected} · сорвано ${this.cancels}\nзадержка событий до ${Math.round(this.maxLag)} мс · ввод ${this.ptype || '—'}`;
   },
 };
 const CONFIG = {
@@ -920,6 +926,7 @@ const CONFIG = {
   continueCost: 10,     // цена «Продолжить» в монетках
   stars: {              // «Продолжить за звёзды» — только в Телеграме, когда не хватает монеток
     price: 10,            // цена в звёздах Telegram
+    enabled: false,       // v0.65: ПОКУПКИ ВЫКЛЮЧЕНЫ (магазин, звёзды, копилка на сервере). Вернуть всё: поставить true
     server: 'https://pond-snake-pay.maria-sidorova-motion.workers.dev',   // v0.63: сервер оплаты подключён. v0.61: адрес сервера оплаты (Cloudflare Worker), например https://pond-snake-pay.ИМЯ.workers.dev — пусто: оплата не подключена
     invoiceApi: '',       // выставляется сам из server (+ /invoice)
     previewOutsideTelegram: false, // показать кнопку и вне Телеграма (для проверки вида)
@@ -1706,6 +1713,8 @@ function fitOverlay() {   // v0.62: на телефоне окна стоят с
     if (el.style.top !== t) el.style.top = t;
     if (el.style.bottom !== b) el.style.bottom = b;
     el.classList.toggle('fit', on);
+    const card = el.querySelector('.card');   // v0.64: прокручиваем, только если карточка правда не влезает
+    if (on && card && !el.hidden) { const need = card.offsetHeight + 24 > el.clientHeight; if (el.classList.contains('scroll') !== need) el.classList.toggle('scroll', need); }
   });
 }
 function centerCards() {   // v0.60: на компьютере карточка стоит по центру воды, а не всей области с бортиком и мостиком
@@ -1756,7 +1765,7 @@ function fitGrid(W, H) {
     gh = CONFIG.gridSize;
     gw = Math.max(gh, Math.min(CONFIG.desktopMaxCols, Math.round(W / (H / (gh + My)) - Mx)));
   }
-  const canChange = typeof mode === 'undefined' || mode === 'menu' || mode === 'over';
+  const canChange = typeof mode === 'undefined' || mode === 'menu';   // v0.64: на «Плюх!» поле держим ради «Продолжить»
   if ((gw !== CONFIG.gridW || gh !== CONFIG.gridH) && canChange) {
     CONFIG.gridW = gw; CONFIG.gridH = gh;
     if (typeof game !== 'undefined') { game.reset(); riders = []; }
@@ -2387,7 +2396,7 @@ const KEY_SIZE = 'pondsnake.size.v1', SIZE_NAME = { small: 'Маленький',
 let fieldSize = (() => { try { const v = JSON.parse(localStorage.getItem(KEY_SIZE)); return SIZE_NAME[v] ? v : 'normal'; } catch (e) { return 'normal'; } })();
 function applySize() { Object.assign(CONFIG, CONFIG.fieldSizes[fieldSize]); }   // клетки, ряды и колонки под выбранный размер
 applySize();
-if (CONFIG.stars.server) CONFIG.stars.invoiceApi = CONFIG.stars.server.replace(/\/+$/, '') + '/invoice';   // v0.61
+if (CONFIG.stars.server && CONFIG.stars.enabled !== false) CONFIG.stars.invoiceApi = CONFIG.stars.server.replace(/\/+$/, '') + '/invoice';   // v0.61
 const game = createGame(CONFIG);
 let prevSnake = game.state.snake.map(p => ({ ...p }));
 let mode = 'menu'; // menu | play | pause | dying | over
@@ -2398,27 +2407,35 @@ let wallet = store.get(KEY_COINS, 0);          // копилка монеток:
    подобранные монеты (earn) и потраченные на «Продолжить» (spend). Отправляем после забега, при выходе и сворачивании. */
 const KEY_PEND = 'pondsnake.pending.v1', KEY_MIGR = 'pondsnake.migrated.v1';
 let pend = store.get(KEY_PEND, { earn: 0, spend: 0 }), srvBusy = false, srvAgain = false;
-const srvOn = () => !!CONFIG.stars.server && typeof inTelegram !== 'undefined' && inTelegram && !!(TG && TG.initData);
+const srvOn = () => CONFIG.stars.enabled !== false && !!CONFIG.stars.server && typeof inTelegram !== 'undefined' && inTelegram && !!(TG && TG.initData);
 function walletChanged() { store.set(KEY_COINS, wallet); try { if (!$('shopPanel').hidden) renderShop(); } catch (e) {} }
 async function srvSync() {
   if (!srvOn()) return null;
   if (srvBusy) { srvAgain = true; return null; }
   srvBusy = true;
-  const send = { earn: pend.earn, spend: pend.spend };
+  if (!pend.inflight && (pend.earn || pend.spend)) {   // v0.64: новая пачка получает свой номер и хранится, пока сервер не подтвердит
+    pend.inflight = { earn: pend.earn, spend: pend.spend, op: Date.now().toString(36) + Math.random().toString(36).slice(2, 8) };
+    pend.earn = 0; pend.spend = 0; store.set(KEY_PEND, pend);
+  }
+  const send = pend.inflight || { earn: 0, spend: 0 };
   try {
     const r = await fetch(CONFIG.stars.server.replace(/\/+$/, '') + '/sync', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ initData: TG.initData, ...send }) });
     if (!r.ok) throw new Error('sync ' + r.status);
     const d = await r.json();
-    pend.earn -= send.earn; pend.spend -= send.spend; store.set(KEY_PEND, pend);   // сервер учёл (или отказал по лимиту) — это уже не наше
+    if (pend.inflight === send) pend.inflight = null;   // сервер учёл (или отказал по лимиту) — пачка закрыта
+    store.set(KEY_PEND, pend);
     wallet = Math.max(0, d.coins + pend.earn - pend.spend); walletChanged();
     return d;
-  } catch (e) { return null; }                      // нет сети — изменения ждут следующей отправки
-  finally { srvBusy = false; if (srvAgain) { srvAgain = false; srvSync(); } }
+  } catch (e) { return null; }                      // нет сети — та же пачка уйдёт ещё раз с тем же номером
+  finally { srvBusy = false; if (srvAgain || (!pend.inflight && (pend.earn || pend.spend))) { srvAgain = false; if (pend.earn || pend.spend) setTimeout(srvSync, 0); } }
 }
 function srvEarn(n) { if (srvOn()) { pend.earn += n; store.set(KEY_PEND, pend); } }
 function srvSpend(n) { if (srvOn()) { pend.spend += n; store.set(KEY_PEND, pend); srvSync(); } }
 function srvStart() {                               // при запуске: один раз переносим старую копилку из браузера, потом берём баланс с сервера
   if (!srvOn()) return;
+  const uid = TG.initDataUnsafe && TG.initDataUnsafe.user && TG.initDataUnsafe.user.id;   // v0.64: неотправленные монеты — только своего аккаунта
+  if (uid && pend.uid && pend.uid !== uid) pend = { earn: 0, spend: 0 };
+  if (uid) { pend.uid = uid; store.set(KEY_PEND, pend); }
   if (!store.get(KEY_MIGR, false)) { pend.earn += wallet; store.set(KEY_PEND, pend); store.set(KEY_MIGR, true); }
   srvSync();
 }
@@ -2479,6 +2496,7 @@ function showCard(title, text, btn, scoreVal) {
   ui.overlay.hidden = false;
 }
 function start() {
+  if (typeof payBusy !== 'undefined' && payBusy) return;   // v0.64: идёт оплата продолжения
   sound.unlock();
   if (mode !== 'pause') {
     if (mode === 'menu' || mode === 'over') { mode = 'menu'; resize(); }
@@ -2553,7 +2571,7 @@ function die(win) {
     const title = win ? 'Весь пруд твой!' : (record && sc > 0 ? 'Новый рекорд!' : 'Плюх!');
     let text = sc === 0 ? 'Ни одной лягушки. Попробуй ещё раз!' : (sc === fr ? '' : `Лягушек на спине: ${fr}`);   // рекорд и так виден на плашке сверху
     showCard(title, text, 'Ещё раз', sc);
-    shareBtn.href = shareUrl(sc); shareBtn.hidden = false;
+    shareBtn.href = shareUrl(fr); shareBtn.hidden = false;   // v0.64: в сообщении — лягушки, не очки
     overWin = win; renderOverCoins(); renderContinue();
   }, 750);
 }
@@ -2574,7 +2592,7 @@ function renderContinue() {
                    : buy ? `Купить монеты <span class="price"><img src="${BOOST_SRC.coin}" alt="">${wallet}/${cost}</span>`
                          : `Продолжить <span class="price"><img src="${BOOST_SRC.coin}" alt="">${wallet}/${cost}</span>`;
       if (can) ui.startBtn.className = 'btn btn-coral';
-      if (!can && (inTelegram || CONFIG.stars.previewOutsideTelegram)) {   // монет не хватает — вместо серой кнопки сразу «за звёзды»
+      if (!can && shopOn() && (inTelegram || CONFIG.stars.previewOutsideTelegram)) {   // v0.65: без покупок кнопки «за звёзды» нет   // монет не хватает — вместо серой кнопки сразу «за звёзды»
         const sb = $('starsBtn'); sb.hidden = false; sb.innerHTML = `Продолжить · ${CONFIG.stars.price} ${STAR_ICON_HTML}`; sb.disabled = false; ui.startBtn.className = 'btn btn-coral';
       }
     }
@@ -2591,6 +2609,7 @@ function continueGame(paidWithStars = false) {
   const snap = JSON.parse(stepHistory[i]), keepCoins = game.state.coins;
   Object.assign(game.state, snap); game.state.coins = keepCoins;   // монеты за забег не теряются при отмотке
   game.state.over = false; game.state.queue = [];   // v0.60: раньше эта строка случайно была в комментарии
+  game.state.itemSeq = Math.max(game.state.itemSeq, ...[...collectedIds].map(Number).filter(Number.isFinite), ...game.state.items.map(i => i.id));   // v0.64: номера новых предметов — только вперёд
   game.state.items = game.state.items.filter(i => !collectedIds.has(i.id)); // монетки не собрать второй раз
   stepHistory.length = i;
   continuesLeft--;
@@ -2662,7 +2681,7 @@ function loop(t) {
 /* Поздний поворот: если кнопку нажали в самом начале шага, шаг пересчитывается
    с новым направлением. Голова в этот момент почти не сдвинулась, так что подмены не видно. */
 function tryLateTurn(dir) {
-  if (!lastSnap || (lastEvent !== 'move' && lastEvent !== 'item') || alpha >= CONFIG.lateTurnWindow) return false;
+  if (!lastSnap || lastEvent !== 'move' || alpha >= CONFIG.lateTurnWindow) return false;   // v0.64: шаг с подбором предмета не пересчитываем
   const st = game.state, snap = JSON.parse(lastSnap);
   if (st.queue.length || snap.queue.length || dir === snap.dir || dir === OPPOSITE[snap.dir]) return false;
   Object.assign(st, snap);
@@ -2707,22 +2726,25 @@ $('resumeBtn').addEventListener('click', resumeRun);
 $('contBtn').addEventListener('click', () => { if (mode === 'over' && wallet < CONFIG.continueCost && shopOn()) openShop(); else continueGame(); });
 /* Оплата звёздами: сервер создаёт счёт (у него токен бота), Телеграм показывает окно оплаты, после «paid» продолжаем */
 const STAR_ICON_HTML = '<span class="star-ic" aria-label="звёзд">⭐</span>';   // эмодзи звезды — как в других мини-играх Телеграма
+let payBusy = false;   // v0.64: идёт оплата продолжения — новую партию не начинаем
 async function buyContinueWithStars() {
   const S = CONFIG.stars, sb = $('starsBtn'), note = $('starsNote');
   const say = (t) => { note.textContent = t; note.hidden = false; };
   if (!S.invoiceApi || !inTelegram || !TG.openInvoice) { say(inTelegram ? 'Оплата звёздами скоро появится 🙂' : 'Оплата звёздами работает только в Телеграме.'); return; }
-  sb.disabled = true; say('Открываю оплату…');
+  if (payBusy) return;
+  const runAt = deathAt; payBusy = true; sb.disabled = true; say('Открываю оплату…');
   try {
     const r = await fetch(S.invoiceApi, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ initData: TG.initData, item: 'continue', stars: S.price }) });
-    if (r.status === 401) { sb.disabled = false; say('Оплата сейчас недоступна. Напиши боту /paysupport.'); return; }
+    if (mode !== 'over' || deathAt !== runAt) { payBusy = false; sb.disabled = false; note.hidden = true; return; }   // партия уже другая — счёт не открываем
+    if (r.status === 401) { payBusy = false; sb.disabled = false; say('Оплата сейчас недоступна. Напиши боту /paysupport.'); return; }
     const { link } = await r.json(); if (!link) throw new Error('no link');
     TG.openInvoice(link, status => {
-      sb.disabled = false;
+      payBusy = false; sb.disabled = false;
       if (status === 'paid') { note.hidden = true; haptic('medium'); continueGame(true); }
       else if (status === 'failed') say('Оплата не прошла. Попробуй ещё раз.');
       else note.hidden = true;           // закрыли окно — ничего не списано
     });
-  } catch (e) { sb.disabled = false; say('Не получилось открыть оплату. Проверь интернет и попробуй ещё раз.'); }
+  } catch (e) { payBusy = false; sb.disabled = false; say('Не получилось открыть оплату. Проверь интернет и попробуй ещё раз.'); }
 }
 $('starsBtn').addEventListener('click', buyContinueWithStars);
 /* ---- Магазин монет за звёзды (Telegram). Без сервера кнопки видны, но оплата не открывается ---- */
@@ -2963,7 +2985,7 @@ function autoCell() {
 function autoDir() {                       // поиск в ширину по клеткам, тело ужа — препятствие (кроме кончика хвоста)
   const st = game.state, tg = autoCell(); if (!tg) { autoTarget = null; return null; }
   const W = CONFIG.gridW, H = CONFIG.gridH, h = st.snake[0], cur = st.queue.length ? st.queue[st.queue.length - 1] : st.dir;
-  const blocked = new Uint8Array(W * H); st.snake.slice(0, -1).forEach(p => blocked[p.y * W + p.x] = 1);
+  const blocked = new Uint8Array(W * H); (st.grow > 0 ? st.snake : st.snake.slice(0, -1)).forEach(p => blocked[p.y * W + p.x] = 1);   // v0.64
   const first = new Int8Array(W * H).fill(-1), q = [], names = ['up', 'down', 'left', 'right'];
   names.forEach((n, k) => {
     if (n === OPPOSITE[cur]) return;
