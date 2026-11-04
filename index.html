@@ -6,7 +6,7 @@
 <meta name="theme-color" content="#237f73">
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <style>
-:root { color-scheme: light; padding-top: env(safe-area-inset-top, 0px); padding-bottom: env(safe-area-inset-bottom, 0px); }
+:root { color-scheme: dark; padding-top: env(safe-area-inset-top, 0px); padding-bottom: env(safe-area-inset-bottom, 0px); }
 html, body { height: 100%; }
 body { margin: 0; font: 14px/1.4 system-ui, -apple-system, "Segoe UI", sans-serif; }
 img { max-width: 100%; }
@@ -40,7 +40,6 @@ img { max-width: 100%; }
 html, body { height: 100%; overscroll-behavior: none; }
 body {
   background: linear-gradient(180deg, var(--bg-top) 0%, var(--bg-mid) 58%, var(--bg-bottom) 100%) var(--bg-top);
-  background-attachment: fixed;
   color: var(--cream);
   font-family: var(--font);
   padding-left: max(16px, env(safe-area-inset-left, 0px));
@@ -846,7 +845,7 @@ const dbg = { on: false, swipes: 0, turns: 0, rejected: 0, cancels: 0, maxLag: 0
     if (!this.t0) this.t0 = t; if (t - this.t0 >= 1000) { this.fps = Math.round(this.n * 1000 / (t - this.t0)); this.n = 0; this.t0 = t; this.show(); this.worst = 0; } },
   show() {
     const T = window.Telegram && window.Telegram.WebApp, tg = T && T.platform && T.platform !== 'unknown' ? 'TG ' + T.version + ' ' + T.platform : 'браузер';
-    document.getElementById('dbg').textContent = `v0.60 · FPS ${this.fps} · худший кадр ${Math.round(this.worst)} мс · ${tg}\nокно ${innerWidth}×${innerHeight} · dpr ${devicePixelRatio} · пруд ${CONFIG.gridW}×${CONFIG.gridH} · ${ctl}\nсвайпы ${this.swipes} · повороты ${this.turns} · отброшено ${this.rejected} · сорвано ${this.cancels}\nзадержка событий до ${Math.round(this.maxLag)} мс · ввод ${this.ptype || '—'}`;
+    document.getElementById('dbg').textContent = `v0.61${CONFIG.stars.server ? ' · сервер' : ''} · FPS ${this.fps} · худший кадр ${Math.round(this.worst)} мс · ${tg}\nокно ${innerWidth}×${innerHeight} · dpr ${devicePixelRatio} · пруд ${CONFIG.gridW}×${CONFIG.gridH} · ${ctl}\nсвайпы ${this.swipes} · повороты ${this.turns} · отброшено ${this.rejected} · сорвано ${this.cancels}\nзадержка событий до ${Math.round(this.maxLag)} мс · ввод ${this.ptype || '—'}`;
   },
 };
 const CONFIG = {
@@ -865,7 +864,8 @@ const CONFIG = {
   continueCost: 10,     // цена «Продолжить» в монетках
   stars: {              // «Продолжить за звёзды» — только в Телеграме, когда не хватает монеток
     price: 10,            // цена в звёздах Telegram
-    invoiceApi: '',       // адрес сервера, который создаёт счёт (пусто — оплата ещё не подключена)
+    server: '',           // v0.61: адрес сервера оплаты (Cloudflare Worker), например https://pond-snake-pay.ИМЯ.workers.dev — пусто: оплата не подключена
+    invoiceApi: '',       // выставляется сам из server (+ /invoice)
     previewOutsideTelegram: false, // показать кнопку и вне Телеграма (для проверки вида)
   },
   shop: {               // магазин монет: покупка за звёзды Telegram (нужен тот же сервер, что и для «Продолжить за звёзды»)
@@ -882,7 +882,7 @@ const CONFIG = {
   headScale: 1.4,       // голова ужа крупнее тела — её лучше видно
   frogHopEveryMs: 2600, // как часто свободная лягушка подпрыгивает на месте
   // ритм прыжка: [кадр, мс]. Присед дольше, толчок и полёт быстрые, приземление с отдачей — так прыжок «живой»
-  frogHopTiming: [[3, 60], [4, 60], [5, 90], [6, 35], [7, 35], [8, 45], [9, 60], [10, 45], [11, 40], [12, 70], [13, 45], [14, 45], [15, 50]],      // размер свободного лягушонка на поле (пассажиры на спине — 0.84)
+  frogHopTiming: [[3, 60], [4, 60], [5, 90], [6, 35], [7, 35], [8, 45], [9, 60], [10, 45], [11, 40], [12, 70], [13, 45], [14, 45], [15, 50]],
   startSpeedMs: 330,    // пауза между шагами в начале (больше = медленнее)
   minSpeedMs: 105,      // самая высокая скорость
   speedUpPerFrog: 5,    // ускорение за каждую лягушку, мс
@@ -905,8 +905,8 @@ const CONFIG = {
     weights: { snail: 1, dragonfly: 1, helmet: 1 }, // как часто выпадает каждый
     snail: { ms: 5000, speed: 1.6 },                // улитка: шаг в 1.6 раза дольше (медленнее)
     dragonfly: { ms: 5000, speed: .72, scoreMul: 2 }, // стрекоза: быстрее, очки ×2
-    rampMs: 800,
-    itemScale: 1.35,     // размер предметов на поле (1 = клетка)         // плавный разгон и возврат скорости
+    rampMs: 800,         // плавный разгон и возврат скорости, мс
+    itemScale: 1.35,     // размер предметов на поле (1 = клетка)
     coin: { firstDelayMs: 4000, spawnMinMs: 5000, spawnMaxMs: 10000, lifeMs: 9000, value: 1 },
   },
   hop: {               // лягушка перепрыгивает, если до неё долго плыть (только на поздних этапах)
@@ -920,8 +920,8 @@ const CONFIG = {
   },
   caustic: { on: false, alpha: .08, blurPx: 2.2, cellsPerTile: 6, drift: .12 }, // каустика на дне: прозрачность, блюр, размер ячеек, скорость
   lateTurnWindow: .4,   // поворот, нажатый в первые 40% шага, применяется к этому же шагу — уж реагирует сразу
-  maxDpr: 2,
-  headLook: .35,        // насколько голова заранее поворачивается к нажатому направлению (0 — нет, 1 — сразу целиком)            // предел чёткости холста (больше — красивее, но медленнее на телефонах)  // поворот, нажатый в первые 25% шага, применяется к этому же шагу (без ускорения змейки)
+  maxDpr: 2,            // предел чёткости холста (больше — красивее, но медленнее на телефонах)
+  headLook: .35,        // насколько голова заранее поворачивается к нажатому направлению (0 — нет, 1 — сразу целиком)
 };
 
 /* =========================================================
@@ -2313,12 +2313,41 @@ function render(t) {
    7. ИГРОВОЙ ЦИКЛ, ИНТЕРФЕЙС, УПРАВЛЕНИЕ
    ========================================================= */
 const reduceMotion = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+if (CONFIG.stars.server) CONFIG.stars.invoiceApi = CONFIG.stars.server.replace(/\/+$/, '') + '/invoice';   // v0.61
 const game = createGame(CONFIG);
 let prevSnake = game.state.snake.map(p => ({ ...p }));
 let mode = 'menu'; // menu | play | pause | dying | over
 let acc = 0, lastT = performance.now(), alpha = 1;
 let best = store.get(KEY_BEST, 0);
-let wallet = store.get(KEY_COINS, 0);          // копилка монеток: хранится в браузере, не сгорает после проигрыша
+let wallet = store.get(KEY_COINS, 0);          // копилка монеток: вне Телеграма хранится в браузере, не сгорает после проигрыша
+/* v0.61: в Телеграме с подключённым сервером копилка живёт на сервере. Здесь — её копия и «неотправленные» изменения:
+   подобранные монеты (earn) и потраченные на «Продолжить» (spend). Отправляем после забега, при выходе и сворачивании. */
+const KEY_PEND = 'pondsnake.pending.v1', KEY_MIGR = 'pondsnake.migrated.v1';
+let pend = store.get(KEY_PEND, { earn: 0, spend: 0 }), srvBusy = false, srvAgain = false;
+const srvOn = () => !!CONFIG.stars.server && typeof inTelegram !== 'undefined' && inTelegram && !!(TG && TG.initData);
+function walletChanged() { store.set(KEY_COINS, wallet); try { if (!$('shopPanel').hidden) renderShop(); } catch (e) {} }
+async function srvSync() {
+  if (!srvOn()) return null;
+  if (srvBusy) { srvAgain = true; return null; }
+  srvBusy = true;
+  const send = { earn: pend.earn, spend: pend.spend };
+  try {
+    const r = await fetch(CONFIG.stars.server.replace(/\/+$/, '') + '/sync', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ initData: TG.initData, ...send }) });
+    if (!r.ok) throw new Error('sync ' + r.status);
+    const d = await r.json();
+    pend.earn -= send.earn; pend.spend -= send.spend; store.set(KEY_PEND, pend);   // сервер учёл (или отказал по лимиту) — это уже не наше
+    wallet = Math.max(0, d.coins + pend.earn - pend.spend); walletChanged();
+    return d;
+  } catch (e) { return null; }                      // нет сети — изменения ждут следующей отправки
+  finally { srvBusy = false; if (srvAgain) { srvAgain = false; srvSync(); } }
+}
+function srvEarn(n) { if (srvOn()) { pend.earn += n; store.set(KEY_PEND, pend); } }
+function srvSpend(n) { if (srvOn()) { pend.spend += n; store.set(KEY_PEND, pend); srvSync(); } }
+function srvStart() {                               // при запуске: один раз переносим старую копилку из браузера, потом берём баланс с сервера
+  if (!srvOn()) return;
+  if (!store.get(KEY_MIGR, false)) { pend.earn += wallet; store.set(KEY_PEND, pend); store.set(KEY_MIGR, true); }
+  srvSync();
+}
 let collectedIds = new Set(), waitReason = '';
 const FX_COLOR = { snail: '#f08a5d', dragonfly: '#22b5c9' };
 let hudKey = '', hudFx = '';
@@ -2408,7 +2437,7 @@ function showMenu() {
   }
   setPauseLabel(); tgBack();
 }
-function exitToMenu() { saveRun(); sound.click(); showMenu(); }
+function exitToMenu() { saveRun(); sound.click(); showMenu(); srvSync(); }
 function resumeRun() {
   const r = savedRun(); if (!r) { showMenu(); return; }
   sound.unlock(); sound.start();
@@ -2436,6 +2465,7 @@ function togglePause() {
   setPauseLabel();
 }
 function die(win) {
+  setTimeout(srvSync, 50);   // v0.61: монеты за забег — на сервер
   clearRun();
   mode = 'dying'; deathAt = performance.now();
   win ? sound.start() : sound.dead();
@@ -2481,7 +2511,7 @@ let lastSnap = null, lastEvent = '', lastStepT = 0;
 let stepHistory = [], continuesLeft = 0;
 function continueGame(paidWithStars = false) {
   if (mode !== 'over' || continuesLeft <= 0 || !stepHistory.length || (!paidWithStars && wallet < CONFIG.continueCost)) return;
-  if (!paidWithStars) { wallet -= CONFIG.continueCost; store.set(KEY_COINS, wallet); } // плата за продолжение монетками
+  if (!paidWithStars) { wallet -= CONFIG.continueCost; store.set(KEY_COINS, wallet); srvSpend(CONFIG.continueCost); } // плата за продолжение монетками (в Телеграме — и на сервере)
   const i = Math.max(0, stepHistory.length - CONFIG.rewindSteps);
   const snap = JSON.parse(stepHistory[i]), keepCoins = game.state.coins;
   Object.assign(game.state, snap); game.state.coins = keepCoins;   // монеты за забег не теряются при отмотке
@@ -2500,7 +2530,7 @@ function onItem(ev, t) {
   if (collectedIds.has(ev.id)) return;   // этот предмет уже засчитан (шаг пересчитан или отмотан)
   collectedIds.add(ev.id);
   if (ev.kind === 'coin') {
-    wallet += CONFIG.boosts.coin.value; store.set(KEY_COINS, wallet);
+    wallet += CONFIG.boosts.coin.value; store.set(KEY_COINS, wallet); srvEarn(CONFIG.boosts.coin.value);
     popups.push({ x: ev.at.x, y: ev.at.y, born: t, text: '+1', color: '#e39a12', drop: '#ffe37a' });
     sound.coin(); haptic('light'); return;
   }
@@ -2653,7 +2683,12 @@ async function buyPack(i) {
     const { link } = await r.json(); if (!link) throw new Error('no link');
     TG.openInvoice(link, status => {
       btns.forEach(b => b.disabled = false);
-      if (status === 'paid') { wallet += pk.coins; store.set(KEY_COINS, wallet); renderShop(); say(`+${pk.coins} монет в копилке!`); haptic('medium'); sound.coin(); }
+      if (status === 'paid') {
+        say('Оплачено! Зачисляю монеты…'); haptic('medium');
+        (async () => { const want = wallet + pk.coins;
+          for (let k = 0; k < 8; k++) { await srvSync(); if (wallet >= want) break; await new Promise(r => setTimeout(r, 900)); }
+          renderShop(); sound.coin(); say(wallet >= want ? `+${pk.coins} монет в копилке!` : 'Оплата прошла, монеты появятся через минуту. Если нет — напиши боту /paysupport.'); })();
+      }
       else if (status === 'failed') say('Оплата не прошла. Попробуй ещё раз.');
       else note.hidden = true;
     });
@@ -2936,7 +2971,7 @@ document.addEventListener('pointerup', e => {
   sw = null;
 });
 document.addEventListener('pointercancel', () => { if (sw) dbg.cancels++; endSwipe(); });
-document.addEventListener('visibilitychange', () => { if (document.hidden && mode === 'play') togglePause(); else if (document.hidden && mode === 'pause') saveRun(); });
+document.addEventListener('visibilitychange', () => { if (document.hidden) srvSync(); if (document.hidden && mode === 'play') togglePause(); else if (document.hidden && mode === 'pause') saveRun(); });
 window.addEventListener('pagehide', () => { if (mode === 'play' || mode === 'pause') saveRun(); });
 
 /* ---- Телеграм Mini App: включается, только если игра открыта внутри Телеграма ---- */
@@ -3093,7 +3128,8 @@ document.querySelectorAll('[data-pick]').forEach(b => b.addEventListener('click'
 }));
 $('ctlBtn').addEventListener('click', () => { sound.unlock(); sound.click(); showCtlPick(mode === 'menu' ? 'menu' : 'card'); });
 $('ctlBtnSet').addEventListener('click', () => { sound.unlock(); sound.click(); showCtlPick('panel'); });
-if (isMobile) showCtlPick(); else showMenu();   // потом стартовая карточка (если есть незаконченная партия — с кнопкой «Продолжить»)
+if (isMobile) showCtlPick(); else showMenu();
+srvStart();   // v0.61: копилка с сервера (только в Телеграме с подключённой оплатой)   // потом стартовая карточка (если есть незаконченная партия — с кнопкой «Продолжить»)
 requestAnimationFrame(loop);
 </script>
 
