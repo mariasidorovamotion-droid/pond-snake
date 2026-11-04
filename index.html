@@ -444,7 +444,8 @@ body.mobile.landscape:not(.in-run) .row #soundBtn { grid-column: auto; }
 html.js .nojs { display: none; }
 /* затемнение: карточка отделена от игры, поле и стрелки уходят в тень */
 .overlay, .panel { position: fixed; inset: 0; z-index: 5; background: rgba(8, 48, 52, .6); }   /* без размытия — на телефоне оно тормозит */
-#shopPanel { z-index: 6; }
+#board > .panel { z-index: 6; }   /* v0.66: настройки, размер, управление, магазин — поверх карточки меню и «Плюх!» */
+#shopPanel { z-index: 7; }
 .overlay[hidden], .panel[hidden] { display: none; }
 .row { position: relative; z-index: 7; }   /* «Магазин» и звук видны и доступны поверх затемнения */
 body.in-run .row, body.panel-open .row { z-index: auto; }   /* пауза, настройки, магазин — кнопки под тенью */
@@ -902,7 +903,7 @@ const dbg = { on: false, swipes: 0, turns: 0, rejected: 0, cancels: 0, maxLag: 0
     if (!this.t0) this.t0 = t; if (t - this.t0 >= 1000) { this.fps = Math.round(this.n * 1000 / (t - this.t0)); this.n = 0; this.t0 = t; this.show(); this.worst = 0; } },
   show() {
     const T = window.Telegram && window.Telegram.WebApp, tg = T && T.platform && T.platform !== 'unknown' ? 'TG ' + T.version + ' ' + T.platform : 'браузер';
-    document.getElementById('dbg').textContent = `v0.65 · ${fieldSize}${CONFIG.stars.server ? ' · сервер' : ''} · FPS ${this.fps} · худший кадр ${Math.round(this.worst)} мс · ${tg}\nокно ${innerWidth}×${innerHeight} · dpr ${devicePixelRatio} · пруд ${CONFIG.gridW}×${CONFIG.gridH} · ${ctl}\nсвайпы ${this.swipes} · повороты ${this.turns} · отброшено ${this.rejected} · сорвано ${this.cancels}\nзадержка событий до ${Math.round(this.maxLag)} мс · ввод ${this.ptype || '—'}`;
+    document.getElementById('dbg').textContent = `v0.66 · ${fieldSize}${typeof srvOn === 'function' && srvOn() ? ' · сервер' : ''} · FPS ${this.fps} · худший кадр ${Math.round(this.worst)} мс · ${tg}\nокно ${innerWidth}×${innerHeight} · dpr ${devicePixelRatio} · пруд ${CONFIG.gridW}×${CONFIG.gridH} · ${ctl}\nсвайпы ${this.swipes} · повороты ${this.turns} · отброшено ${this.rejected} · сорвано ${this.cancels}\nзадержка событий до ${Math.round(this.maxLag)} мс · ввод ${this.ptype || '—'}`;
   },
 };
 const CONFIG = {
@@ -2554,7 +2555,7 @@ function togglePause() {
   if (!ui.panel.hidden || !$('ctlPanel').hidden || !$('sizePanel').hidden) return;
   if (mode === 'play') { mode = 'pause'; showCard('Уже уходите?', 'Лягушата будут ждать!', '▶ Продолжить'); $('exitBtn').hidden = false; $('againBtn').hidden = false; $('ovSad').hidden = false; $('ovSound').hidden = false; $('ovClose').hidden = false; ui.ovText.classList.add('sad'); drawSadFrog(); syncSound(); saveRun(); }
   else if (mode === 'pause') start();
-  else if (mode === 'menu' || mode === 'over') start();
+  else if (mode === 'menu' && !savedRun()) start();   // v0.66: на «Плюх!» и при сохранённой партии пробел ничего не запускает
   setPauseLabel();
 }
 function die(win) {
@@ -2694,15 +2695,19 @@ function input(dir, auto = false) {
   if (!auto) autoTarget = null;          // любое ручное управление отменяет автопилот
   sound.unlock();
   if (!ui.panel.hidden || !$('ctlPanel').hidden || !$('sizePanel').hidden) return;
-  if (mode === 'menu' || mode === 'over') start();
+  if (mode === 'over') return;                      // v0.66: на «Плюх!» партию начинают только кнопки — иначе терялось «Продолжить»
+  if (mode === 'menu') { if (savedRun()) return; start(); }   // v0.66: с сохранённой партией стрелка не стирает её
   if (mode !== 'play') return;
   if (waitFirst) { // первый жест: трогаемся сразу в выбранную сторону, даже назад
     const st = game.state;
     if (dir === OPPOSITE[st.dir]) {
       // назад — плавная петля: шаг в сторону, где больше места, затем в нужную сторону
       const h = st.snake[0], horiz = st.dir === 'left' || st.dir === 'right';
-      const side = horiz ? (h.y < CONFIG.gridH / 2 ? 'down' : 'up') : (h.x < CONFIG.gridW / 2 ? 'right' : 'left');
-      st.queue = [side, dir];
+      const pref = horiz ? (h.y < CONFIG.gridH / 2 ? 'down' : 'up') : (h.x < CONFIG.gridW / 2 ? 'right' : 'left');
+      const body = st.grow > 0 ? st.snake : st.snake.slice(0, -1);   // v0.66: боковая клетка должна быть свободна — иначе петля убивала
+      const free = d => { const [dx, dy] = DIRS[d], x = h.x + dx, y = h.y + dy; return x >= 0 && y >= 0 && x < CONFIG.gridW && y < CONFIG.gridH && !body.some(p => p.x === x && p.y === y); };
+      const side = [pref, OPPOSITE[pref]].find(free);
+      st.queue = side ? [side, dir] : [];   // обе стороны заняты — плывём прямо
     } else if (dir !== st.dir) game.turn(dir);
     waitFirst = false; waitReason = ''; lastT = performance.now();
     doStep(lastT); acc = 0; alpha = 0; // сразу делаем первый шаг: картинка продолжает движение с того места, где уж стоял
@@ -3230,7 +3235,7 @@ let sizeBack = 'menu';
 function showSizePick(back) {
   sizeBack = back;
   if (back === 'panel') ui.panel.hidden = true; else ui.overlay.hidden = true;
-  const live = mode === 'play' || mode === 'pause' || mode === 'dying';
+  const live = mode === 'play' || mode === 'pause' || mode === 'dying' || mode === 'over';   // v0.66: и на «Плюх!» — иначе сброс партии ломал «Продолжить»
   $('sizeNote').hidden = !live;   // во время партии размер не меняется — подсказываем, что со следующей
   $('sizePanel').hidden = false;
   document.querySelectorAll('[data-size]').forEach(b => b.setAttribute('aria-pressed', b.dataset.size === fieldSize));
@@ -3240,7 +3245,7 @@ document.querySelectorAll('[data-size]').forEach(b => b.addEventListener('click'
   fieldSize = b.dataset.size; try { localStorage.setItem(KEY_SIZE, JSON.stringify(fieldSize)); } catch (e) {}
   applySize(); syncSound();
   $('sizePanel').hidden = true;
-  if (mode === 'menu' || mode === 'over') { mode = 'menu'; resize(); }   // новый пруд сразу виден в меню
+  if (mode === 'menu') resize();   // новый пруд сразу виден в меню; v0.66: на «Плюх!» поле держим ради «Продолжить» — новый размер со следующей партии
   if (sizeBack === 'panel') ui.panel.hidden = false; else showMenu();
 }));
 $('sizeBtn').addEventListener('click', () => { sound.unlock(); sound.click(); showSizePick('menu'); });
