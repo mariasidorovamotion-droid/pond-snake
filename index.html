@@ -546,7 +546,7 @@ body.mobile:not(.landscape) .hint { display: none !important; }   /* режим 
 /* ===== v0.60: пруд шире (камни по бокам частично за краем экрана) и круглый пульт с Паузой и Звуком по бокам ===== */
 .dpad button { pointer-events: none; }   /* нажатие ловит весь пульт, а не отдельная стрелка */
 body.mobile:not(.landscape) .board, body.mobile:not(.landscape).dpad-on .board {
-  width: auto; margin-left: calc(-1 * max(6px, env(safe-area-inset-left, 0px))); margin-right: calc(-1 * max(6px, env(safe-area-inset-right, 0px))); }
+  width: auto; max-width: none; margin-left: calc(-1 * max(6px, env(safe-area-inset-left, 0px))); margin-right: calc(-1 * max(6px, env(safe-area-inset-right, 0px))); }
 body.mobile:not(.landscape).dpad-on .app { grid-template-columns: minmax(0, 1fr); grid-template-rows: auto auto minmax(0, 1fr) auto; grid-template-areas: "top" "fx" "board" "ctl"; }
 body.mobile:not(.landscape).dpad-on .dpad, body.mobile:not(.landscape).dpad-on .row { grid-area: ctl; }
 body.mobile:not(.landscape).dpad-on .row { display: flex; justify-content: space-between; align-items: center; align-self: center; gap: 10px; }
@@ -592,14 +592,72 @@ body.mobile:not(.landscape) .dpad button.hit polygon { fill: var(--coral); strok
 body.mobile:not(.landscape) .app { grid-template-rows: auto minmax(0, 1fr) auto auto auto; grid-template-areas: "top" "board" "pad" "btns" "hint"; }
 body.mobile:not(.landscape).dpad-on .app { grid-template-rows: auto minmax(0, 1fr) auto; grid-template-areas: "top" "board" "ctl"; }
 body.mobile:not(.landscape) .fxhud { position: absolute; grid-area: auto; width: auto; height: 34px; margin: 0; z-index: 3; }
+/* v0.60: бусты в верхней полосе: «иконка + секунды» без полоски, шлем — одной иконкой. Место под них всегда занято — счёт не прыгает */
+body.mobile:not(.landscape) .top { display: flex; flex-wrap: nowrap; align-items: center; justify-content: space-between; gap: 6px; }
+body.mobile:not(.landscape) .top .pill { flex: 0 0 auto; min-width: 0; width: auto; gap: 5px; }
+body.mobile:not(.landscape) .top .fxhud { position: static; display: flex; align-items: center; justify-content: flex-end; gap: 10px; flex: none; min-width: calc(var(--hud-ic) * 2 + 34px); height: auto; margin: 0; padding: 0; }
+body.mobile:not(.landscape) .top .fxhud .chip { height: auto; min-height: 0; padding: 0; gap: 4px; border: 0; border-radius: 0; background: none; box-shadow: none; }
+body.mobile:not(.landscape) .top .fxhud .chip canvas { width: var(--hud-ic); height: var(--hud-ic); filter: drop-shadow(0 2px 2px rgba(0,0,0,.25)); }
+body.mobile:not(.landscape) .top .fxhud .fxbar, body.mobile:not(.landscape) .top .fxhud .fxlbl, body.mobile:not(.landscape) .top .fxhud #shieldChip .fxlbl { display: none; }
+body.mobile:not(.landscape) .top .fxhud .fxsec { min-width: 0; color: #fff; font-size: clamp(17px, 5.4vw, 24px); font-weight: 900; text-shadow: 0 2px 0 rgba(0,0,0,.28); font-variant-numeric: tabular-nums; }
+body:not(.mobile) #board > .overlay > .card, body:not(.mobile) #board > .panel > .card { translate: var(--cx, 0) var(--cy, 0); }
+/* v0.60: компьютер в режиме стрелок — всё помещается по высоте (было на 80 px выше экрана и уезжало) */
+body.wide.dpad-on .hint { display: none; }
+body.wide.dpad-on .pill { min-height: clamp(48px, 7vh, 92px); }
+body.wide.dpad-on .title .logo { height: clamp(56px, 10vh, 130px); }
+body.wide .dpad { grid-template-rows: repeat(2, clamp(44px, 5.6vh, 70px)); grid-template-columns: repeat(3, clamp(52px, 5vw, 84px)); }
+@media (max-height: 610px) { body.wide.dpad-on { padding-block: 8px; } }
+@media (max-height: 660px) { body.wide.dpad-on .title .logo { height: 48px; } body.wide.dpad-on .pill { min-height: 44px; } body.wide .dpad { grid-template-rows: repeat(2, 42px); } }
+/* v0.60: компьютер и горизонталь — тот же стиль, что на телефоне: строка «иконка + число», круглые Пауза и Звук, контурные стрелки */
+body:is(.wide, .deskn), body.mobile.landscape { --hud-ic: clamp(22px, 3.4vh, 30px); --pad: clamp(124px, 22vh, 176px); --side-btn: clamp(52px, 7.5vh, 64px); }
+body:is(.wide, .deskn) .top, body.mobile.landscape .top { display: flex; flex-direction: column; align-items: stretch; gap: clamp(8px, 1.6vh, 14px); }
+body:is(.wide, .deskn) .pills, body.mobile.landscape .pills { display: flex; flex-direction: row; flex-wrap: wrap; align-items: center; justify-content: space-between; row-gap: 2px; column-gap: 6px; padding: 4px 12px; border-radius: 16px; background: rgba(8, 48, 44, .32); box-shadow: inset 0 1px 0 rgba(255,255,255,.08); }
+body:is(.wide, .deskn) .pill, body.mobile.landscape .pill { flex: 0 0 auto; min-height: 36px; min-width: 0; width: auto; padding: 0; gap: 5px; flex-direction: row; justify-content: center; align-items: center; background: none; border: 0; box-shadow: none; border-radius: 0; }
+body:is(.wide, .deskn) .pill .ic, body.mobile.landscape .pill .ic { display: block !important; height: var(--hud-ic); width: auto; aspect-ratio: auto; flex: none; filter: drop-shadow(0 2px 2px rgba(0,0,0,.25)); }
+body:is(.wide, .deskn) #frogIcon, body.mobile.landscape #frogIcon { height: calc(var(--hud-ic) / .65); margin: calc(var(--hud-ic) * -.27) -7px; }
+body:is(.wide, .deskn) .pill .txt, body.mobile.landscape .pill .txt { flex: none; flex-direction: row; align-items: center; justify-content: flex-start; }
+body:is(.wide, .deskn) .pill small, body.mobile.landscape .pill small { display: none; }
+body:is(.wide, .deskn) .pill b, body.mobile.landscape .pill b { min-width: 0; color: #fff; font-size: clamp(18px, 2.8vh, 24px); line-height: 1; text-align: left; text-shadow: 0 2px 0 rgba(0,0,0,.28); font-variant-numeric: tabular-nums; }
+body:is(.wide, .deskn) .pills .fxhud, body.mobile.landscape .pills .fxhud { position: static; display: flex; flex: 0 0 100%; justify-content: center; align-items: center; gap: 14px; height: auto; min-height: 34px; margin: 0; padding: 0; width: auto; }
+body:is(.wide, .deskn) .pills .fxhud .chip, body.mobile.landscape .pills .fxhud .chip { height: auto; min-height: 0; padding: 0; gap: 4px; border: 0; border-radius: 0; background: none; box-shadow: none; }
+body:is(.wide, .deskn) .pills .fxhud .chip canvas, body.mobile.landscape .pills .fxhud .chip canvas { width: var(--hud-ic); height: var(--hud-ic); filter: drop-shadow(0 2px 2px rgba(0,0,0,.25)); }
+body:is(.wide, .deskn) .pills .fxhud .fxbar, body.mobile.landscape .pills .fxhud .fxbar, body:is(.wide, .deskn) .pills .fxhud .fxlbl, body.mobile.landscape .pills .fxhud .fxlbl { display: none; }
+body:is(.wide, .deskn) .pills .fxhud .fxsec, body.mobile.landscape .pills .fxhud .fxsec { min-width: 0; color: #fff; font-size: clamp(18px, 2.8vh, 24px); font-weight: 900; text-shadow: 0 2px 0 rgba(0,0,0,.28); font-variant-numeric: tabular-nums; }
+body:is(.wide, .deskn) .row, body.mobile.landscape .row, body:is(.wide, .deskn):not(.in-run) .row, body.mobile.landscape:not(.in-run) .row { display: flex; flex-direction: row; justify-content: center; align-items: center; gap: 18px; width: 100%; }
+body:is(.wide, .deskn) .row .btn, body.mobile.landscape .row .btn { width: auto; }
+body:is(.wide, .deskn) #restartBtn, body.mobile.landscape #restartBtn { display: none !important; }
+body:is(.wide, .deskn).in-run #pauseBtn, body.mobile.landscape.in-run #pauseBtn, body:is(.wide, .deskn) #soundBtn, body.mobile.landscape #soundBtn { width: var(--side-btn); height: var(--side-btn); min-height: 0; flex: none; padding: 0; border-radius: 50%; }
+body:is(.wide, .deskn).in-run #pauseBtn .lbl, body.mobile.landscape.in-run #pauseBtn .lbl, body:is(.wide, .deskn) #soundBtn .lbl, body.mobile.landscape #soundBtn .lbl { display: none !important; }
+body:is(.wide, .deskn) .row #shopBtn, body.mobile.landscape .row #shopBtn { width: auto; min-height: var(--side-btn); padding: 0 22px; }
+body:is(.wide, .deskn) .dpad, body.mobile.landscape .dpad, body:is(.wide, .deskn).dpad-on .dpad, body.mobile.landscape.dpad-on .dpad { display: block; position: relative; justify-self: center; align-self: center; width: var(--pad); height: var(--pad); margin: 0; padding: 0; gap: 0;
+  border-radius: 50%; background: radial-gradient(circle, rgba(255,255,255,.22) 0 62%, rgba(255,255,255,0) 71%); box-shadow: none; touch-action: none; user-select: none; }
+body:is(.wide, .deskn) .dpad[hidden], body.mobile.landscape .dpad[hidden] { display: none; }
+body:is(.wide, .deskn):not(.in-run) .dpad, body.mobile.landscape:not(.in-run) .dpad { visibility: hidden; }
+body:is(.wide, .deskn) .dpad button, body.mobile.landscape .dpad button { position: absolute; inset: 0; width: auto; height: auto; margin: 0; padding: 0; border: 0; border-radius: 50%; box-shadow: none; transform: none; background: none; color: var(--ink); display: flex; line-height: 1; }
+body:is(.wide, .deskn) .dpad button i, body.mobile.landscape .dpad button i { display: block; width: calc(var(--pad) * .27); height: calc(var(--pad) * .27); }
+body:is(.wide, .deskn) .dpad button svg, body.mobile.landscape .dpad button svg { width: 100%; height: 100%; overflow: visible; }
+body:is(.wide, .deskn) .dpad polygon, body.mobile.landscape .dpad polygon { fill: #fffaf0; stroke: var(--teal-btn-edge); stroke-width: 3.2; stroke-linejoin: round; transition: fill .1s; }
+body:is(.wide, .deskn) .dpad .up, body.mobile.landscape .dpad .up { clip-path: polygon(50% 47%, 4% 0, 96% 0); align-items: flex-start; justify-content: center; padding-top: 7%; }
+body:is(.wide, .deskn) .dpad .down, body.mobile.landscape .dpad .down { clip-path: polygon(50% 53%, 4% 100%, 96% 100%); align-items: flex-end; justify-content: center; padding-bottom: 7%; }
+body:is(.wide, .deskn) .dpad .left, body.mobile.landscape .dpad .left { clip-path: polygon(47% 50%, 0 4%, 0 96%); align-items: center; justify-content: flex-start; padding-left: 7%; }
+body:is(.wide, .deskn) .dpad .right, body.mobile.landscape .dpad .right { clip-path: polygon(53% 50%, 100% 4%, 100% 96%); align-items: center; justify-content: flex-end; padding-right: 7%; }
+body:is(.wide, .deskn) .dpad::after, body.mobile.landscape .dpad::after { content: ""; position: absolute; inset: 44%; border-radius: 50%; pointer-events: none; background: rgba(26,95,92,.35); }
+body:is(.wide, .deskn) .dpad[data-cur="up"] .up polygon, body:is(.wide, .deskn) .dpad[data-cur="down"] .down polygon, body:is(.wide, .deskn) .dpad[data-cur="left"] .left polygon, body:is(.wide, .deskn) .dpad[data-cur="right"] .right polygon, body.mobile.landscape .dpad[data-cur="up"] .up polygon, body.mobile.landscape .dpad[data-cur="down"] .down polygon, body.mobile.landscape .dpad[data-cur="left"] .left polygon, body.mobile.landscape .dpad[data-cur="right"] .right polygon { fill: #bfe8dc; }
+body:is(.wide, .deskn) .dpad[data-cur="up"] .down, body:is(.wide, .deskn) .dpad[data-cur="down"] .up, body:is(.wide, .deskn) .dpad[data-cur="left"] .right, body:is(.wide, .deskn) .dpad[data-cur="right"] .left, body.mobile.landscape .dpad[data-cur="up"] .down, body.mobile.landscape .dpad[data-cur="down"] .up, body.mobile.landscape .dpad[data-cur="left"] .right, body.mobile.landscape .dpad[data-cur="right"] .left { opacity: .38; }
+body:is(.wide, .deskn) .dpad button.hit polygon, body.mobile.landscape .dpad button.hit polygon { fill: var(--coral); stroke: var(--coral-edge); }
+/* v0.60: Пауза и Звук — круглые во всех режимах управления (раньше в режиме свайпов «Пауза» была длинной) */
+body.mobile:not(.landscape) .row, body.mobile:not(.landscape):not(.in-run) .row { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+body.mobile:not(.landscape).in-run #pauseBtn, body.mobile:not(.landscape) #soundBtn { width: var(--side-btn); height: var(--side-btn); min-height: 0; flex: none; padding: 0; border-radius: 50%; }
+body.mobile:not(.landscape).in-run #pauseBtn .lbl { display: none; }
 /* v0.60: верх как в Google Snake — одна тонкая полоса «иконка + число», без плашек и кнопочной тени (это не кнопки) */
 body.mobile:not(.landscape) .top { box-sizing: border-box; align-self: start; min-height: 0; padding: 4px 10px; gap: 4px; border-radius: 16px; background: rgba(8, 48, 44, .32); box-shadow: inset 0 1px 0 rgba(255,255,255,.08); }
 body.mobile:not(.landscape) .pill { min-height: 36px; padding: 0; gap: 8px; flex-direction: row; justify-content: center; align-items: center; background: none; border: 0; box-shadow: none; border-radius: 0; }
-body.mobile:not(.landscape) .pill .ic { display: block !important; width: clamp(24px, 7vw, 30px); height: auto; flex: none; filter: drop-shadow(0 2px 2px rgba(0,0,0,.25)); }
+body.mobile:not(.landscape) { --hud-ic: clamp(22px, 6.8vw, 30px); }   /* одна видимая высота для всех трёх значков */
+body.mobile:not(.landscape) .pill .ic { display: block !important; height: var(--hud-ic); width: auto; aspect-ratio: auto; flex: none; filter: drop-shadow(0 2px 2px rgba(0,0,0,.25)); }
 body.mobile:not(.landscape) .pill .txt { flex-direction: row; align-items: center; }
-body.mobile:not(.landscape) #frogIcon { width: clamp(34px, 10vw, 42px); margin: -5px -4px; }   /* лягушка нарисована мельче кубка и монеты — уравниваем на глаз */
+body.mobile:not(.landscape) #frogIcon { height: calc(var(--hud-ic) / .65); margin: calc(var(--hud-ic) * -.27) -7px; }   /* рисунок лягушки занимает 65% своего холста — холст крупнее, видимая высота как у кубка и монеты */
 body.mobile:not(.landscape) .pill small { display: none; }
-body.mobile:not(.landscape) .pill b { color: #fff; font-size: clamp(20px, 6.2vw, 26px); line-height: 1; text-shadow: 0 2px 0 rgba(0,0,0,.28); font-variant-numeric: tabular-nums; }
+body.mobile:not(.landscape) .pill b { color: #fff; font-size: clamp(17px, 5.4vw, 24px); line-height: 1; text-shadow: 0 2px 0 rgba(0,0,0,.28); font-variant-numeric: tabular-nums; }
 </style>
 </head>
 <body>
@@ -765,14 +823,18 @@ const dbg = { on: false, swipes: 0, turns: 0, rejected: 0, cancels: 0, maxLag: 0
     if (!this.t0) this.t0 = t; if (t - this.t0 >= 1000) { this.fps = Math.round(this.n * 1000 / (t - this.t0)); this.n = 0; this.t0 = t; this.show(); this.worst = 0; } },
   show() {
     const T = window.Telegram && window.Telegram.WebApp, tg = T && T.platform && T.platform !== 'unknown' ? 'TG ' + T.version + ' ' + T.platform : 'браузер';
-    document.getElementById('dbg').textContent = `FPS ${this.fps} · худший кадр ${Math.round(this.worst)} мс · ${tg}\nокно ${innerWidth}×${innerHeight} · dpr ${devicePixelRatio} · пруд ${CONFIG.gridW}×${CONFIG.gridH} · ${ctl}\nсвайпы ${this.swipes} · повороты ${this.turns} · отброшено ${this.rejected} · сорвано ${this.cancels}\nзадержка событий до ${Math.round(this.maxLag)} мс · ввод ${this.ptype || '—'}`;
+    document.getElementById('dbg').textContent = `v0.60 · FPS ${this.fps} · худший кадр ${Math.round(this.worst)} мс · ${tg}\nокно ${innerWidth}×${innerHeight} · dpr ${devicePixelRatio} · пруд ${CONFIG.gridW}×${CONFIG.gridH} · ${ctl}\nсвайпы ${this.swipes} · повороты ${this.turns} · отброшено ${this.rejected} · сорвано ${this.cancels}\nзадержка событий до ${Math.round(this.maxLag)} мс · ввод ${this.ptype || '—'}`;
   },
 };
 const CONFIG = {
   gridSize: 15,         // компьютер: квадратный пруд N×N клеток
-  mobileCols: 9,        // телефон: клеток в ширину (v0.59: было 10 — клетки и уж стали крупнее); высота подбирается под экран (прямоугольный пруд)
+  mobileCols: 12,       // телефон: клеток в ширину (v0.60: 12, примерно 12×19 — как обычное поле Google Snake; v0.59 было 9)
+  tallMinCols: 9,       // Telegram на ПК: не уже стольких клеток; высота подбирается под экран (прямоугольный пруд)
   mobileFrameBleed: 1,  // телефон: боковой бортик целиком за краем экрана — стенки пруда = края экрана, камни видны только сверху и снизу (v0.60)
-  mobileMinRows: 8,     // телефон: не меньше стольких рядов (на очень низком экране клетки чуть уменьшатся)
+  mobileMinRows: 8,
+  tallMinRows: 13,      // Telegram на ПК: не меньше стольких рядов — есть где играть
+  tallAspect: 1.35,     // и пруд во столько раз выше, чем шире (как на телефоне)
+  tallCellPx: 32,       // Telegram на ПК: желаемый размер клетки на экране, px     // телефон: не меньше стольких рядов (на очень низком экране клетки чуть уменьшатся)
   mobileSlower: 1.12,   // на телефоне змейка на 12% медленнее (крупные клетки, палец медленнее клавиатуры)
   speedScale: 1,        // выставляется сам: 1 на компьютере, mobileSlower на телефоне
   rewindSteps: 6,       // «Продолжить» отматывает игру на столько шагов назад (≈2 секунды)
@@ -1444,15 +1506,16 @@ function drawTopStamps(g, s0, s1, ty0, k) {
 function drawFrame(g) {
   const img = images.frame, { c, ox, oy, fieldW, fieldH } = R, m = frameMargins(), k = m.l * c / FRAME.l, F_ = FRAME, d = F_.d, f = FRAME_FEATHER;
   const X0 = ox - F_.l * k, X1 = ox + fieldW + (F_.w - F_.r) * k;
+  const sidesOff = phoneNow() && !document.body.classList.contains('landscape') && CONFIG.mobileFrameBleed >= 1;   // v0.60: телефон — края экрана = стенки пруда
   const hband = (sy0, sy1, ty0, cuts) => {
     const a = cuts[0], z = cuts[cuts.length - 1], h = sy1 - sy0;
-    const s0 = X0 + a * k, s1 = X1 - (F_.w - z) * k, span = s1 - s0;
-    g.drawImage(img, 0, sy0, a, h, X0, ty0, a * k, h * k);
+    const s0 = sidesOff ? 0 : X0 + a * k, s1 = sidesOff ? R.W : X1 - (F_.w - z) * k, span = s1 - s0;
+    if (!sidesOff) g.drawImage(img, 0, sy0, a, h, X0, ty0, a * k, h * k);
     if (span > 0) { let x = s0; const { tiles, scale } = frameSeq(cuts, span, k), ks = k * scale;
       for (const t of tiles) { const w = (t[1] - t[0]) * ks;
         g.drawImage(frameTile(t[0] - f, sy0, t[1] - t[0] + f, h, false), x - f * ks, ty0, w + f * ks + .5, h * k); x += w; } }
     if (sy0 === 0) drawTopStamps(g, s0, s1, ty0, k);   // только верхний бортик
-    g.drawImage(frameTile(z - f, sy0, F_.w - z + f, h, false), s1 - f * k, ty0, (F_.w - z + f) * k, h * k);
+    if (!sidesOff) g.drawImage(frameTile(z - f, sy0, F_.w - z + f, h, false), s1 - f * k, ty0, (F_.w - z + f) * k, h * k);
   };
   const vband = (sx0, sx1, tx0, cuts) => {
     const ys = F_.t + d, ye = F_.b - d, a = cuts[0], z = cuts[cuts.length - 1], w = sx1 - sx0;
@@ -1463,8 +1526,7 @@ function drawFrame(g) {
         g.drawImage(frameTile(sx0, t[0] - f, w, t[1] - t[0] + f, true), tx0, y - f * ks, w * k, hh + f * ks + .5); y += hh; } }
     g.drawImage(frameTile(sx0, z - f, w, ye - z + f, true), tx0, s1 - f * k, w * k, (ye - z + f) * k);
   };
-  vband(0, F_.l + d, X0, F_.left);
-  vband(F_.r - d, F_.w, ox + fieldW - d * k, F_.right);
+  if (!sidesOff) { vband(0, F_.l + d, X0, F_.left); vband(F_.r - d, F_.w, ox + fieldW - d * k, F_.right); }
   hband(F_.b - d, F_.h, oy + fieldH - d * k, F_.bottom);
   hband(0, F_.t + d, oy - F_.t * k, F_.top);
 }
@@ -1546,12 +1608,24 @@ function resize() {
   const W = Math.max(100, Math.round(r.width * dpr)), H = Math.max(100, Math.round(r.height * dpr));
   canvas.width = W; canvas.height = H;
   fitGrid(W, H);
-  const gw = CONFIG.gridW, gh = CONFIG.gridH, m = fitMargins(), c = Math.min(W / (gw + m.l + m.r), H / (gh + m.t + m.b));
+  const gw = CONFIG.gridW, gh = CONFIG.gridH, m = fitMargins(), cw = W / (gw + m.l + m.r);
+  let c = Math.min(cw, H / (gh + m.t + m.b));
+  if (m.l === 0 && (gh + m.t + m.b) * cw <= H * 1.03) c = cw;   // v0.60: вода от края до края; лишний пиксель по высоте срежет бортик, не воду
   R.W = W; R.H = H; R.c = c; R.O = c * .1; R.F = c * .6;
   R.fieldW = c * gw; R.fieldH = c * gh;
   R.ox = (W - (gw + m.l + m.r) * c) / 2 + m.l * c; R.oy = (H - (gh + m.t + m.b) * c) / 2 + m.t * c;
   buildStaticLayer();
+  centerCards();
   render(performance.now());
+}
+function centerCards() {   // v0.60: на компьютере карточка стоит по центру воды, а не всей области с бортиком и мостиком
+  const cr = canvas.getBoundingClientRect(), k = R.W / (cr.width || 1), wide = !isMobileNow();
+  const wx = cr.left + (R.ox + R.fieldW / 2) / k, wy = cr.top + (R.oy + R.fieldH / 2) / k;
+  document.querySelectorAll('#board > .overlay, #board > .panel').forEach(el => {
+    if (!wide) { el.style.removeProperty('--cx'); el.style.removeProperty('--cy'); return; }
+    const o = el.getBoundingClientRect(); if (!o.width) return;
+    el.style.setProperty('--cx', Math.round(wx - (o.left + o.width / 2)) + 'px'); el.style.setProperty('--cy', Math.round(wy - (o.top + o.height / 2)) + 'px');
+  });
 }
 
 const cellX = x => R.ox + (x + .5) * R.c;
@@ -1565,8 +1639,9 @@ const FRAME = { w: 1122, h: 1402, l: 146, r: 960, t: 232, b: 1228, d: 30,
   top: [405, 569],
   bottom: [422, 680], left: [579, 1078], right: [662, 1072] };   // периоды повтора: колонки на концах почти совпадают → шов незаметен
 const frameCells = () => isMobileNow() ? .8 : 1.55; // толщина левого бортика в клетках: на телефоне тонкий — воде место важнее
-function fitMargins() {   // поля для расчёта клетки: на телефоне вертикально часть бокового бортика за краем экрана
-  const m = frameMargins(), k = isMobileNow() && !document.body.classList.contains('landscape') ? 1 - CONFIG.mobileFrameBleed : 1;
+const phoneNow = () => window.__isPhone === true;   // настоящий телефон (не Telegram на компьютере)
+function fitMargins() {   // поля для расчёта клетки: на телефоне вертикально боковой бортик за краем экрана
+  const m = frameMargins(), k = phoneNow() && !document.body.classList.contains('landscape') ? 1 - CONFIG.mobileFrameBleed : 1;
   return { l: m.l * k, r: m.r * k, t: m.t, b: m.b };
 }
 function frameMargins() {
@@ -1576,9 +1651,14 @@ function frameMargins() {
 function fitGrid(W, H) {
   let gw = CONFIG.gridSize, gh = CONFIG.gridSize;
   const m = fitMargins(), Mx = m.l + m.r, My = m.t + m.b;
-  if (isMobileNow() && !document.body.classList.contains('landscape')) {   // v0.59: телефон вертикально — всегда 9 колонок, рядов сколько влезет
-    gw = CONFIG.mobileCols;
-    gh = Math.max(CONFIG.mobileMinRows, Math.round(H / (W / (gw + Mx)) - My));
+  if (isMobileNow() && !document.body.classList.contains('landscape') && !phoneNow()) {   // v0.60: Telegram на ПК — вытянутый пруд, клетки помельче, камни по бокам
+    const dprNow = W / (canvas.getBoundingClientRect().width || W);
+    gh = Math.max(CONFIG.tallMinRows, Math.floor(H / (CONFIG.tallCellPx * dprNow) - My));   // окно больше — клеток больше, а не клетки крупнее
+    const c = H / (gh + My);
+    gw = Math.max(CONFIG.tallMinCols, Math.min(Math.floor(W / c - Mx), Math.round(gh / CONFIG.tallAspect)));
+  } else if (isMobileNow() && !document.body.classList.contains('landscape')) {   // v0.59: телефон вертикально — 9 колонок, рядов сколько влезет
+    gw = Math.max(CONFIG.mobileCols, Math.ceil(W * (CONFIG.mobileMinRows + My) / H - Mx - .02));   // v0.60: низкий экран — больше колонок, чтобы вода всё равно шла от края до края
+    gh = Math.max(CONFIG.mobileMinRows, Math.floor(H / (W / (gw + Mx)) - My + .02));   // v0.60: вниз — иначе лишний ряд ужимал клетки и по бокам оставался зазор
   } else if (isMobileNow() && W > H * 1.05) {          // телефон боком: широкий пруд во всю высоту
     gh = CONFIG.mobileCols;
     gw = Math.max(gh, Math.min(CONFIG.desktopMaxCols, Math.round(W / (H / (gh + My)) - Mx)));
@@ -1593,7 +1673,13 @@ function fitGrid(W, H) {
   } else if (!canChange && typeof game !== 'undefined') {
     // v0.59: партия идёт, а окно выросло (Телеграм раскрылся на весь экран) — пруд добавляет ряды снизу (или колонки справа).
     // Координаты на поле не меняются, поэтому уж, лягушки и сохранённые шаги остаются на своих клетках.
+    const maxY = st => Math.max(0, ...st.snake.map(p => p.y), ...(st.trail || []).map(p => p.y), st.food ? st.food.y : 0, ...(st.items || []).map(i => i.y), st.hop ? Math.max(st.hop.from.y, st.hop.to.y) : 0);
     if (gw === CONFIG.gridW && gh > CONFIG.gridH) CONFIG.gridH = gh;
+    else if (gw === CONFIG.gridW && gh < CONFIG.gridH && mode !== 'dying' && maxY(game.state) < gh) {   // v0.60: снизу пусто — ряды убираем, клетки не мельчают
+      CONFIG.gridH = gh;
+      stepHistory = stepHistory.filter(j => maxY(JSON.parse(j)) < gh);          // шаги для «Продолжить» — только те, что помещаются
+      if (lastSnap && maxY(JSON.parse(lastSnap)) >= gh) lastSnap = null;
+    }
     else if (gh === CONFIG.gridH && gw > CONFIG.gridW) CONFIG.gridW = gw;
   }
 }
@@ -2215,13 +2301,15 @@ const FX_COLOR = { snail: '#f08a5d', dragonfly: '#22b5c9' };
 let hudKey = '', hudFx = '';
 function updateHud(t) {
   const st = game.state, hud = $('fxhud'), dpr = R.W / canvas.getBoundingClientRect().width || 1;
-  const key = R.ox + ',' + R.oy + ',' + R.W;
-  const fxRow = document.body.classList.contains('mobile') && document.body.classList.contains('landscape');   // v0.60: в вертикали значки лежат на верхнем бортике, в горизонтали — в панели справа
+  const key = R.ox + ',' + R.oy + ',' + R.W + ',' + hud.offsetWidth;
+  const fxRow = true;   // v0.60: значки бустов везде живут в строке со счётом
   if (fxRow) { if (hudKey !== 'row') { hudKey = 'row'; hud.style.left = ''; hud.style.top = ''; } }
   else if (key !== hudKey) {             // панель лежит на верхнем бортике, не закрывая воду
     hudKey = key; const top = R.oy / dpr, h = hud.offsetHeight || 32;
     const cr = canvas.getBoundingClientRect(), ar = hud.offsetParent ? hud.offsetParent.getBoundingClientRect() : { left: 0, top: 0 };   // значки лежат на верхнем бортике пруда
-    hud.style.left = (cr.left - ar.left + R.ox / dpr + R.c / dpr * 1.6) + 'px'; hud.style.top = (cr.top - ar.top + Math.max(2, (top - h) / 2 + top * .12)) + 'px';
+    const center = isMobileNow() && !document.body.classList.contains('landscape');   // v0.60: на телефоне — по центру и выше
+    hud.style.left = (center ? cr.left - ar.left + cr.width / 2 - hud.offsetWidth / 2 : cr.left - ar.left + R.ox / dpr + R.c / dpr * 1.6) + 'px';
+    hud.style.top = (cr.top - ar.top + Math.max(2, center ? (top - h) / 2 - top * .1 : (top - h) / 2 + top * .12)) + 'px';
   }
   syncRunUI();
   const showFx = mode === 'play' && ui.overlay.hidden && (!!st.effect || !!st.shield);
@@ -2235,7 +2323,7 @@ function updateHud(t) {
   if (!e) { fxChip.hidden = true; hudFx = ''; }
   else {
     if (hudFx !== e.kind) { hudFx = e.kind; iconItem('fxIc', e.kind); $('fxLbl').textContent = e.kind === 'snail' ? 'Замедление' : 'Ускорение ×2'; fxChip.style.setProperty('--fxc', FX_COLOR[e.kind]); fxChip.title = e.kind === 'snail' ? 'Улитка: медленнее' : 'Стрекоза: быстрее, очки ×2'; }
-    fxChip.hidden = false; $('fxSec').textContent = Math.ceil(e.left / 1000) + ' с'; $('fxBar').style.width = Math.max(0, e.left / e.total * 100) + '%';
+    fxChip.hidden = false; $('fxSec').textContent = Math.ceil(e.left / 1000) + (isMobileNow() && !document.body.classList.contains('landscape') ? '' : ' с'); $('fxBar').style.width = Math.max(0, e.left / e.total * 100) + '%';
     fxChip.classList.toggle('warn', e.left < 1200);
   }
   $('shieldChip').hidden = !st.shield;
@@ -2422,6 +2510,7 @@ let waitFirst = false;
 function loop(t) {
   if (dbg.on) dbg.frame(t);
   syncPadCur();
+  if (!isMobileNow()) centerCards();   // окна могли только что открыться
   if (mode === 'play' && waitFirst) { acc = 0; alpha = 1; }
   else if (mode === 'play') {
     acc += Math.min(t - lastT, 250); // скорость всегда ровная — никаких ускорений
@@ -2850,6 +2939,7 @@ const isPhone = (() => {
   if (inTelegram && TG.platform && !/^(android|ios)$/.test(TG.platform)) return false;   // Телеграм на компьютере
   return /iPhone|iPod|Android.+Mobile/i.test(navigator.userAgent) && Math.min(screen.width, screen.height) < 600;
 })();
+window.__isPhone = isPhone;
 let orientLocked = false;
 function lockPortrait() {
   if (orientLocked || !isPhone || innerWidth > innerHeight) return;
@@ -2857,12 +2947,17 @@ function lockPortrait() {
   try { if (screen.orientation && screen.orientation.lock) screen.orientation.lock('portrait').catch(() => {}); } catch (e) {}
 }
 function applyLayout() {
+  isMobile = detectMobile() || !(innerWidth >= 900 && innerWidth > innerHeight * 1.1);   // v0.60: не широкое окно — вертикальная раскладка
   document.body.classList.toggle('mobile', isMobile);
   const frame = isMobile && location.hash === '#mobile' && !detectRealMobile(); // проверка с компьютера: вертикальный «телефон» по центру
   document.body.classList.toggle('phone-frame', frame);
   document.body.classList.toggle('landscape', isMobile && !frame && innerWidth > innerHeight);
   document.body.classList.toggle('wide', !isMobile && innerWidth >= 900 && innerWidth > innerHeight * 1.1);
+  document.body.classList.toggle('deskn', !isMobile && !document.body.classList.contains('wide'));   // v0.60: узкое окно компьютера — в общем стиле
   CONFIG.speedScale = isMobile ? CONFIG.mobileSlower : 1;
+  { const hud = $('fxhud'), inTop = isMobile && !document.body.classList.contains('landscape');   // v0.60: в вертикали значки бустов живут в верхней полосе
+    const home = inTop ? document.querySelector('.top') : document.querySelector('.pills');   // v0.60: везде в строке со счётом
+    if (hud.parentNode !== home) home.appendChild(hud); }
   const rot = isPhone && innerWidth > innerHeight;
   $('rotateMsg').hidden = !rot; document.body.classList.toggle('rotate-on', rot);
   if (rot && typeof mode !== 'undefined' && mode === 'play') togglePause();
@@ -2923,7 +3018,7 @@ if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => rend
 for (const im of Object.values(images)) im.addEventListener('load', () => { buildStaticLayer(); iconFrog('frogIcon', 52); iconFrog('ovFrog', 138); iconItem('shIc', 'helmet'); hudFx = ''; });
 /* v0.60: пульт. Нажатие в любом месте сектора поворачивает; палец можно вести по кругу, не отрывая.
    В центре мёртвая зона. На компьютере и в горизонтали (стрелки сеткой) сектор = стрелка под пальцем. */
-const padRound = () => isMobileNow() && !document.body.classList.contains('landscape');
+const padRound = () => true;   // v0.60: пульт круглый на всех раскладках
 let padCur = null;
 (function padInput() {
   const pad = $('dpad'); let padDir = null, padId = null;
