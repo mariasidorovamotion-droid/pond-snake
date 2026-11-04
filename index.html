@@ -512,11 +512,32 @@ body.mobile .hint { max-width: 100%; min-width: 0; box-sizing: border-box; overf
 @media (max-height: 440px) { body.mobile.landscape #overlay .card { padding-block: 10px; gap: 6px; } body.mobile.landscape #overlay .card .btn { min-height: 38px; font-size: 17px; } body.mobile.landscape #ovText.sad { display: none; } body.mobile.landscape #ovSad { display: none; } body.mobile.landscape .gesture .gest-ic { width: 64px; } }
 @media (max-height: 340px) { body.mobile.landscape #overlay .card .btn { min-height: 32px !important; font-size: 15px; } body.mobile.landscape .snd-head { display: none; } }
 .modes .tog:last-child:nth-child(odd) { grid-column: 1 / -1; }
+/* ===== v0.59: крупнее пруд, компактная крестовина, выбор управления, только вертикаль на телефоне ===== */
+body.mobile { --padcol: min(calc((100vw - 48px) / 3), 104px); --padrow: clamp(42px, 6dvh, 56px); }
+body.mobile .dpad button { font-size: clamp(20px, 6vw, 28px); border-radius: 16px; }
+body.mobile:not(.landscape) .hint { display: none !important; }   /* режим выбирается на входе и в настройках — строка под кнопками отдана пруду */
+.ctl-pick { gap: clamp(10px, 2dvh, 16px); }
+.ctl-opts { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; width: 100%; }
+.ctl-opt { display: flex; flex-direction: column; align-items: center; justify-content: flex-start; gap: 6px; min-width: 0; padding: 14px 8px 12px; border-radius: 20px;
+  background: linear-gradient(180deg, #fffaf0, #f3e4c6); border: 3px solid var(--cream-edge); box-shadow: 0 4px 0 var(--cream-edge); color: var(--ink); font: inherit; cursor: pointer; touch-action: manipulation; }
+.ctl-opt svg { width: clamp(56px, 18vw, 76px); height: auto; aspect-ratio: 96 / 68; }
+.ctl-opt b { font-size: clamp(16px, 4.8vw, 21px); font-weight: 900; line-height: 1.15; }
+.ctl-opt small { font-size: clamp(12px, 3.4vw, 14px); font-weight: 700; line-height: 1.25; opacity: .8; }
+.ctl-opt[aria-pressed="true"] { border-color: var(--coral); box-shadow: 0 4px 0 var(--coral-edge); background: linear-gradient(180deg, #fff6ee, #ffe2d2); }
+.ctl-opt:active { transform: translateY(2px); box-shadow: 0 1px 0 var(--cream-edge); }
+.ctl-note { font-size: 13px !important; opacity: .7 !important; }
+.ctl-panel { z-index: 4; }
+.rotate { position: fixed; inset: 0; z-index: 50; display: flex; align-items: center; justify-content: center; padding: 24px;
+  background: linear-gradient(180deg, var(--bg-top), var(--bg-mid)); }
+.rotate[hidden] { display: none; }
+.rotate .card { gap: 10px; }
+.rotate svg { color: var(--ink); }
+.dbg { position: fixed; left: 4px; top: 4px; z-index: 60; max-width: calc(100vw - 8px); padding: 4px 6px; border-radius: 6px; background: rgba(0,0,0,.72); color: #9f9;
+  font: 11px/1.35 ui-monospace, Menlo, monospace; white-space: pre-wrap; pointer-events: none; }
+.dbg[hidden] { display: none; }
 </style>
 </head>
 <body>
-<div class="nojs" id="nojs">Это игра, а не документ 🙂 Откройте файл в браузере (Safari или Chrome) или играйте по ссылке: <a href="https://t.me/pondsnake_bot/snake">t.me/pondsnake_bot/snake</a></div>
-<div class="nojs" id="nojs">Это игра, а не документ 🙂 Откройте файл в браузере (Safari или Chrome) или играйте по ссылке: <a href="https://t.me/pondsnake_bot/snake">t.me/pondsnake_bot/snake</a></div>
 <div class="nojs" id="nojs">Это игра, а не документ 🙂 Откройте файл в браузере (Safari или Chrome) или играйте по ссылке: <a href="https://t.me/pondsnake_bot/snake">t.me/pondsnake_bot/snake</a></div>
 <div class="app" id="app">
   <div class="top">
@@ -555,11 +576,8 @@ body.mobile .hint { max-width: 100%; min-width: 0; box-sizing: border-box; overf
           <input type="range" id="sfxVol" min="0" max="100" aria-label="Громкость звуков">
         </div>
         <div class="modes" role="group" aria-label="Управление">
-          <button class="tog" data-ctl="dpad" type="button" aria-pressed="false">Стрелки</button>
-          <button class="tog" data-ctl="swipe" type="button" aria-pressed="false">Свайпы</button>
-          <button class="tog" data-ctl="point" type="button" aria-pressed="false">Тап к цели</button>
-          <button class="tog" data-ctl="tap" type="button" aria-pressed="false">Тапы</button>
-          <button class="tog" data-ctl="tilt" type="button" aria-pressed="false">Наклон</button>
+          <button class="tog" data-ctl="swipe" type="button" aria-pressed="false">Свайпы и тапы</button>
+          <button class="tog" data-ctl="dpad" type="button" aria-pressed="false">Кнопки</button>
         </div>
         <p id="ctlHint" style="margin:0;font-size:14px"></p>
         <button class="btn btn-green" id="panelClose" type="button">Готово</button>
@@ -574,6 +592,22 @@ body.mobile .hint { max-width: 100%; min-width: 0; box-sizing: border-box; overf
         <p class="stars-note" id="shopNote" hidden></p>
         <p class="shop-tip" id="shopTip">Монеты нужны, чтобы продолжить забег после проигрыша.</p>
         <button class="btn btn-green" id="shopClose" type="button">Готово</button>
+      </div>
+    </div>
+    <div class="panel ctl-panel" id="ctlPanel" hidden>
+      <div class="card ctl-pick" role="dialog" aria-labelledby="ctlTitle">
+        <h2 id="ctlTitle">Как будешь управлять?</h2>
+        <div class="ctl-opts">
+          <button class="ctl-opt" data-pick="swipe" type="button" aria-pressed="false">
+            <svg viewBox="12 6 96 68" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"><path d="M44 16 Q30 12 16 20"/><path d="M25 11 L15 20.5 L28 25"/><path d="M76 16 Q90 12 104 20"/><path d="M95 11 L105 20.5 L92 25"/><path d="M53 70 L45 57 Q41 50 47 49 Q50 49 53 53 V31 Q53 26 57.5 26 Q62 26 62 31 V46 Q62 42 66 42 Q70 42 70 46 V49 Q70 45 74 45 Q78 45 78 49 V52 Q78 48.5 81.5 49 Q85 49.5 85 54 V60 Q85 66 81 70"/></g></svg>
+            <b>Свайпы и тапы</b><small>Веди пальцем по пруду или тапни по лягушке</small>
+          </button>
+          <button class="ctl-opt" data-pick="dpad" type="button" aria-pressed="false">
+            <svg viewBox="0 0 96 68" aria-hidden="true"><g fill="#fffaf0" stroke="currentColor" stroke-width="4" stroke-linejoin="round"><rect x="34" y="4" width="28" height="26" rx="7"/><rect x="2" y="38" width="28" height="26" rx="7"/><rect x="34" y="38" width="28" height="26" rx="7"/><rect x="66" y="38" width="28" height="26" rx="7"/></g><g fill="currentColor"><path d="M48 11 l7 9 h-14z"/><path d="M9 51 l9 -7 v14z"/><path d="M48 57 l7 -9 h-14z"/><path d="M87 51 l-9 -7 v14z"/></g></svg>
+            <b>Кнопки</b><small>Стрелки под прудом, как на клавиатуре</small>
+          </button>
+        </div>
+        <p class="ctl-note">Сменить можно в настройках звука и управления</p>
       </div>
     </div>
     <div class="overlay" id="overlay">
@@ -636,6 +670,14 @@ body.mobile .hint { max-width: 100%; min-width: 0; box-sizing: border-box; overf
   <button class="hint" id="hint" type="button" title="Нажми, чтобы сменить управление">Свайп · стрелки · WASD</button>
   <div class="tapzone l" id="tzL" aria-hidden="true"></div><div class="tapzone r" id="tzR" aria-hidden="true"></div>
 </div>
+<div class="rotate" id="rotateMsg" hidden>
+  <div class="card">
+    <svg viewBox="0 0 64 64" width="72" height="72" aria-hidden="true"><rect x="20" y="6" width="24" height="44" rx="5" fill="none" stroke="currentColor" stroke-width="4"/><circle cx="32" cy="43" r="2.5" fill="currentColor"/><path d="M8 40 a26 26 0 0 0 20 18" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round"/><path d="M22 52 l7 6 -7 5" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    <h2>Поверни телефон</h2>
+    <p>Змейка у пруда играет вертикально</p>
+  </div>
+</div>
+<div class="dbg" id="dbg" hidden></div>
 
 <script>
 document.documentElement.classList.add('js');   // скрипты работают — подсказку «откройте в браузере» прячем
@@ -651,9 +693,20 @@ const TELEGRAM = {
 };
 function plural(n, a, b, c) { const m = n % 100, k = n % 10; return m > 10 && m < 20 ? c : k === 1 ? a : k > 1 && k < 5 ? b : c; }
 
+/* v0.59: диагностика управления. Включается ссылкой с ?debug или t.me/pondsnake_bot/snake?startapp=debug */
+const dbg = { on: false, swipes: 0, turns: 0, rejected: 0, cancels: 0, maxLag: 0, ptype: '', n: 0, t0: 0, worst: 0, fps: 0, last: 0,
+  lag(e) { const l = performance.now() - e.timeStamp; if (l > 0 && l < 5000 && l > this.maxLag) this.maxLag = l; },
+  frame(t) { if (this.last) { const d = t - this.last; if (d > this.worst) this.worst = d; } this.last = t; this.n++;
+    if (!this.t0) this.t0 = t; if (t - this.t0 >= 1000) { this.fps = Math.round(this.n * 1000 / (t - this.t0)); this.n = 0; this.t0 = t; this.show(); this.worst = 0; } },
+  show() {
+    const T = window.Telegram && window.Telegram.WebApp, tg = T && T.platform && T.platform !== 'unknown' ? 'TG ' + T.version + ' ' + T.platform : 'браузер';
+    document.getElementById('dbg').textContent = `FPS ${this.fps} · худший кадр ${Math.round(this.worst)} мс · ${tg}\nокно ${innerWidth}×${innerHeight} · dpr ${devicePixelRatio} · пруд ${CONFIG.gridW}×${CONFIG.gridH} · ${ctl}\nсвайпы ${this.swipes} · повороты ${this.turns} · отброшено ${this.rejected} · сорвано ${this.cancels}\nзадержка событий до ${Math.round(this.maxLag)} мс · ввод ${this.ptype || '—'}`;
+  },
+};
 const CONFIG = {
   gridSize: 15,         // компьютер: квадратный пруд N×N клеток
-  mobileCols: 10,       // телефон: клеток в ширину; высота подбирается под экран (прямоугольный пруд)
+  mobileCols: 9,        // телефон: клеток в ширину (v0.59: было 10 — клетки и уж стали крупнее); высота подбирается под экран (прямоугольный пруд)
+  mobileMinRows: 8,     // телефон: не меньше стольких рядов (на очень низком экране клетки чуть уменьшатся)
   mobileSlower: 1.12,   // на телефоне змейка на 12% медленнее (крупные клетки, палец медленнее клавиатуры)
   speedScale: 1,        // выставляется сам: 1 на компьютере, mobileSlower на телефоне
   rewindSteps: 6,       // «Продолжить» отматывает игру на столько шагов назад (≈2 секунды)
@@ -674,8 +727,8 @@ const CONFIG = {
   growPerFrog: 1,       // на сколько клеток вырастает за лягушку (одна лягушка — один сегмент)
   blinkEveryMs: 3200,   // лягушки моргают примерно раз в столько мс (у каждой свой ритм)
   blinkMs: 220,         // длительность одного моргания
-  freeFrogScale: 1.3,   // свободная лягушка крупнее клетки — её лучше видно (было 1.1)
-  headScale: 1.3,       // голова ужа крупнее тела — её лучше видно
+  freeFrogScale: 1.4,   // свободная лягушка крупнее клетки — её лучше видно (было 1.1)
+  headScale: 1.4,       // голова ужа крупнее тела — её лучше видно
   frogHopEveryMs: 2600, // как часто свободная лягушка подпрыгивает на месте
   // ритм прыжка: [кадр, мс]. Присед дольше, толчок и полёт быстрые, приземление с отдачей — так прыжок «живой»
   frogHopTiming: [[3, 60], [4, 60], [5, 90], [6, 35], [7, 35], [8, 45], [9, 60], [10, 45], [11, 40], [12, 70], [13, 45], [14, 45], [15, 50]],      // размер свободного лягушонка на поле (пассажиры на спине — 0.84)
@@ -683,7 +736,9 @@ const CONFIG = {
   minSpeedMs: 105,      // самая высокая скорость
   speedUpPerFrog: 5,    // ускорение за каждую лягушку, мс
   wrapWalls: false,     // true — проплывать сквозь бортик
-  swipeMinPx: 16,       // следующий поворот в том же свайпе — через столько пикселей
+  swipeMinPx: 16,       // (старое, не используется)
+  swipeTurnPx: 22,      // следующий поворот в том же касании — когда палец явно ушёл в новую сторону на столько пикселей
+  swipeAxisRatio: 1.6,  // и движение вдоль новой оси во столько раз сильнее, чем поперёк (дрожание пальца не поворачивает)
   swipeStartPx: 28,     // свайп начинается, только когда палец сдвинулся на столько пикселей
   tapSlopPx: 16,        // «Тап к цели»: тап — если палец сдвинулся меньше чем на столько пикселей; больше — это уже свайп
   flickMinPx: 12,       // короткий свайп (не дотянул до swipeStartPx) всё равно поворачивает по направлению пальца
@@ -1450,9 +1505,9 @@ function frameMargins() {
 function fitGrid(W, H) {
   let gw = CONFIG.gridSize, gh = CONFIG.gridSize;
   const m = frameMargins(), Mx = m.l + m.r, My = m.t + m.b;
-  if (isMobileNow() && H > W * 1.05) {
+  if (isMobileNow() && !document.body.classList.contains('landscape')) {   // v0.59: телефон вертикально — всегда 9 колонок, рядов сколько влезет
     gw = CONFIG.mobileCols;
-    gh = Math.max(gw, Math.round(H / (W / (gw + Mx)) - My));
+    gh = Math.max(CONFIG.mobileMinRows, Math.round(H / (W / (gw + Mx)) - My));
   } else if (isMobileNow() && W > H * 1.05) {          // телефон боком: широкий пруд во всю высоту
     gh = CONFIG.mobileCols;
     gw = Math.max(gh, Math.min(CONFIG.desktopMaxCols, Math.round(W / (H / (gh + My)) - Mx)));
@@ -1464,6 +1519,11 @@ function fitGrid(W, H) {
   if ((gw !== CONFIG.gridW || gh !== CONFIG.gridH) && canChange) {
     CONFIG.gridW = gw; CONFIG.gridH = gh;
     if (typeof game !== 'undefined') { game.reset(); riders = []; }
+  } else if (!canChange && typeof game !== 'undefined') {
+    // v0.59: партия идёт, а окно выросло (Телеграм раскрылся на весь экран) — пруд добавляет ряды снизу (или колонки справа).
+    // Координаты на поле не меняются, поэтому уж, лягушки и сохранённые шаги остаются на своих клетках.
+    if (gw === CONFIG.gridW && gh > CONFIG.gridH) CONFIG.gridH = gh;
+    else if (gh === CONFIG.gridH && gw > CONFIG.gridW) CONFIG.gridW = gw;
   }
 }
 
@@ -2146,7 +2206,7 @@ function saveRun() {
 function clearRun() { try { localStorage.removeItem(KEY_SAVE); } catch (e) {} }
 function savedRun() {
   const r = store.get(KEY_SAVE, null);
-  return r && r.v === 1 && r.gw === CONFIG.gridW && r.gh === CONFIG.gridH && r.state && !r.state.over ? r : null; // поле другого размера (повернули экран) — сохранение не подходит
+  return r && r.v === 1 && (r.gw === CONFIG.gridW || r.gh === CONFIG.gridH) && (r.gh >= r.gw) === (CONFIG.gridH >= CONFIG.gridW) && r.state && !r.state.over ? r : null; // поле другого размера (повернули экран) — сохранение не подходит
 }
 function showMenu() {
   mode = 'menu';
@@ -2168,8 +2228,9 @@ function resumeRun() {
   riders = Array.from({ length: game.state.frogs }, () => ({ born: -1e9, from: { x: 0, y: 0 } }));
   ui.score.textContent = game.state.score; frogBornAt = performance.now();
   stepHistory = []; continuesLeft = r.continuesLeft ?? CONFIG.continuesPerGame;
-  if (ctl === 'tilt') { if (!tilt.on) tilt.enable(); tilt.calibrate(); }
+  CONFIG.gridW = r.gw; CONFIG.gridH = r.gh;   // пруд того размера, в котором партия была сохранена
   waitFirst = true; mode = 'play'; acc = 0; alpha = 1; lastT = performance.now();
+  resize();                                  // а если окно сейчас выше — пруд дорастёт
   ui.overlay.hidden = true; setPauseLabel(); tgBack();
 }
 const SAD_FROG_SRC = 'data:image/webp;base64,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'; // грустная лягушка со слёзкой (PNG от Совы)
@@ -2287,6 +2348,7 @@ function doStep(t) {
 
 let waitFirst = false;
 function loop(t) {
+  if (dbg.on) dbg.frame(t);
   if (mode === 'play' && waitFirst) { acc = 0; alpha = 1; }
   else if (mode === 'play') {
     acc += Math.min(t - lastT, 250); // скорость всегда ровная — никаких ускорений
@@ -2314,7 +2376,7 @@ function tryLateTurn(dir) {
 function input(dir, auto = false) {
   if (!auto) autoTarget = null;          // любое ручное управление отменяет автопилот
   sound.unlock();
-  if (!ui.panel.hidden) return;
+  if (!ui.panel.hidden || !$('ctlPanel').hidden) return;
   if (mode === 'menu' || mode === 'over') start();
   if (mode !== 'play') return;
   if (waitFirst) { // первый жест: трогаемся сразу в выбранную сторону, даже назад
@@ -2329,8 +2391,8 @@ function input(dir, auto = false) {
     doStep(lastT); acc = 0; alpha = 0; // сразу делаем первый шаг: картинка продолжает движение с того места, где уж стоял
     turnFeedback(dir); return;
   }
-  if (tryLateTurn(dir)) { turnFeedback(dir); return; }
-  const q = game.state.queue.length; game.turn(dir); if (game.state.queue.length > q) turnFeedback(dir);
+  if (tryLateTurn(dir)) { dbg.turns++; turnFeedback(dir); return; }
+  const q = game.state.queue.length; game.turn(dir); if (game.state.queue.length > q) { dbg.turns++; turnFeedback(dir); } else dbg.rejected++;
 }
 let lastPressHaptic = 0;
 function turnFeedback(dir) {
@@ -2476,15 +2538,16 @@ const tilt = {
    Клавиатура работает всегда. На телефоне по умолчанию — стрелки. */
 const isTouch = window.matchMedia && matchMedia('(pointer: coarse)').matches;
 let ctl = store.get(KEY_CTL, null) || (store.get(KEY_DPAD, false) ? 'dpad' : 'swipe');
+if (ctl !== 'dpad') ctl = 'swipe';   // v0.59: остались два режима — «Свайпы и тапы» и «Кнопки» (тап к цели работает внутри свайпов)
 let panelResume = false;
 const CTL_HINT = {
-  dpad: 'Крупные стрелки под прудом. Свайпы тоже работают.',
+  dpad: 'Кнопки под прудом. Свайпы тоже работают.',
   swipe: 'Свайпни в нужную сторону — уж повернёт. Тапни по лягушке — поплывёт к ней сам.',
   point: 'Тапни по лягушке или монетке — уж сам поплывёт к ней. Тап по пустой воде поворачивает к пальцу, свайпы тоже работают.',
   tap: 'Тап по левой половине экрана — змейка свернёт налево, по правой — направо.',
   tilt: 'Наклоняй телефон в нужную сторону. Ровное положение запоминается при старте игры.',
 };
-const HINT_BAR = { dpad: 'Управление стрелками', swipe: 'Свайп или тап по лягушке', point: 'Тапни по лягушке', tap: 'Управление тапами', tilt: 'Управление наклоном' };
+const HINT_BAR = { dpad: 'Управление кнопками', swipe: 'Свайп или тап по лягушке', point: 'Тапни по лягушке', tap: 'Управление тапами', tilt: 'Управление наклоном' };
 const HINT_DESK = { dpad: 'Стрелки · WASD', swipe: 'Свайп · стрелки · WASD', point: 'Клик по лягушке · стрелки', tap: 'Тап слева / справа', tilt: 'Наклоняй телефон' };
 const GESTURE_TEXT = { swipe: 'Свайпни или тапни по лягушке', point: 'Тапни по лягушке — уж поплывёт к ней', dpad: 'Поворачивай стрелками внизу', tap: 'Тапай слева или справа', tilt: 'Наклоняй телефон' };
 const MENU_TEXT = 'Собирай лягушат на спину.\nНе врезайся в берег и хвост.';
@@ -2495,7 +2558,7 @@ const START_TEXT = {
   tap: 'Тапай слева или справа — уж свернёт туда.',
   tilt: 'Наклоняй телефон — уж поплывёт в ту сторону.',
 };
-const CTL_ORDER = ['swipe', 'point', 'dpad', 'tap', 'tilt'];
+const CTL_ORDER = ['swipe', 'dpad'];
 function setCtl(next) {
   ctl = next; store.set(KEY_CTL, ctl);
   if (ctl === 'tilt') tilt.enable(); else tilt.disable();
@@ -2579,6 +2642,7 @@ document.addEventListener('pointerdown', e => {
     flashZone(leftSide ? 'tzL' : 'tzR');
     return;
   }
+  dbg.ptype = e.pointerType;
   if (ctl === 'dpad' || ctl === 'swipe' || ctl === 'point') sw = { x0: e.clientX, y0: e.clientY, x: e.clientX, y: e.clientY, moved: false, maxD: 0 };
 });
 /* Тап по пруду в режиме свайпа: уж поворачивает в сторону пальца относительно своей головы */
@@ -2652,23 +2716,32 @@ document.addEventListener('pointermove', e => {
   if (!sw) return;
   sw.maxD = Math.max(sw.maxD, Math.hypot(e.clientX - sw.x0, e.clientY - sw.y0)); sw.lx = e.clientX; sw.ly = e.clientY;
   // пока палец почти на месте — это ещё тап; свайп начинается только с явного движения
+  dbg.lag(e);
   if (!sw.moved && sw.maxD < CONFIG.swipeStartPx) return;
   const ox = sw.moved ? sw.x : sw.x0, oy = sw.moved ? sw.y : sw.y0;
-  const dx = e.clientX - ox, dy = e.clientY - oy;
-  if (Math.max(Math.abs(dx), Math.abs(dy)) < (sw.moved ? CONFIG.swipeMinPx : CONFIG.swipeStartPx * .8)) return;
-  if (mode === 'play') input(Math.abs(dx) > Math.abs(dy) ? (dx > 0 ? 'right' : 'left') : (dy > 0 ? 'down' : 'up'));
-  sw.x = e.clientX; sw.y = e.clientY; sw.moved = true;
+  const dx = e.clientX - ox, dy = e.clientY - oy, adx = Math.abs(dx), ady = Math.abs(dy);
+  const major = Math.max(adx, ady), minor = Math.min(adx, ady);
+  const dir = adx > ady ? (dx > 0 ? 'right' : 'left') : (dy > 0 ? 'down' : 'up');
+  if (!sw.moved) {                                   // начало свайпа
+    if (major < CONFIG.swipeStartPx * .8) return;
+  } else if (dir === sw.dir) {                       // палец ведёт дальше в ту же сторону — точку отсчёта двигаем за ним,
+    if (major >= 6) { sw.x = e.clientX; sw.y = e.clientY; }   // так небольшой увод вбок не копится и не даёт лишний поворот
+    return;
+  } else if (major < CONFIG.swipeTurnPx || major < minor * CONFIG.swipeAxisRatio) return;   // новый поворот — только явный
+  dbg.swipes++;
+  if (mode === 'play') input(dir);
+  sw.dir = dir; sw.x = e.clientX; sw.y = e.clientY; sw.moved = true;
 });
 const endSwipe = () => { sw = null; };
 document.addEventListener('pointerup', e => {
   if (sw && !sw.moved) {
     const lx = sw.lx ?? sw.x0, ly = sw.ly ?? sw.y0, dx = lx - sw.x0, dy = ly - sw.y0;
     if (sw.maxD < CONFIG.tapSlopPx) { if (ctl === 'swipe' || ctl === 'point') tapToward(sw.x0, sw.y0); }   // тап по лягушке/монетке или в сторону — работает и в режиме свайпов
-    else if (Math.max(Math.abs(dx), Math.abs(dy)) >= CONFIG.flickMinPx && mode === 'play') { autoTarget = null; input(Math.abs(dx) > Math.abs(dy) ? (dx > 0 ? 'right' : 'left') : (dy > 0 ? 'down' : 'up')); } // короткий свайп — поворот по жесту, а не тап
+    else if (Math.max(Math.abs(dx), Math.abs(dy)) >= CONFIG.flickMinPx && mode === 'play') { autoTarget = null; dbg.swipes++; input(Math.abs(dx) > Math.abs(dy) ? (dx > 0 ? 'right' : 'left') : (dy > 0 ? 'down' : 'up')); } // короткий свайп — поворот по жесту, а не тап
   }
   sw = null;
 });
-document.addEventListener('pointercancel', endSwipe);
+document.addEventListener('pointercancel', () => { if (sw) dbg.cancels++; endSwipe(); });
 document.addEventListener('visibilitychange', () => { if (document.hidden && mode === 'play') togglePause(); else if (document.hidden && mode === 'pause') saveRun(); });
 window.addEventListener('pagehide', () => { if (mode === 'play' || mode === 'pause') saveRun(); });
 
@@ -2680,6 +2753,7 @@ if (inTelegram) {
     TG.ready(); TG.expand();
     if (TG.isVersionAtLeast && TG.isVersionAtLeast('7.7') && TG.disableVerticalSwipes) TG.disableVerticalSwipes(); // свайп вниз не закрывает игру
     if (TG.isVersionAtLeast && TG.isVersionAtLeast('6.1')) { TG.setHeaderColor('#237f73'); TG.setBackgroundColor('#237f73'); }
+    if (TG.initDataUnsafe && TG.initDataUnsafe.start_param === 'debug') dbg.on = true;
     if (TG.BackButton) TG.BackButton.onClick(() => { if (mode === 'play') togglePause(); else if (mode === 'pause') exitToMenu(); });
   } catch (e) {}
 }
@@ -2697,6 +2771,17 @@ function detectRealMobile() {
   return tgPhone || ua || (coarse && Math.min(screen.width, screen.height) < 900);
 }
 let isMobile = detectMobile();
+/* v0.59: телефон играет только вертикально. Телеграм 8.0+ умеет закрепить ориентацию; где нельзя — экран «Поверни телефон» */
+const isPhone = (() => {
+  if (inTelegram && TG.platform && !/^(android|ios)$/.test(TG.platform)) return false;   // Телеграм на компьютере
+  return /iPhone|iPod|Android.+Mobile/i.test(navigator.userAgent) && Math.min(screen.width, screen.height) < 600;
+})();
+let orientLocked = false;
+function lockPortrait() {
+  if (orientLocked || !isPhone || innerWidth > innerHeight) return;
+  try { if (inTelegram && TG.isVersionAtLeast && TG.isVersionAtLeast('8.0') && TG.lockOrientation) { TG.lockOrientation(); orientLocked = true; } } catch (e) {}
+  try { if (screen.orientation && screen.orientation.lock) screen.orientation.lock('portrait').catch(() => {}); } catch (e) {}
+}
 function applyLayout() {
   document.body.classList.toggle('mobile', isMobile);
   const frame = isMobile && location.hash === '#mobile' && !detectRealMobile(); // проверка с компьютера: вертикальный «телефон» по центру
@@ -2704,8 +2789,14 @@ function applyLayout() {
   document.body.classList.toggle('landscape', isMobile && !frame && innerWidth > innerHeight);
   document.body.classList.toggle('wide', !isMobile && innerWidth >= 900 && innerWidth > innerHeight * 1.1);
   CONFIG.speedScale = isMobile ? CONFIG.mobileSlower : 1;
+  const rot = isPhone && innerWidth > innerHeight;
+  $('rotateMsg').hidden = !rot; document.body.classList.toggle('rotate-on', rot);
+  if (rot && typeof mode !== 'undefined' && mode === 'play') togglePause();
+  lockPortrait();
 }
 applyLayout();
+if (/[?&#]debug\b/.test(location.search + location.hash)) dbg.on = true;
+$('dbg').hidden = !dbg.on;
 window.addEventListener('resize', () => { applyLayout(); syncSound(); });
 window.addEventListener('hashchange', () => location.reload()); // #mobile / #desktop — перезапуск в нужной раскладке
 syncSound();
@@ -2758,7 +2849,16 @@ if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => rend
 for (const im of Object.values(images)) im.addEventListener('load', () => { buildStaticLayer(); iconFrog('frogIcon', 52); iconFrog('ovFrog', 138); iconItem('shIc', 'helmet'); hudFx = ''; });
 new ResizeObserver(resize).observe(canvas);
 resize();
-showMenu();   // стартовая карточка (если есть незаконченная партия — с кнопкой «Продолжить партию»)
+/* v0.59: при каждом входе на телефоне спрашиваем, как управлять; выбор запоминается и подсвечивается в следующий раз */
+function showCtlPick() {
+  mode = 'menu'; ui.overlay.hidden = true; $('ctlPanel').hidden = false;
+  document.querySelectorAll('[data-pick]').forEach(b => b.setAttribute('aria-pressed', b.dataset.pick === ctl));
+}
+document.querySelectorAll('[data-pick]').forEach(b => b.addEventListener('click', () => {
+  sound.unlock(); sound.click(); setCtl(b.dataset.pick);
+  $('ctlPanel').hidden = true; showMenu();
+}));
+if (isMobile) showCtlPick(); else showMenu();   // потом стартовая карточка (если есть незаконченная партия — с кнопкой «Продолжить»)
 requestAnimationFrame(loop);
 </script>
 
