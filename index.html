@@ -518,6 +518,12 @@ body.mobile .dpad button { font-size: clamp(20px, 6vw, 28px); border-radius: 16p
 /* v0.59b: крестовина — отдельная группа. Между стрелками 10 px, от пруда 12 px, от «Паузы» 16 px видимого зазора (тень кнопки 4 px учтена),
    чтобы палец со стрелки не попадал в паузу. Правила: Apple HIG — цель от 44 pt; WCAG 2.5.8 — центры целей не ближе 24 px. */
 body.mobile .dpad, body.mobile.dpad-on .dpad { gap: 10px; margin: 6px 0 14px; }
+/* v0.59c: на невысоком телефоне стрелки в одну строку ◀ ▲ ▼ ▶ — пруд получает целый ряд кнопок по высоте */
+@media (max-height: 759px) {
+  body.mobile:not(.landscape) .dpad { grid-template-columns: repeat(4, minmax(0, 1fr)); grid-template-rows: var(--padrow); width: 100%; max-width: 440px; justify-self: center; }
+  body.mobile:not(.landscape) .dpad .left { grid-column: 1; grid-row: 1; } body.mobile:not(.landscape) .dpad .up { grid-column: 2; grid-row: 1; }
+  body.mobile:not(.landscape) .dpad .down { grid-column: 3; grid-row: 1; } body.mobile:not(.landscape) .dpad .right { grid-column: 4; grid-row: 1; }
+}
 body.mobile:not(.landscape) .hint { display: none !important; }   /* режим выбирается на входе и в настройках — строка под кнопками отдана пруду */
 .ctl-pick { gap: clamp(10px, 2dvh, 16px); }
 .ctl-opts { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; width: 100%; }
@@ -528,6 +534,11 @@ body.mobile:not(.landscape) .hint { display: none !important; }   /* режим 
 .ctl-opt small { font-size: clamp(12px, 3.4vw, 14px); font-weight: 700; line-height: 1.25; opacity: .8; }
 .ctl-opt[aria-pressed="true"] { border-color: var(--coral); box-shadow: 0 4px 0 var(--coral-edge); background: linear-gradient(180deg, #fff6ee, #ffe2d2); }
 .ctl-opt:active { transform: translateY(2px); box-shadow: 0 1px 0 var(--cream-edge); }
+.btn-ctl { width: 100%; gap: 8px; }
+.btn-ctl svg { width: 22px; height: 22px; flex: none; color: var(--teal-btn); }
+.btn-ctl b { font-weight: 900; color: var(--coral-edge); }
+#ctlBtn, body.mobile #overlay .card #ctlBtn, body.mobile .card #ctlBtnSet { min-height: 44px; font-size: clamp(15px, 4.4vw, 18px); padding: 0 12px; }
+@media (max-width: 359px) { body.mobile #overlay .card #ctlBtn, body.mobile .card #ctlBtnSet { font-size: 14px; padding: 0 8px; gap: 6px; } }
 .ctl-note { font-size: 13px !important; opacity: .7 !important; }
 .ctl-panel { z-index: 4; }
 .rotate { position: fixed; inset: 0; z-index: 50; display: flex; align-items: center; justify-content: center; padding: 24px;
@@ -579,8 +590,7 @@ body.mobile:not(.landscape) .hint { display: none !important; }   /* режим 
           <input type="range" id="sfxVol" min="0" max="100" aria-label="Громкость звуков">
         </div>
         <div class="modes" role="group" aria-label="Управление">
-          <button class="tog" data-ctl="swipe" type="button" aria-pressed="false">Свайпы и тапы</button>
-          <button class="tog" data-ctl="dpad" type="button" aria-pressed="false">Кнопки</button>
+          <button class="btn btn-cream btn-ctl" id="ctlBtnSet" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><g fill="currentColor"><rect x="9" y="2.5" width="6" height="6" rx="1.6"/><rect x="2.5" y="10" width="6" height="6" rx="1.6"/><rect x="9" y="10" width="6" height="6" rx="1.6"/><rect x="15.5" y="10" width="6" height="6" rx="1.6"/></g></svg><span>Управление: <b class="ctl-name">Свайпы и тапы</b></span></button>
         </div>
         <p id="ctlHint" style="margin:0;font-size:14px"></p>
         <button class="btn btn-green" id="panelClose" type="button">Готово</button>
@@ -638,6 +648,7 @@ body.mobile:not(.landscape) .hint { display: none !important; }   /* режим 
           <span id="ovGestTxt">Свайпни, чтобы повернуть</span>
         </div>
         <div class="btn-pair"><button class="btn btn-cream" id="againBtn" type="button" hidden>Заново</button><button class="btn btn-blue" id="exitBtn" type="button" hidden>Выйти</button></div>
+        <button class="btn btn-cream btn-ctl" id="ctlBtn" type="button" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><g fill="currentColor"><rect x="9" y="2.5" width="6" height="6" rx="1.6"/><rect x="2.5" y="10" width="6" height="6" rx="1.6"/><rect x="9" y="10" width="6" height="6" rx="1.6"/><rect x="15.5" y="10" width="6" height="6" rx="1.6"/></g></svg><span>Управление: <b class="ctl-name">Свайпы и тапы</b></span></button>
       </div>
     </div>
   </div>
@@ -2181,6 +2192,7 @@ function iconFrog(id, s) { const cv = $(id), g = cv.getContext('2d'); g.clearRec
 function setPauseLabel() { ui.pauseTxt.textContent = mode === 'pause' ? 'Дальше' : 'Пауза'; }
 function showCard(title, text, btn, scoreVal) {
   const isMenu = title === 'Змейка у пруда'; $('ovLogo').hidden = !isMenu; ui.ovTitle.hidden = isMenu;
+  $('ctlBtn').hidden = !(isMenu || title === 'Уже уходите?');   // v0.59: смена управления — в меню и на паузе
   shareBtn.hidden = true; $('contBtn').hidden = true; $('exitBtn').hidden = true; $('againBtn').hidden = true; $('ovGesture').hidden = true; $('ovCoins').hidden = true; $('resumeBtn').hidden = true; $('starsBtn').hidden = true; $('starsNote').hidden = true; $('ovSad').hidden = true; $('ovSound').hidden = true; $('ovClose').hidden = true; ui.ovText.classList.remove('sad'); ui.startBtn.className = 'btn btn-green';
   ui.ovTitle.textContent = title; ui.ovText.textContent = text; ui.startBtn.textContent = btn;
   ui.ovBig.hidden = scoreVal === undefined;
@@ -2242,7 +2254,7 @@ function tgBack() {              // в Телеграме системная к�
   try { if (inTelegram && TG.BackButton) { if (mode === 'play' || mode === 'pause') TG.BackButton.show(); else TG.BackButton.hide(); } } catch (e) {}
 }
 function togglePause() {
-  if (!ui.panel.hidden) return;
+  if (!ui.panel.hidden || !$('ctlPanel').hidden) return;
   if (mode === 'play') { mode = 'pause'; showCard('Уже уходите?', 'Лягушата будут ждать!', '▶ Продолжить'); $('exitBtn').hidden = false; $('againBtn').hidden = false; $('ovSad').hidden = false; $('ovSound').hidden = false; $('ovClose').hidden = false; ui.ovText.classList.add('sad'); drawSadFrog(); syncSound(); saveRun(); }
   else if (mode === 'pause') start();
   else if (mode === 'menu' || mode === 'over') start();
@@ -2543,6 +2555,7 @@ const isTouch = window.matchMedia && matchMedia('(pointer: coarse)').matches;
 let ctl = store.get(KEY_CTL, null) || (store.get(KEY_DPAD, false) ? 'dpad' : 'swipe');
 if (ctl !== 'dpad') ctl = 'swipe';   // v0.59: остались два режима — «Свайпы и тапы» и «Кнопки» (тап к цели работает внутри свайпов)
 let panelResume = false;
+const CTL_NAME = { swipe: 'Свайпы и тапы', dpad: 'Кнопки' };
 const CTL_HINT = {
   dpad: 'Кнопки под прудом. Свайпы тоже работают.',
   swipe: 'Свайпни в нужную сторону — уж повернёт. Тапни по лягушке — поплывёт к ней сам.',
@@ -2581,6 +2594,7 @@ function syncSound() {
   $('musicVol').style.setProperty('--fill', st.musicVol + '%'); $('sfxVol').style.setProperty('--fill', st.sfxVol + '%');
   $('musicVol').disabled = !st.musicOn; $('sfxVol').disabled = !st.sfxOn;
   document.querySelectorAll('[data-ctl]').forEach(b => b.setAttribute('aria-pressed', b.dataset.ctl === ctl));
+  document.querySelectorAll('.ctl-name').forEach(e => e.textContent = CTL_NAME[ctl]);
   $('dpad').hidden = ctl !== 'dpad'; document.body.classList.toggle('dpad-on', ctl === 'dpad');
   $('ctlHint').textContent = tilt.error && ctl === 'tilt' ? tilt.error : CTL_HINT[ctl];
   const tiltOff = ctl === 'tilt' && tilt.error;
@@ -2853,14 +2867,23 @@ for (const im of Object.values(images)) im.addEventListener('load', () => { buil
 new ResizeObserver(resize).observe(canvas);
 resize();
 /* v0.59: при каждом входе на телефоне спрашиваем, как управлять; выбор запоминается и подсвечивается в следующий раз */
-function showCtlPick() {
-  mode = 'menu'; ui.overlay.hidden = true; $('ctlPanel').hidden = false;
+let ctlBack = 'menu';   // куда вернуться после выбора: 'menu' — стартовое окно, 'card' — та же карточка (пауза), 'panel' — настройки
+function showCtlPick(back = 'menu') {
+  ctlBack = back;
+  if (back === 'menu') mode = 'menu';
+  if (back === 'panel') ui.panel.hidden = true; else ui.overlay.hidden = true;
+  $('ctlPanel').hidden = false;
   document.querySelectorAll('[data-pick]').forEach(b => b.setAttribute('aria-pressed', b.dataset.pick === ctl));
 }
 document.querySelectorAll('[data-pick]').forEach(b => b.addEventListener('click', () => {
   sound.unlock(); sound.click(); setCtl(b.dataset.pick);
-  $('ctlPanel').hidden = true; showMenu();
+  $('ctlPanel').hidden = true;
+  if (ctlBack === 'panel') ui.panel.hidden = false;
+  else if (ctlBack === 'card' && mode !== 'menu') ui.overlay.hidden = false;
+  else showMenu();
 }));
+$('ctlBtn').addEventListener('click', () => { sound.unlock(); sound.click(); showCtlPick(mode === 'menu' ? 'menu' : 'card'); });
+$('ctlBtnSet').addEventListener('click', () => { sound.unlock(); sound.click(); showCtlPick('panel'); });
 if (isMobile) showCtlPick(); else showMenu();   // потом стартовая карточка (если есть незаконченная партия — с кнопкой «Продолжить»)
 requestAnimationFrame(loop);
 </script>
