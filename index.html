@@ -649,6 +649,26 @@ body:is(.wide, .deskn) .dpad button.hit polygon, body.mobile.landscape .dpad but
 body.mobile:not(.landscape) .row, body.mobile:not(.landscape):not(.in-run) .row { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
 body.mobile:not(.landscape).in-run #pauseBtn, body.mobile:not(.landscape) #soundBtn { width: var(--side-btn); height: var(--side-btn); min-height: 0; flex: none; padding: 0; border-radius: 50%; }
 body.mobile:not(.landscape).in-run #pauseBtn .lbl { display: none; }
+/* v0.60: места под бусты — всегда видны; неактивные приглушены, активный яркий с отсчётом */
+.fxhud .slot { display: none; }
+body.mobile:not(.landscape) .top .fxhud .chip, body:is(.wide, .deskn) .pills .fxhud .chip, body.mobile.landscape .pills .fxhud .chip { display: none !important; }
+body.mobile:not(.landscape) .top .fxhud .slot, body:is(.wide, .deskn) .pills .fxhud .slot, body.mobile.landscape .pills .fxhud .slot {
+  display: inline-flex; align-items: center; gap: 2px; opacity: .38; filter: grayscale(.7); transition: opacity .2s, filter .2s; }
+body.mobile:not(.landscape) .top .fxhud .slot.on, body:is(.wide, .deskn) .pills .fxhud .slot.on, body.mobile.landscape .pills .fxhud .slot.on { opacity: 1; filter: none; }
+.fxhud .slot canvas { width: var(--hud-ic); height: var(--hud-ic); filter: drop-shadow(0 2px 2px rgba(0,0,0,.25)); }
+.fxhud .slot { position: relative; }
+.fxhud .slot .slsec { position: absolute; right: -7px; bottom: -5px; min-width: 0; padding: 1px 4px; border-radius: 8px; background: var(--coral); color: #fff; font-size: 12px; font-weight: 900; line-height: 1.1; box-shadow: 0 1px 2px rgba(0,0,0,.3); font-variant-numeric: tabular-nums; }
+.fxhud .slot .slsec:empty { display: none; }
+.fxhud .slot.warn .slsec { background: #b84a26; }
+body.mobile:not(.landscape) .top .fxhud { min-width: 0; gap: 10px; padding-right: 4px; }
+@media (max-width: 359px) { body.mobile:not(.landscape) .top { padding: 4px 6px; gap: 3px; } body.mobile:not(.landscape) .top .pill { gap: 3px; } body.mobile:not(.landscape) .top .fxhud { gap: 3px; } body.mobile:not(.landscape) { --hud-ic: 20px; } body.mobile:not(.landscape) .pill b { font-size: 16px; } body.mobile:not(.landscape) .top .fxhud { gap: 7px; } }
+/* v0.60: шесть смысловых блоков верхней строки (счёт, рекорд, монеты, улитка, стрекоза, шлем) — с равными промежутками */
+body.mobile:not(.landscape) .top .fxhud, body.mobile:not(.landscape) .top .fxhud[style] { display: contents !important; }
+body.mobile:not(.landscape) .top { justify-content: space-between; }
+body.mobile:not(.landscape) .top > .pill, body.mobile:not(.landscape) .top .fxhud .slot { flex: 0 0 auto; }
+/* v0.60: компьютер и планшет — строка счёта сеткой 3×2: колонки равные, всё по центру своей колонки */
+body:is(.wide, .deskn) .pills, body.mobile.landscape .pills { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); justify-items: center; align-items: center; row-gap: 6px; column-gap: 0; padding: 6px 8px; }
+body:is(.wide, .deskn) .pills .fxhud, body.mobile.landscape .pills .fxhud, body:is(.wide, .deskn) .pills .fxhud[style], body.mobile.landscape .pills .fxhud[style] { display: contents !important; }
 /* v0.60: верх как в Google Snake — одна тонкая полоса «иконка + число», без плашек и кнопочной тени (это не кнопки) */
 body.mobile:not(.landscape) .top { box-sizing: border-box; align-self: start; min-height: 0; padding: 4px 10px; gap: 4px; border-radius: 16px; background: rgba(8, 48, 44, .32); box-shadow: inset 0 1px 0 rgba(255,255,255,.08); }
 body.mobile:not(.landscape) .pill { min-height: 36px; padding: 0; gap: 8px; flex-direction: row; justify-content: center; align-items: center; background: none; border: 0; box-shadow: none; border-radius: 0; }
@@ -683,6 +703,9 @@ body.mobile:not(.landscape) .pill b { color: #fff; font-size: clamp(17px, 5.4vw,
 
   <div class="fxhud" id="fxhud">
     <div class="chip" id="fxChip" hidden><canvas id="fxIc" width="72" height="72" aria-hidden="true"></canvas><span class="fxlbl" id="fxLbl"></span><span class="fxbar"><i id="fxBar"></i></span><b class="fxsec" id="fxSec"></b></div>
+    <span class="slot" data-k="snail" title="Улитка: замедление"><canvas id="slSnail" width="72" height="72" aria-hidden="true"></canvas><b class="slsec"></b></span>
+    <span class="slot" data-k="dragonfly" title="Стрекоза: быстрее, очки ×2"><canvas id="slDragonfly" width="72" height="72" aria-hidden="true"></canvas><b class="slsec"></b></span>
+    <span class="slot" data-k="helmet" title="Шлем: спасёт от одного удара"><canvas id="slHelmet" width="72" height="72" aria-hidden="true"></canvas></span>
     <div class="chip" id="shieldChip" hidden title="Шлем спасёт от одного удара"><canvas id="shIc" width="72" height="72" aria-hidden="true"></canvas><span class="fxlbl">1 удар</span></div>
   </div>
   <div class="board" id="board">
@@ -2327,6 +2350,13 @@ function updateHud(t) {
     fxChip.classList.toggle('warn', e.left < 1200);
   }
   $('shieldChip').hidden = !st.shield;
+  const live = mode === 'play' || mode === 'pause';   // v0.60: места под бусты видны всегда; горит то, что действует сейчас
+  document.querySelectorAll('#fxhud .slot').forEach(sl => {
+    const k = sl.dataset.k, on = live && (k === 'helmet' ? !!st.shield : !!(e && e.kind === k));
+    if (sl.classList.contains('on') !== on) sl.classList.toggle('on', on);
+    const sec = sl.querySelector('.slsec'); if (sec) { const t = on ? String(Math.ceil(e.left / 1000)) : ''; if (sec.textContent !== t) sec.textContent = t; sl.classList.toggle('warn', on && e.left < 1200); }
+  });
+  if (fxRow) hud.style.visibility = '';
 }
 const $ = id => document.getElementById(id);
 const ui = { panel: $('panel'), score: $('score'), best: $('best'), overlay: $('overlay'), ovTitle: $('ovTitle'), ovText: $('ovText'), ovBig: $('ovBig'), ovScore: $('ovScore'), startBtn: $('startBtn'), pauseTxt: $('pauseTxt') };
@@ -2366,7 +2396,7 @@ function saveRun() {
 function clearRun() { try { localStorage.removeItem(KEY_SAVE); } catch (e) {} }
 function savedRun() {
   const r = store.get(KEY_SAVE, null);
-  return r && r.v === 1 && (r.gw === CONFIG.gridW || r.gh === CONFIG.gridH) && (r.gh >= r.gw) === (CONFIG.gridH >= CONFIG.gridW) && r.state && !r.state.over ? r : null; // поле другого размера (повернули экран) — сохранение не подходит
+  return r && r.v === 1 && r.gw > 0 && r.gh > 0 && r.state && !r.state.over ? r : null;   // v0.60: размер окна не важен — resumeRun вернёт поле той партии // поле другого размера (повернули экран) — сохранение не подходит
 }
 function showMenu() {
   mode = 'menu';
@@ -2454,7 +2484,8 @@ function continueGame(paidWithStars = false) {
   if (!paidWithStars) { wallet -= CONFIG.continueCost; store.set(KEY_COINS, wallet); } // плата за продолжение монетками
   const i = Math.max(0, stepHistory.length - CONFIG.rewindSteps);
   const snap = JSON.parse(stepHistory[i]), keepCoins = game.state.coins;
-  Object.assign(game.state, snap); game.state.coins = keepCoins;   // монеты за забег не теряются при отмотке game.state.over = false; game.state.queue = [];
+  Object.assign(game.state, snap); game.state.coins = keepCoins;   // монеты за забег не теряются при отмотке
+  game.state.over = false; game.state.queue = [];   // v0.60: раньше эта строка случайно была в комментарии
   game.state.items = game.state.items.filter(i => !collectedIds.has(i.id)); // монетки не собрать второй раз
   stepHistory.length = i;
   continuesLeft--;
@@ -2786,7 +2817,7 @@ window.addEventListener('keydown', e => {
   if (KEYS[e.code]) { e.preventDefault(); if (!e.repeat) input(KEYS[e.code]); }
   else if (e.code === 'Space' || e.code === 'KeyP') { e.preventDefault(); togglePause(); }
   else if (e.code === 'Escape') { e.preventDefault(); if (mode === 'play') togglePause(); else if (mode === 'pause') exitToMenu(); } // Esc: пауза, второй Esc — выход в меню
-  else if (e.code === 'KeyR') { mode = 'menu'; start(); }
+  else if (e.code === 'KeyR' && mode !== 'play' && mode !== 'dying') { mode = 'menu'; start(); }   // v0.60: во время игры R не сбрасывает забег
   else if (e.code === 'KeyM') { const st = sound.settings, on = !(st.musicOn || st.sfxOn); sound.update({ musicOn: on, sfxOn: on }); syncSound(); }
 });
 
@@ -3013,9 +3044,9 @@ if (images.frame) { if (imgReady('frame')) makeCardDeco(); else images.frame.add
 
 iconFrog('frogIcon', 52);
 iconFrog('ovFrog', 138);
-$('logoTop').src = LOGO_SRC; $('ovLogo').src = LOGO_SRC; $('coinPillIc').src = BOOST_SRC.coin; iconItem('shIc', 'helmet');
+$('logoTop').src = LOGO_SRC; $('ovLogo').src = LOGO_SRC; $('coinPillIc').src = BOOST_SRC.coin; iconItem('shIc', 'helmet'); iconItem('slSnail', 'snail'); iconItem('slDragonfly', 'dragonfly'); iconItem('slHelmet', 'helmet');
 if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => render(performance.now()));
-for (const im of Object.values(images)) im.addEventListener('load', () => { buildStaticLayer(); iconFrog('frogIcon', 52); iconFrog('ovFrog', 138); iconItem('shIc', 'helmet'); hudFx = ''; });
+for (const im of Object.values(images)) im.addEventListener('load', () => { buildStaticLayer(); iconFrog('frogIcon', 52); iconFrog('ovFrog', 138); iconItem('shIc', 'helmet'); iconItem('slSnail', 'snail'); iconItem('slDragonfly', 'dragonfly'); iconItem('slHelmet', 'helmet'); hudFx = ''; });
 /* v0.60: пульт. Нажатие в любом месте сектора поворачивает; палец можно вести по кругу, не отрывая.
    В центре мёртвая зона. На компьютере и в горизонтали (стрелки сеткой) сектор = стрелка под пальцем. */
 const padRound = () => true;   // v0.60: пульт круглый на всех раскладках
