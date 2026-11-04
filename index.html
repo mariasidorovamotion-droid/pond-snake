@@ -518,12 +518,6 @@ body.mobile .dpad button { font-size: clamp(20px, 6vw, 28px); border-radius: 16p
 /* v0.59b: крестовина — отдельная группа. Между стрелками 10 px, от пруда 12 px, от «Паузы» 16 px видимого зазора (тень кнопки 4 px учтена),
    чтобы палец со стрелки не попадал в паузу. Правила: Apple HIG — цель от 44 pt; WCAG 2.5.8 — центры целей не ближе 24 px. */
 body.mobile .dpad, body.mobile.dpad-on .dpad { gap: 10px; margin: 6px 0 14px; }
-/* v0.59c: на невысоком телефоне стрелки в одну строку ◀ ▲ ▼ ▶ — пруд получает целый ряд кнопок по высоте */
-@media (max-height: 759px) {
-  body.mobile:not(.landscape) .dpad { grid-template-columns: repeat(4, minmax(0, 1fr)); grid-template-rows: var(--padrow); width: 100%; max-width: 440px; justify-self: center; }
-  body.mobile:not(.landscape) .dpad .left { grid-column: 1; grid-row: 1; } body.mobile:not(.landscape) .dpad .up { grid-column: 2; grid-row: 1; }
-  body.mobile:not(.landscape) .dpad .down { grid-column: 3; grid-row: 1; } body.mobile:not(.landscape) .dpad .right { grid-column: 4; grid-row: 1; }
-}
 body.mobile:not(.landscape) .hint { display: none !important; }   /* режим выбирается на входе и в настройках — строка под кнопками отдана пруду */
 .ctl-pick { gap: clamp(10px, 2dvh, 16px); }
 .ctl-opts { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; width: 100%; }
@@ -549,6 +543,63 @@ body.mobile:not(.landscape) .hint { display: none !important; }   /* режим 
 .dbg { position: fixed; left: 4px; top: 4px; z-index: 60; max-width: calc(100vw - 8px); padding: 4px 6px; border-radius: 6px; background: rgba(0,0,0,.72); color: #9f9;
   font: 11px/1.35 ui-monospace, Menlo, monospace; white-space: pre-wrap; pointer-events: none; }
 .dbg[hidden] { display: none; }
+/* ===== v0.60: пруд шире (камни по бокам частично за краем экрана) и круглый пульт с Паузой и Звуком по бокам ===== */
+.dpad button { pointer-events: none; }   /* нажатие ловит весь пульт, а не отдельная стрелка */
+body.mobile:not(.landscape) .board, body.mobile:not(.landscape).dpad-on .board {
+  width: auto; margin-left: calc(-1 * max(6px, env(safe-area-inset-left, 0px))); margin-right: calc(-1 * max(6px, env(safe-area-inset-right, 0px))); }
+body.mobile:not(.landscape).dpad-on .app { grid-template-columns: minmax(0, 1fr); grid-template-rows: auto auto minmax(0, 1fr) auto; grid-template-areas: "top" "fx" "board" "ctl"; }
+body.mobile:not(.landscape).dpad-on .dpad, body.mobile:not(.landscape).dpad-on .row { grid-area: ctl; }
+body.mobile:not(.landscape).dpad-on .row { display: flex; justify-content: space-between; align-items: center; align-self: center; gap: 10px; }
+body.mobile:not(.landscape).dpad-on.in-run #pauseBtn, body.mobile:not(.landscape).dpad-on #soundBtn { width: var(--side-btn); height: var(--side-btn); min-height: 0; flex: none; padding: 0; border-radius: 50%; }
+body.mobile:not(.landscape).dpad-on.in-run #pauseBtn .lbl { display: none; }
+body.mobile:not(.landscape) { --pad: clamp(124px, min(calc(100vw - 2 * var(--side-btn) - 44px), 22dvh), 184px); --side-btn: clamp(56px, 16vw, 66px); }
+body.mobile:not(.landscape) .dpad, body.mobile:not(.landscape).dpad-on .dpad {
+  display: block; position: relative; z-index: 2; justify-self: center; align-self: center; width: var(--pad); height: var(--pad); margin: 2px 0 6px; padding: 0;
+  border-radius: 50%; background: #dcc79c; box-shadow: 0 5px 0 #c4ad7d, 0 10px 18px rgba(0,0,0,.2); touch-action: none; -webkit-user-select: none; user-select: none; }
+body.mobile:not(.landscape):not(.in-run) .dpad { visibility: hidden; }   /* в меню и после проигрыша пульт не нужен — место держим, чтобы пруд не прыгал */
+body.mobile:not(.landscape) .dpad[hidden] { display: none; }
+body.mobile:not(.landscape) .dpad button {
+  position: absolute; inset: 3px; width: auto; height: auto; margin: 0; padding: 0; border: 0; border-radius: 50%; box-shadow: none; transform: none;
+  background: radial-gradient(circle at 50% 50%, #f4e6c8 0 30%, #fffaf0 62%, #f6e9cc 100%); color: var(--ink);
+  display: flex; font-size: calc(var(--pad) * .15); line-height: 1; transition: background .12s, color .12s, opacity .12s; }
+body.mobile:not(.landscape) .dpad .up { clip-path: polygon(50% 47%, 4% 0, 96% 0); align-items: flex-start; justify-content: center; padding-top: 9%; }
+body.mobile:not(.landscape) .dpad .down { clip-path: polygon(50% 53%, 4% 100%, 96% 100%); align-items: flex-end; justify-content: center; padding-bottom: 9%; }
+body.mobile:not(.landscape) .dpad .left { clip-path: polygon(47% 50%, 0 4%, 0 96%); align-items: center; justify-content: flex-start; padding-left: 9%; }
+body.mobile:not(.landscape) .dpad .right { clip-path: polygon(53% 50%, 100% 4%, 100% 96%); align-items: center; justify-content: flex-end; padding-right: 9%; }
+body.mobile:not(.landscape) .dpad::after { content: ""; position: absolute; inset: 35%; border-radius: 50%; pointer-events: none;
+  background: radial-gradient(circle at 50% 35%, #3aa39e, var(--teal-btn) 60%, var(--teal-btn-edge)); box-shadow: 0 2px 0 rgba(0,0,0,.15), inset 0 2px 0 rgba(255,255,255,.25); }
+body.mobile:not(.landscape) .dpad[data-cur="up"] .up, body.mobile:not(.landscape) .dpad[data-cur="down"] .down,
+body.mobile:not(.landscape) .dpad[data-cur="left"] .left, body.mobile:not(.landscape) .dpad[data-cur="right"] .right { color: var(--teal-btn); background: radial-gradient(circle at 50% 50%, #d9efe6 0 30%, #eefaf4 62%, #d9efe6 100%); }
+body.mobile:not(.landscape) .dpad[data-cur="up"] .down, body.mobile:not(.landscape) .dpad[data-cur="down"] .up,
+body.mobile:not(.landscape) .dpad[data-cur="left"] .right, body.mobile:not(.landscape) .dpad[data-cur="right"] .left { opacity: .38; }
+body.mobile:not(.landscape) .dpad button.hit { background: var(--coral); color: #fff; opacity: 1; transform: none; box-shadow: none; }
+/* v0.60b: по примеру — лёгкие контурные стрелки крестом без плашки; зона нажатия — весь круг */
+body.mobile:not(.landscape) .dpad, body.mobile:not(.landscape).dpad-on .dpad { background: radial-gradient(circle, rgba(255,255,255,.22) 0 62%, rgba(255,255,255,0) 71%); box-shadow: none; }
+body.mobile:not(.landscape) .dpad button { background: none; inset: 0; }
+body.mobile:not(.landscape) .dpad button i { display: block; width: calc(var(--pad) * .27); height: calc(var(--pad) * .27); }
+body.mobile:not(.landscape) .dpad button svg { width: 100%; height: 100%; overflow: visible; }
+body.mobile:not(.landscape) .dpad polygon { fill: #fffaf0; stroke: var(--teal-btn-edge); stroke-width: 3.2; stroke-linejoin: round; transition: fill .1s; }
+body.mobile:not(.landscape) .dpad .up, body.mobile:not(.landscape) .dpad .down { padding-top: 7%; padding-bottom: 7%; }
+body.mobile:not(.landscape) .dpad .left, body.mobile:not(.landscape) .dpad .right { padding-left: 7%; padding-right: 7%; }
+body.mobile:not(.landscape) .dpad::after { inset: 44%; background: rgba(26,95,92,.35); box-shadow: none; }
+body.mobile:not(.landscape) .dpad[data-cur="up"] .up, body.mobile:not(.landscape) .dpad[data-cur="down"] .down,
+body.mobile:not(.landscape) .dpad[data-cur="left"] .left, body.mobile:not(.landscape) .dpad[data-cur="right"] .right { background: none; }
+body.mobile:not(.landscape) .dpad[data-cur="up"] .up polygon, body.mobile:not(.landscape) .dpad[data-cur="down"] .down polygon,
+body.mobile:not(.landscape) .dpad[data-cur="left"] .left polygon, body.mobile:not(.landscape) .dpad[data-cur="right"] .right polygon { fill: #bfe8dc; }
+body.mobile:not(.landscape) .dpad button.hit { background: none; }
+body.mobile:not(.landscape) .dpad button.hit polygon { fill: var(--coral); stroke: var(--coral-edge); }
+/* v0.60: строка бустов убрана — значки лежат на верхнем бортике пруда, вода выше */
+body.mobile:not(.landscape) .app { grid-template-rows: auto minmax(0, 1fr) auto auto auto; grid-template-areas: "top" "board" "pad" "btns" "hint"; }
+body.mobile:not(.landscape).dpad-on .app { grid-template-rows: auto minmax(0, 1fr) auto; grid-template-areas: "top" "board" "ctl"; }
+body.mobile:not(.landscape) .fxhud { position: absolute; grid-area: auto; width: auto; height: 34px; margin: 0; z-index: 3; }
+/* v0.60: верх как в Google Snake — одна тонкая полоса «иконка + число», без плашек и кнопочной тени (это не кнопки) */
+body.mobile:not(.landscape) .top { box-sizing: border-box; align-self: start; min-height: 0; padding: 4px 10px; gap: 4px; border-radius: 16px; background: rgba(8, 48, 44, .32); box-shadow: inset 0 1px 0 rgba(255,255,255,.08); }
+body.mobile:not(.landscape) .pill { min-height: 36px; padding: 0; gap: 8px; flex-direction: row; justify-content: center; align-items: center; background: none; border: 0; box-shadow: none; border-radius: 0; }
+body.mobile:not(.landscape) .pill .ic { display: block !important; width: clamp(24px, 7vw, 30px); height: auto; flex: none; filter: drop-shadow(0 2px 2px rgba(0,0,0,.25)); }
+body.mobile:not(.landscape) .pill .txt { flex-direction: row; align-items: center; }
+body.mobile:not(.landscape) #frogIcon { width: clamp(34px, 10vw, 42px); margin: -5px -4px; }   /* лягушка нарисована мельче кубка и монеты — уравниваем на глаз */
+body.mobile:not(.landscape) .pill small { display: none; }
+body.mobile:not(.landscape) .pill b { color: #fff; font-size: clamp(20px, 6.2vw, 26px); line-height: 1; text-shadow: 0 2px 0 rgba(0,0,0,.28); font-variant-numeric: tabular-nums; }
 </style>
 </head>
 <body>
@@ -676,10 +727,10 @@ body.mobile:not(.landscape) .hint { display: none !important; }   /* режим 
     </button>
   </div>
   <div class="dpad" id="dpad" hidden aria-label="Стрелки">
-    <button class="up" data-dir="up" type="button" aria-label="Вверх">▲</button>
-    <button class="left" data-dir="left" type="button" aria-label="Влево">◀</button>
-    <button class="down" data-dir="down" type="button" aria-label="Вниз">▼</button>
-    <button class="right" data-dir="right" type="button" aria-label="Вправо">▶</button>
+    <button class="up" data-dir="up" type="button" aria-label="Вверх" tabindex="-1"><i><svg viewBox="0 0 40 40" aria-hidden="true"><polygon points="20,6 35,30 5,30"/></svg></i></button>
+    <button class="left" data-dir="left" type="button" aria-label="Влево" tabindex="-1"><i><svg viewBox="0 0 40 40" aria-hidden="true"><polygon points="6,20 30,5 30,35"/></svg></i></button>
+    <button class="down" data-dir="down" type="button" aria-label="Вниз" tabindex="-1"><i><svg viewBox="0 0 40 40" aria-hidden="true"><polygon points="20,34 35,10 5,10"/></svg></i></button>
+    <button class="right" data-dir="right" type="button" aria-label="Вправо" tabindex="-1"><i><svg viewBox="0 0 40 40" aria-hidden="true"><polygon points="34,20 10,5 10,35"/></svg></i></button>
   </div>
   <button class="hint" id="hint" type="button" title="Нажми, чтобы сменить управление">Свайп · стрелки · WASD</button>
   <div class="tapzone l" id="tzL" aria-hidden="true"></div><div class="tapzone r" id="tzR" aria-hidden="true"></div>
@@ -720,6 +771,7 @@ const dbg = { on: false, swipes: 0, turns: 0, rejected: 0, cancels: 0, maxLag: 0
 const CONFIG = {
   gridSize: 15,         // компьютер: квадратный пруд N×N клеток
   mobileCols: 9,        // телефон: клеток в ширину (v0.59: было 10 — клетки и уж стали крупнее); высота подбирается под экран (прямоугольный пруд)
+  mobileFrameBleed: 1,  // телефон: боковой бортик целиком за краем экрана — стенки пруда = края экрана, камни видны только сверху и снизу (v0.60)
   mobileMinRows: 8,     // телефон: не меньше стольких рядов (на очень низком экране клетки чуть уменьшатся)
   mobileSlower: 1.12,   // на телефоне змейка на 12% медленнее (крупные клетки, палец медленнее клавиатуры)
   speedScale: 1,        // выставляется сам: 1 на компьютере, mobileSlower на телефоне
@@ -757,6 +809,7 @@ const CONFIG = {
   tapSlopPx: 16,        // «Тап к цели»: тап — если палец сдвинулся меньше чем на столько пикселей; больше — это уже свайп
   flickMinPx: 12,       // короткий свайп (не дотянул до swipeStartPx) всё равно поворачивает по направлению пальца
   tapTargetCells: 1.2,  // тап ближе стольких клеток к бусту или лягушке — уж плывёт к ней сам        // если палец сдвинулся меньше — это тап, а не свайп
+  padDeadZone: .17,     // пульт: центр круга (доля диаметра от центра) не поворачивает
   tiltDeg: 14,          // на сколько градусов наклонить телефон, чтобы змейка повернула
   boosts: {            // бусты на поле: появляются сами, подбираются заездом на клетку
     firstDelayMs: 7000,  // первый буст — через столько мс игры
@@ -1493,7 +1546,7 @@ function resize() {
   const W = Math.max(100, Math.round(r.width * dpr)), H = Math.max(100, Math.round(r.height * dpr));
   canvas.width = W; canvas.height = H;
   fitGrid(W, H);
-  const gw = CONFIG.gridW, gh = CONFIG.gridH, m = frameMargins(), c = Math.min(W / (gw + m.l + m.r), H / (gh + m.t + m.b));
+  const gw = CONFIG.gridW, gh = CONFIG.gridH, m = fitMargins(), c = Math.min(W / (gw + m.l + m.r), H / (gh + m.t + m.b));
   R.W = W; R.H = H; R.c = c; R.O = c * .1; R.F = c * .6;
   R.fieldW = c * gw; R.fieldH = c * gh;
   R.ox = (W - (gw + m.l + m.r) * c) / 2 + m.l * c; R.oy = (H - (gh + m.t + m.b) * c) / 2 + m.t * c;
@@ -1512,13 +1565,17 @@ const FRAME = { w: 1122, h: 1402, l: 146, r: 960, t: 232, b: 1228, d: 30,
   top: [405, 569],
   bottom: [422, 680], left: [579, 1078], right: [662, 1072] };   // периоды повтора: колонки на концах почти совпадают → шов незаметен
 const frameCells = () => isMobileNow() ? .8 : 1.55; // толщина левого бортика в клетках: на телефоне тонкий — воде место важнее
+function fitMargins() {   // поля для расчёта клетки: на телефоне вертикально часть бокового бортика за краем экрана
+  const m = frameMargins(), k = isMobileNow() && !document.body.classList.contains('landscape') ? 1 - CONFIG.mobileFrameBleed : 1;
+  return { l: m.l * k, r: m.r * k, t: m.t, b: m.b };
+}
 function frameMargins() {
   const tk = frameCells();
   return { l: tk, r: tk * (FRAME.w - FRAME.r) / FRAME.l, t: tk * FRAME.t / FRAME.l, b: tk * (FRAME.h - FRAME.b) / FRAME.l };
 }
 function fitGrid(W, H) {
   let gw = CONFIG.gridSize, gh = CONFIG.gridSize;
-  const m = frameMargins(), Mx = m.l + m.r, My = m.t + m.b;
+  const m = fitMargins(), Mx = m.l + m.r, My = m.t + m.b;
   if (isMobileNow() && !document.body.classList.contains('landscape')) {   // v0.59: телефон вертикально — всегда 9 колонок, рядов сколько влезет
     gw = CONFIG.mobileCols;
     gh = Math.max(CONFIG.mobileMinRows, Math.round(H / (W / (gw + Mx)) - My));
@@ -2159,7 +2216,7 @@ let hudKey = '', hudFx = '';
 function updateHud(t) {
   const st = game.state, hud = $('fxhud'), dpr = R.W / canvas.getBoundingClientRect().width || 1;
   const key = R.ox + ',' + R.oy + ',' + R.W;
-  const fxRow = document.body.classList.contains('mobile');   // на телефоне — своя строка: в вертикали над прудом, в горизонтали в панели справа
+  const fxRow = document.body.classList.contains('mobile') && document.body.classList.contains('landscape');   // v0.60: в вертикали значки лежат на верхнем бортике, в горизонтали — в панели справа
   if (fxRow) { if (hudKey !== 'row') { hudKey = 'row'; hud.style.left = ''; hud.style.top = ''; } }
   else if (key !== hudKey) {             // панель лежит на верхнем бортике, не закрывая воду
     hudKey = key; const top = R.oy / dpr, h = hud.offsetHeight || 32;
@@ -2364,6 +2421,7 @@ function doStep(t) {
 let waitFirst = false;
 function loop(t) {
   if (dbg.on) dbg.frame(t);
+  syncPadCur();
   if (mode === 'play' && waitFirst) { acc = 0; alpha = 1; }
   else if (mode === 'play') {
     acc += Math.min(t - lastT, 250); // скорость всегда ровная — никаких ускорений
@@ -2631,7 +2689,6 @@ $('psVol').addEventListener('input', e => { sound.update({ sfxVol: +e.target.val
 $('psVol').addEventListener('change', () => sound.catch(1));
 document.querySelectorAll('[data-ctl]').forEach(b => b.addEventListener('click', () => { sound.click(); setCtl(b.dataset.ctl); }));
 $('hint').addEventListener('click', () => { sound.unlock(); sound.click(); setCtl(CTL_ORDER[(CTL_ORDER.indexOf(ctl) + 1) % CTL_ORDER.length]); });
-document.querySelectorAll('#dpad [data-dir]').forEach(b => b.addEventListener('pointerdown', e => { e.preventDefault(); haptic('press'); lastPressHaptic = performance.now(); input(b.dataset.dir); }));
 syncSound();
 
 const KEYS = { ArrowUp: 'up', ArrowDown: 'down', ArrowLeft: 'left', ArrowRight: 'right', KeyW: 'up', KeyS: 'down', KeyA: 'left', KeyD: 'right' };
@@ -2649,7 +2706,7 @@ let sw = null;
 const LEFT_OF = { up: 'left', left: 'down', down: 'right', right: 'up' }, RIGHT_OF = { up: 'right', right: 'down', down: 'left', left: 'up' };
 function flashZone(id) { const z = $(id); z.classList.add('on'); requestAnimationFrame(() => requestAnimationFrame(() => z.classList.remove('on'))); }
 document.addEventListener('pointerdown', e => {
-  if (!e.target.closest || e.target.closest('button, .panel, input, a, .card')) return;
+  if (!e.target.closest || e.target.closest('button, .panel, input, a, .card, .dpad')) return;
   if (ctl === 'tap') {
     if (mode !== 'play') return;
     e.preventDefault();
@@ -2864,6 +2921,32 @@ iconFrog('ovFrog', 138);
 $('logoTop').src = LOGO_SRC; $('ovLogo').src = LOGO_SRC; $('coinPillIc').src = BOOST_SRC.coin; iconItem('shIc', 'helmet');
 if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => render(performance.now()));
 for (const im of Object.values(images)) im.addEventListener('load', () => { buildStaticLayer(); iconFrog('frogIcon', 52); iconFrog('ovFrog', 138); iconItem('shIc', 'helmet'); hudFx = ''; });
+/* v0.60: пульт. Нажатие в любом месте сектора поворачивает; палец можно вести по кругу, не отрывая.
+   В центре мёртвая зона. На компьютере и в горизонтали (стрелки сеткой) сектор = стрелка под пальцем. */
+const padRound = () => isMobileNow() && !document.body.classList.contains('landscape');
+let padCur = null;
+(function padInput() {
+  const pad = $('dpad'); let padDir = null, padId = null;
+  const at = e => {
+    if (padRound()) {
+      const r = pad.getBoundingClientRect(), dx = e.clientX - (r.left + r.width / 2), dy = e.clientY - (r.top + r.height / 2);
+      if (Math.hypot(dx, dy) < r.width * CONFIG.padDeadZone) return null;
+      return Math.abs(dx) > Math.abs(dy) ? (dx > 0 ? 'right' : 'left') : (dy > 0 ? 'down' : 'up');
+    }
+    for (const b of pad.querySelectorAll('[data-dir]')) { const r = b.getBoundingClientRect(); if (e.clientX >= r.left && e.clientX <= r.right && e.clientY >= r.top && e.clientY <= r.bottom) return b.dataset.dir; }
+    return null;
+  };
+  const go = d => { padDir = d; haptic('press'); lastPressHaptic = performance.now(); input(d); };
+  pad.addEventListener('pointerdown', e => { e.preventDefault(); padId = e.pointerId; try { pad.setPointerCapture(e.pointerId); } catch (err) {} const d = at(e); padDir = null; if (d) go(d); });
+  pad.addEventListener('pointermove', e => { if (e.pointerId !== padId) return; const d = at(e); if (d && d !== padDir) go(d); });
+  const end = e => { if (e.pointerId === padId) { padId = null; padDir = null; } };
+  pad.addEventListener('pointerup', end); pad.addEventListener('pointercancel', end);
+})();
+function syncPadCur() {   // куда плывёт уж — подсвечено, назад — приглушено (до первого хода можно в любую сторону)
+  if (ctl !== 'dpad') return;
+  const st = game.state, cur = (mode === 'play' || mode === 'pause') && !waitFirst ? (st.queue.length ? st.queue[st.queue.length - 1] : st.dir) : '';
+  if (cur !== padCur) { padCur = cur; $('dpad').dataset.cur = cur; }
+}
 new ResizeObserver(resize).observe(canvas);
 resize();
 /* v0.59: при каждом входе на телефоне спрашиваем, как управлять; выбор запоминается и подсвечивается в следующий раз */
