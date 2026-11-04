@@ -513,8 +513,11 @@ body.mobile .hint { max-width: 100%; min-width: 0; box-sizing: border-box; overf
 @media (max-height: 340px) { body.mobile.landscape #overlay .card .btn { min-height: 32px !important; font-size: 15px; } body.mobile.landscape .snd-head { display: none; } }
 .modes .tog:last-child:nth-child(odd) { grid-column: 1 / -1; }
 /* ===== v0.59: крупнее пруд, компактная крестовина, выбор управления, только вертикаль на телефоне ===== */
-body.mobile { --padcol: min(calc((100vw - 48px) / 3), 104px); --padrow: clamp(42px, 6dvh, 56px); }
+body.mobile { --padcol: min(calc((100vw - 48px) / 3), 104px); --padrow: clamp(46px, 6dvh, 56px); }   /* стрелка не ниже 44 pt (Apple HIG) */
 body.mobile .dpad button { font-size: clamp(20px, 6vw, 28px); border-radius: 16px; }
+/* v0.59b: крестовина — отдельная группа. Между стрелками 10 px, от пруда 12 px, от «Паузы» 16 px видимого зазора (тень кнопки 4 px учтена),
+   чтобы палец со стрелки не попадал в паузу. Правила: Apple HIG — цель от 44 pt; WCAG 2.5.8 — центры целей не ближе 24 px. */
+body.mobile .dpad, body.mobile.dpad-on .dpad { gap: 10px; margin: 6px 0 14px; }
 body.mobile:not(.landscape) .hint { display: none !important; }   /* режим выбирается на входе и в настройках — строка под кнопками отдана пруду */
 .ctl-pick { gap: clamp(10px, 2dvh, 16px); }
 .ctl-opts { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; width: 100%; }
