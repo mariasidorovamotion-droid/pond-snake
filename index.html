@@ -330,11 +330,12 @@ body.wide .card .btn { max-width: 360px; min-height: clamp(58px, 7.5vh, 78px); f
 body.mobile {
   --padcol: min(calc((100vw - 48px) / 3), 128px);
   --padrow: clamp(52px, 8.5dvh, 80px);
-  --plate: clamp(54px, 8dvh, 68px);
-  padding-block: 8px;
+  --plate: clamp(46px, 6.5dvh, 60px);
+  padding-block: 6px;
+  padding-left: max(6px, env(safe-area-inset-left, 0px)); padding-right: max(6px, env(safe-area-inset-right, 0px));   /* узкие поля: пруд во всю ширину */
 }
 body.mobile .app {
-  max-width: 640px; display: grid; gap: 10px;
+  max-width: 640px; display: grid; gap: 6px;
   grid-template-columns: minmax(0, 1fr);
   grid-template-rows: auto auto minmax(0, 1fr) auto auto auto;
   grid-template-areas: "top" "fx" "board" "pad" "btns" "hint";
@@ -350,18 +351,18 @@ body.mobile .title {
 }
 body.mobile .title svg:first-child { display: none; }
 body.mobile .title svg { width: .55em; height: .55em; }
-body.mobile .pill { min-height: var(--plate); justify-content: center; gap: 4px; padding: 4px 6px; border-radius: 18px; box-shadow: 0 4px 0 var(--cream-edge), 0 8px 16px rgba(0,0,0,.2); }
-body.mobile .pill .ic { width: clamp(26px, 10vw, 46px); height: auto; aspect-ratio: 34 / 30; }
+body.mobile .pill { min-height: var(--plate); justify-content: center; gap: 4px; padding: 3px 6px; border-radius: 16px; box-shadow: 0 4px 0 var(--cream-edge), 0 8px 16px rgba(0,0,0,.2); }
+body.mobile .pill .ic { width: clamp(24px, 9vw, 40px); height: auto; aspect-ratio: 34 / 30; }
 body.mobile .pill small { font-size: clamp(9px, 2.8vw, 13px); }
-body.mobile .pill b { font-size: clamp(22px, 8vw, 36px); }
+body.mobile .pill b { font-size: clamp(20px, 7vw, 32px); }
 body.mobile .row { grid-area: btns; width: 100%; display: grid; grid-template-columns: 1fr 1.15fr .6fr; gap: 10px; }
-body.mobile .row .btn { width: 100%; min-height: var(--plate); padding: 0 6px; gap: 8px; border-radius: 20px; font-size: clamp(17px, 5.8vw, 27px); }
+body.mobile .row .btn { width: 100%; min-height: var(--plate); padding: 0 6px; gap: 8px; border-radius: 18px; font-size: clamp(17px, 5.4vw, 24px); }
 body.mobile .row .btn svg { width: clamp(22px, 7vw, 32px); height: clamp(22px, 7vw, 32px); }
 body.mobile .row .lbl { display: inline; }
 body.mobile .board, body.mobile.dpad-on .board { grid-area: board; justify-self: stretch; align-self: stretch; width: 100%; height: 100%; min-width: 0; min-height: 0; aspect-ratio: auto; }
 body.mobile .dpad { grid-area: pad; justify-self: center; grid-template-columns: repeat(3, var(--padcol)); grid-template-rows: repeat(2, var(--padrow)); gap: 8px; }
 body.mobile .dpad button { font-size: clamp(24px, 8vw, 38px); border-radius: 20px; }
-body.mobile .hint, body.mobile.dpad-on .hint { grid-area: hint; display: flex; justify-self: center; font-size: clamp(15px, 4.4vw, 20px); color: var(--muted); }
+body.mobile .hint, body.mobile.dpad-on .hint { grid-area: hint; display: flex; justify-self: center; font-size: clamp(13px, 3.8vw, 17px); padding: 0 8px; color: var(--muted); }
 body.mobile .overlay, body.mobile .panel { padding: 6%; }
 body.mobile .card { max-width: 380px; box-sizing: border-box; padding: clamp(14px, 3dvh, 26px) 20px; gap: clamp(8px, 1.6dvh, 14px); border-radius: 26px; }
 body.mobile.phone-frame .app { max-width: 430px; margin: 0 auto; }
@@ -402,7 +403,7 @@ body.mobile.landscape .card-logo { width: auto; max-width: 70%; height: clamp(52
 body.mobile.landscape .overlay, body.mobile.landscape .panel { padding: 6px 4%; overflow-y: auto; align-items: safe center; }
 @media (max-height: 340px) { body.mobile.landscape #overlay .card { padding-block: 8px; gap: 5px; } body.mobile.landscape #overlay .card .btn { min-height: 34px !important; } body.mobile.landscape #ovText { display: none; } }
 
-/* ===== v0.57: Магазин вместо Паузы до старта, «Заново» — в паузе, жест на стартовом окне ===== */
+/* ===== v0.58: Магазин вместо Паузы до старта, «Заново» — в паузе, жест на стартовом окне ===== */
 #shopBtn { display: none; }
 body:not(.in-run) #pauseBtn, body:not(.in-run) #restartBtn { display: none; }
 body.shop-on:not(.in-run) #shopBtn { display: inline-flex; }
@@ -454,7 +455,7 @@ body.mobile .dpad { position: relative; z-index: 1; }
 @media (prefers-reduced-motion: no-preference) { .overlay:not([hidden]) .card, .panel:not([hidden]) .card { animation: card-in .18s ease-out; } }
 @keyframes card-in { from { transform: translateY(10px) scale(.98); opacity: 0; } to { transform: none; opacity: 1; } }
 /* значки бустов: на телефоне в вертикали — строка между плашками и прудом, как на макете */
-body.mobile:not(.landscape) .fxhud { position: static; grid-area: fx; justify-content: center; align-items: center; gap: 10px; width: 100%; height: 40px; margin: -6px 0 -2px; }   /* строка эффектов 40px: 8–12px до мостика, пруд не прыгает */   /* строка эффектов: место сохраняется всегда — пруд не прыгает */
+body.mobile:not(.landscape) .fxhud { position: static; grid-area: fx; justify-content: center; align-items: center; gap: 10px; width: 100%; height: 36px; margin: -4px 0 -2px; }   /* строка эффектов 40px: 8–12px до мостика, пруд не прыгает */   /* строка эффектов: место сохраняется всегда — пруд не прыгает */
 body.mobile:not(.landscape) .fxhud .chip { height: 34px; box-sizing: border-box; }
 body.mobile:not(.landscape) .fxhud .chip { padding: 4px 14px 4px 6px; gap: 8px; border-radius: 999px; border-width: 2px; box-shadow: 0 3px 0 #dcc59a, 0 6px 12px rgba(0,0,0,.14); font-size: clamp(15px, 4.6vw, 20px); }
 body.mobile:not(.landscape) .fxhud .chip canvas { width: clamp(30px, 9vw, 40px); height: clamp(30px, 9vw, 40px); }
@@ -472,7 +473,7 @@ body.mobile.landscape .fxhud .fxsec { font-size: 13px; min-width: 2.2ch; }
 body.mobile.landscape .fxhud #shieldChip .fxlbl { display: inline; font-size: 12px; text-transform: none; letter-spacing: 0; }
 #ovText:empty { display: none; }
 @media (max-height: 620px) and (orientation: portrait) { body.mobile #overlay .big { margin-block: -6px; } body.mobile #overlay .big canvas { width: 52px; height: auto; } }
-/* v0.57: разные размеры телефонов */
+/* v0.58: разные размеры телефонов */
 .btn-gold { --hi: #ffe58a; --base: #f6bd3f; --edge: #c98a1c; color: #5a3a06; text-shadow: 0 1px 0 rgba(255,255,255,.45); }
 .btn-gold .price { background: rgba(255,255,255,.45); }
 .btn .price { white-space: nowrap; }
@@ -514,6 +515,7 @@ body.mobile .hint { max-width: 100%; min-width: 0; box-sizing: border-box; overf
 </style>
 </head>
 <body>
+<div class="nojs" id="nojs">Это игра, а не документ 🙂 Откройте файл в браузере (Safari или Chrome) или играйте по ссылке: <a href="https://t.me/pondsnake_bot/snake">t.me/pondsnake_bot/snake</a></div>
 <div class="nojs" id="nojs">Это игра, а не документ 🙂 Откройте файл в браузере (Safari или Chrome) или играйте по ссылке: <a href="https://t.me/pondsnake_bot/snake">t.me/pondsnake_bot/snake</a></div>
 <div class="nojs" id="nojs">Это игра, а не документ 🙂 Откройте файл в браузере (Safari или Chrome) или играйте по ссылке: <a href="https://t.me/pondsnake_bot/snake">t.me/pondsnake_bot/snake</a></div>
 <div class="app" id="app">
@@ -1440,7 +1442,7 @@ const isMobileNow = () => document.body.classList.contains('mobile');
 const FRAME = { w: 1122, h: 1402, l: 146, r: 960, t: 232, b: 1228, d: 30,
   top: [405, 569],
   bottom: [422, 680], left: [579, 1078], right: [662, 1072] };   // периоды повтора: колонки на концах почти совпадают → шов незаметен
-const frameCells = () => isMobileNow() ? 1.25 : 1.55; // толщина левого бортика в клетках
+const frameCells = () => isMobileNow() ? .8 : 1.55; // толщина левого бортика в клетках: на телефоне тонкий — воде место важнее
 function frameMargins() {
   const tk = frameCells();
   return { l: tk, r: tk * (FRAME.w - FRAME.r) / FRAME.l, t: tk * FRAME.t / FRAME.l, b: tk * (FRAME.h - FRAME.b) / FRAME.l };
